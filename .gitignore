@@ -1,0 +1,33 @@
+# Os sepcific
+[Dd]esktop.ini
+.DS_Store
+
+# Ide's
+.vscode/
+
+# Byte-compiled
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Unit test
+.tox/
+pytest_cache/
+
+# Coverage reports
+.coverage
+cover/
+
+# Mypy
+.mypy_cache/
+
+# Sphinx documentation
+docs/_build/
+docs/_apidoc/
+
+# Others
+.temp/

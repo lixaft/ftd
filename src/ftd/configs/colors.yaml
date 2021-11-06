@@ -1,0 +1,588 @@
+aliceblue:
+  hex: "#f0f8ff"
+  percent: [94.12, 97.25, 100]
+  rgb: [240, 248, 255]
+antiquewhite:
+  hex: "#faebd7"
+  percent: [98.04, 92.16, 84.31]
+  rgb: [250, 235, 215]
+aqua:
+  hex: "#00ffff"
+  percent: [0, 100, 100]
+  rgb: [0, 255, 255]
+aquamarine:
+  hex: "#7fffd4"
+  percent: [49.80, 100, 83.14]
+  rgb: [127, 255, 212]
+azure:
+  hex: "#f0ffff"
+  percent: [94.12, 100, 100]
+  rgb: [240, 255, 255]
+beige:
+  hex: "#f5f5dc"
+  percent: [96.08, 96.08, 86.27]
+  rgb: [245, 245, 220]
+bisque:
+  hex: "#ffe4c4"
+  percent: [100, 89.41, 76.86]
+  rgb: [255, 228, 196]
+black:
+  hex: "#000000"
+  percent: [0, 0, 0]
+  rgb: [0, 0, 0]
+blanchedalmond:
+  hex: "#ffebcd"
+  percent: [100, 92.16, 80.39]
+  rgb: [255, 235, 205]
+blue:
+  hex: "#0000ff"
+  percent: [0, 0, 100]
+  rgb: [0, 0, 255]
+blueviolet:
+  hex: "#8a2be2"
+  percent: [54.12, 16.86, 88.63]
+  rgb: [138, 43, 226]
+brown:
+  hex: "#a52a2a"
+  percent: [64.71, 16.47, 16.47]
+  rgb: [165, 42, 42]
+burlywood:
+  hex: "#deb887"
+  percent: [87.06, 72.16, 52.94]
+  rgb: [222, 184, 135]
+cadetblue:
+  hex: "#5f9ea0"
+  percent: [37.25, 61.96, 62.75]
+  rgb: [95, 158, 160]
+chartreuse:
+  hex: "#7fff00"
+  percent: [49.80, 100, 0]
+  rgb: [127, 255, 0]
+chocolate:
+  hex: "#d2691e"
+  percent: [82.35, 41.18, 11.76]
+  rgb: [210, 105, 30]
+coral:
+  hex: "#ff7f50"
+  percent: [100, 49.80, 31.37]
+  rgb: [255, 127, 80]
+cornflowerblue:
+  hex: "#6495ed"
+  percent: [39.22, 58.43, 92.94]
+  rgb: [100, 149, 237]
+cornsilk:
+  hex: "#fff8dc"
+  percent: [100, 97.25, 86.27]
+  rgb: [255, 248, 220]
+crimson:
+  hex: "#dc143c"
+  percent: [86.27, 7.84, 23.53]
+  rgb: [220, 20, 60]
+cyan:
+  hex: "#00ffff"
+  percent: [0, 100, 100]
+  rgb: [0, 255, 255]
+darkblue:
+  hex: "#00008b"
+  percent: [0, 0, 54.51]
+  rgb: [0, 0, 139]
+darkcyan:
+  hex: "#008b8b"
+  percent: [0, 54.51, 54.51]
+  rgb: [0, 139, 139]
+darkgoldenrod:
+  hex: "#b8860b"
+  percent: [72.16, 52.55, 4.31]
+  rgb: [184, 134, 11]
+darkgray:
+  hex: "#a9a9a9"
+  percent: [66.27, 66.27, 66.27]
+  rgb: [169, 169, 169]
+darkgreen:
+  hex: "#006400"
+  percent: [0, 39.22, 0]
+  rgb: [0, 100, 0]
+darkgrey:
+  hex: "#a9a9a9"
+  percent: [66.27, 66.27, 66.27]
+  rgb: [169, 169, 169]
+darkkhaki:
+  hex: "#bdb76b"
+  percent: [74.12, 71.76, 41.96]
+  rgb: [189, 183, 107]
+darkmagenta:
+  hex: "#8b008b"
+  percent: [54.51, 0, 54.51]
+  rgb: [139, 0, 139]
+darkolivegreen:
+  hex: "#556b2f"
+  percent: [33.33, 41.96, 18.43]
+  rgb: [85, 107, 47]
+darkorange:
+  hex: "#ff8c00"
+  percent: [100, 54.90, 0]
+  rgb: [255, 140, 0]
+darkorchid:
+  hex: "#9932cc"
+  percent: [60.00, 19.61, 80.00]
+  rgb: [153, 50, 204]
+darkred:
+  hex: "#8b0000"
+  percent: [54.51, 0, 0]
+  rgb: [139, 0, 0]
+darksalmon:
+  hex: "#e9967a"
+  percent: [91.37, 58.82, 47.84]
+  rgb: [233, 150, 122]
+darkseagreen:
+  hex: "#8fbc8f"
+  percent: [56.08, 73.73, 56.08]
+  rgb: [143, 188, 143]
+darkslateblue:
+  hex: "#483d8b"
+  percent: [28.24, 23.92, 54.51]
+  rgb: [72, 61, 139]
+darkslategray:
+  hex: "#2f4f4f"
+  percent: [18.43, 30.98, 30.98]
+  rgb: [47, 79, 79]
+darkslategrey:
+  hex: "#2f4f4f"
+  percent: [18.43, 30.98, 30.98]
+  rgb: [47, 79, 79]
+darkturquoise:
+  hex: "#00ced1"
+  percent: [0, 80.78, 81.96]
+  rgb: [0, 206, 209]
+darkviolet:
+  hex: "#9400d3"
+  percent: [58.04, 0, 82.75]
+  rgb: [148, 0, 211]
+deeppink:
+  hex: "#ff1493"
+  percent: [100, 7.84, 57.65]
+  rgb: [255, 20, 147]
+deepskyblue:
+  hex: "#00bfff"
+  percent: [0, 74.90, 100]
+  rgb: [0, 191, 255]
+dimgray:
+  hex: "#696969"
+  percent: [41.18, 41.18, 41.18]
+  rgb: [105, 105, 105]
+dimgrey:
+  hex: "#696969"
+  percent: [41.18, 41.18, 41.18]
+  rgb: [105, 105, 105]
+dodgerblue:
+  hex: "#1e90ff"
+  percent: [11.76, 56.47, 100]
+  rgb: [30, 144, 255]
+firebrick:
+  hex: "#b22222"
+  percent: [69.80, 13.33, 13.33]
+  rgb: [178, 34, 34]
+floralwhite:
+  hex: "#fffaf0"
+  percent: [100, 98.04, 94.12]
+  rgb: [255, 250, 240]
+forestgreen:
+  hex: "#228b22"
+  percent: [13.33, 54.51, 13.33]
+  rgb: [34, 139, 34]
+fuchsia:
+  hex: "#ff00ff"
+  percent: [100, 0, 100]
+  rgb: [255, 0, 255]
+gainsboro:
+  hex: "#dcdcdc"
+  percent: [86.27, 86.27, 86.27]
+  rgb: [220, 220, 220]
+ghostwhite:
+  hex: "#f8f8ff"
+  percent: [97.25, 97.25, 100]
+  rgb: [248, 248, 255]
+gold:
+  hex: "#ffd700"
+  percent: [100, 84.31, 0]
+  rgb: [255, 215, 0]
+goldenrod:
+  hex: "#daa520"
+  percent: [85.49, 64.71, 12.5]
+  rgb: [218, 165, 32]
+gray:
+  hex: "#808080"
+  percent: [50, 50, 50]
+  rgb: [128, 128, 128]
+green:
+  hex: "#008000"
+  percent: [0, 50, 0]
+  rgb: [0, 128, 0]
+greenyellow:
+  hex: "#adff2f"
+  percent: [67.84, 100, 18.43]
+  rgb: [173, 255, 47]
+grey:
+  hex: "#808080"
+  percent: [50, 50, 50]
+  rgb: [128, 128, 128]
+honeydew:
+  hex: "#f0fff0"
+  percent: [94.12, 100, 94.12]
+  rgb: [240, 255, 240]
+hotpink:
+  hex: "#ff69b4"
+  percent: [100, 41.18, 70.59]
+  rgb: [255, 105, 180]
+indianred:
+  hex: "#cd5c5c"
+  percent: [80.39, 36.08, 36.08]
+  rgb: [205, 92, 92]
+indigo:
+  hex: "#4b0082"
+  percent: [29.41, 0, 50.98]
+  rgb: [75, 0, 130]
+ivory:
+  hex: "#fffff0"
+  percent: [100, 100, 94.12]
+  rgb: [255, 255, 240]
+khaki:
+  hex: "#f0e68c"
+  percent: [94.12, 90.20, 54.90]
+  rgb: [240, 230, 140]
+lavender:
+  hex: "#e6e6fa"
+  percent: [90.20, 90.20, 98.04]
+  rgb: [230, 230, 250]
+lavenderblush:
+  hex: "#fff0f5"
+  percent: [100, 94.12, 96.08]
+  rgb: [255, 240, 245]
+lawngreen:
+  hex: "#7cfc00"
+  percent: [48.63, 98.82, 0]
+  rgb: [124, 252, 0]
+lemonchiffon:
+  hex: "#fffacd"
+  percent: [100, 98.04, 80.39]
+  rgb: [255, 250, 205]
+lightblue:
+  hex: "#add8e6"
+  percent: [67.84, 84.71, 90.20]
+  rgb: [173, 216, 230]
+lightcoral:
+  hex: "#f08080"
+  percent: [94.12, 50, 50]
+  rgb: [240, 128, 128]
+lightcyan:
+  hex: "#e0ffff"
+  percent: [87.84, 100, 100]
+  rgb: [224, 255, 255]
+lightgoldenrodyellow:
+  hex: "#fafad2"
+  percent: [98.04, 98.04, 82.35]
+  rgb: [250, 250, 210]
+lightgray:
+  hex: "#d3d3d3"
+  percent: [82.75, 82.75, 82.75]
+  rgb: [211, 211, 211]
+lightgreen:
+  hex: "#90ee90"
+  percent: [56.47, 93.33, 56.47]
+  rgb: [144, 238, 144]
+lightgrey:
+  hex: "#d3d3d3"
+  percent: [82.75, 82.75, 82.75]
+  rgb: [211, 211, 211]
+lightpink:
+  hex: "#ffb6c1"
+  percent: [100, 71.37, 75.69]
+  rgb: [255, 182, 193]
+lightsalmon:
+  hex: "#ffa07a"
+  percent: [100, 62.75, 47.84]
+  rgb: [255, 160, 122]
+lightseagreen:
+  hex: "#20b2aa"
+  percent: [12.5, 69.80, 66.67]
+  rgb: [32, 178, 170]
+lightskyblue:
+  hex: "#87cefa"
+  percent: [52.94, 80.78, 98.04]
+  rgb: [135, 206, 250]
+lightslategray:
+  hex: "#778899"
+  percent: [46.67, 53.33, 60.00]
+  rgb: [119, 136, 153]
+lightslategrey:
+  hex: "#778899"
+  percent: [46.67, 53.33, 60.00]
+  rgb: [119, 136, 153]
+lightsteelblue:
+  hex: "#b0c4de"
+  percent: [69.02, 76.86, 87.06]
+  rgb: [176, 196, 222]
+lightyellow:
+  hex: "#ffffe0"
+  percent: [100, 100, 87.84]
+  rgb: [255, 255, 224]
+lime:
+  hex: "#00ff00"
+  percent: [0, 100, 0]
+  rgb: [0, 255, 0]
+limegreen:
+  hex: "#32cd32"
+  percent: [19.61, 80.39, 19.61]
+  rgb: [50, 205, 50]
+linen:
+  hex: "#faf0e6"
+  percent: [98.04, 94.12, 90.20]
+  rgb: [250, 240, 230]
+magenta:
+  hex: "#ff00ff"
+  percent: [100, 0, 100]
+  rgb: [255, 0, 255]
+maroon:
+  hex: "#800000"
+  percent: [50, 0, 0]
+  rgb: [128, 0, 0]
+mediumaquamarine:
+  hex: "#66cdaa"
+  percent: [40.00, 80.39, 66.67]
+  rgb: [102, 205, 170]
+mediumblue:
+  hex: "#0000cd"
+  percent: [0, 0, 80.39]
+  rgb: [0, 0, 205]
+mediumorchid:
+  hex: "#ba55d3"
+  percent: [72.94, 33.33, 82.75]
+  rgb: [186, 85, 211]
+mediumpurple:
+  hex: "#9370db"
+  percent: [57.65, 43.92, 85.88]
+  rgb: [147, 112, 219]
+mediumseagreen:
+  hex: "#3cb371"
+  percent: [23.53, 70.20, 44.31]
+  rgb: [60, 179, 113]
+mediumslateblue:
+  hex: "#7b68ee"
+  percent: [48.24, 40.78, 93.33]
+  rgb: [123, 104, 238]
+mediumspringgreen:
+  hex: "#00fa9a"
+  percent: [0, 98.04, 60.39]
+  rgb: [0, 250, 154]
+mediumturquoise:
+  hex: "#48d1cc"
+  percent: [28.24, 81.96, 80.00]
+  rgb: [72, 209, 204]
+mediumvioletred:
+  hex: "#c71585"
+  percent: [78.04, 8.24, 52.16]
+  rgb: [199, 21, 133]
+midnightblue:
+  hex: "#191970"
+  percent: [9.80, 9.80, 43.92]
+  rgb: [25, 25, 112]
+mintcream:
+  hex: "#f5fffa"
+  percent: [96.08, 100, 98.04]
+  rgb: [245, 255, 250]
+mistyrose:
+  hex: "#ffe4e1"
+  percent: [100, 89.41, 88.24]
+  rgb: [255, 228, 225]
+moccasin:
+  hex: "#ffe4b5"
+  percent: [100, 89.41, 70.98]
+  rgb: [255, 228, 181]
+navajowhite:
+  hex: "#ffdead"
+  percent: [100, 87.06, 67.84]
+  rgb: [255, 222, 173]
+navy:
+  hex: "#000080"
+  percent: [0, 0, 50]
+  rgb: [0, 0, 128]
+oldlace:
+  hex: "#fdf5e6"
+  percent: [99.22, 96.08, 90.20]
+  rgb: [253, 245, 230]
+olive:
+  hex: "#808000"
+  percent: [50, 50, 0]
+  rgb: [128, 128, 0]
+olivedrab:
+  hex: "#6b8e23"
+  percent: [41.96, 55.69, 13.73]
+  rgb: [107, 142, 35]
+orange:
+  hex: "#ffa500"
+  percent: [100, 64.71, 0]
+  rgb: [255, 165, 0]
+orangered:
+  hex: "#ff4500"
+  percent: [100, 27.06, 0]
+  rgb: [255, 69, 0]
+orchid:
+  hex: "#da70d6"
+  percent: [85.49, 43.92, 83.92]
+  rgb: [218, 112, 214]
+palegoldenrod:
+  hex: "#eee8aa"
+  percent: [93.33, 90.98, 66.67]
+  rgb: [238, 232, 170]
+palegreen:
+  hex: "#98fb98"
+  percent: [59.61, 98.43, 59.61]
+  rgb: [152, 251, 152]
+paleturquoise:
+  hex: "#afeeee"
+  percent: [68.63, 93.33, 93.33]
+  rgb: [175, 238, 238]
+palevioletred:
+  hex: "#db7093"
+  percent: [85.88, 43.92, 57.65]
+  rgb: [219, 112, 147]
+papayawhip:
+  hex: "#ffefd5"
+  percent: [100, 93.73, 83.53]
+  rgb: [255, 239, 213]
+peachpuff:
+  hex: "#ffdab9"
+  percent: [100, 85.49, 72.55]
+  rgb: [255, 218, 185]
+peru:
+  hex: "#cd853f"
+  percent: [80.39, 52.16, 24.71]
+  rgb: [205, 133, 63]
+pink:
+  hex: "#ffc0cb"
+  percent: [100, 75.29, 79.61]
+  rgb: [255, 192, 203]
+plum:
+  hex: "#dda0dd"
+  percent: [86.67, 62.75, 86.67]
+  rgb: [221, 160, 221]
+powderblue:
+  hex: "#b0e0e6"
+  percent: [69.02, 87.84, 90.20]
+  rgb: [176, 224, 230]
+purple:
+  hex: "#800080"
+  percent: [50, 0, 50]
+  rgb: [128, 0, 128]
+red:
+  hex: "#ff0000"
+  percent: [100, 0, 0]
+  rgb: [255, 0, 0]
+rosybrown:
+  hex: "#bc8f8f"
+  percent: [73.73, 56.08, 56.08]
+  rgb: [188, 143, 143]
+royalblue:
+  hex: "#4169e1"
+  percent: [25.49, 41.18, 88.24]
+  rgb: [65, 105, 225]
+saddlebrown:
+  hex: "#8b4513"
+  percent: [54.51, 27.06, 7.45]
+  rgb: [139, 69, 19]
+salmon:
+  hex: "#fa8072"
+  percent: [98.04, 50, 44.71]
+  rgb: [250, 128, 114]
+sandybrown:
+  hex: "#f4a460"
+  percent: [95.69, 64.31, 37.65]
+  rgb: [244, 164, 96]
+seagreen:
+  hex: "#2e8b57"
+  percent: [18.04, 54.51, 34.12]
+  rgb: [46, 139, 87]
+seashell:
+  hex: "#fff5ee"
+  percent: [100, 96.08, 93.33]
+  rgb: [255, 245, 238]
+sienna:
+  hex: "#a0522d"
+  percent: [62.75, 32.16, 17.65]
+  rgb: [160, 82, 45]
+silver:
+  hex: "#c0c0c0"
+  percent: [75.29, 75.29, 75.29]
+  rgb: [192, 192, 192]
+skyblue:
+  hex: "#87ceeb"
+  percent: [52.94, 80.78, 92.16]
+  rgb: [135, 206, 235]
+slateblue:
+  hex: "#6a5acd"
+  percent: [41.57, 35.29, 80.39]
+  rgb: [106, 90, 205]
+slategray:
+  hex: "#708090"
+  percent: [43.92, 50, 56.47]
+  rgb: [112, 128, 144]
+slategrey:
+  hex: "#708090"
+  percent: [43.92, 50, 56.47]
+  rgb: [112, 128, 144]
+snow:
+  hex: "#fffafa"
+  percent: [100, 98.04, 98.04]
+  rgb: [255, 250, 250]
+springgreen:
+  hex: "#00ff7f"
+  percent: [0, 100, 49.80]
+  rgb: [0, 255, 127]
+steelblue:
+  hex: "#4682b4"
+  percent: [27.45, 50.98, 70.59]
+  rgb: [70, 130, 180]
+tan:
+  hex: "#d2b48c"
+  percent: [82.35, 70.59, 54.90]
+  rgb: [210, 180, 140]
+teal:
+  hex: "#008080"
+  percent: [0, 50, 50]
+  rgb: [0, 128, 128]
+thistle:
+  hex: "#d8bfd8"
+  percent: [84.71, 74.90, 84.71]
+  rgb: [216, 191, 216]
+tomato:
+  hex: "#ff6347"
+  percent: [100, 38.82, 27.84]
+  rgb: [255, 99, 71]
+turquoise:
+  hex: "#40e0d0"
+  percent: [25, 87.84, 81.57]
+  rgb: [64, 224, 208]
+violet:
+  hex: "#ee82ee"
+  percent: [93.33, 50.98, 93.33]
+  rgb: [238, 130, 238]
+wheat:
+  hex: "#f5deb3"
+  percent: [96.08, 87.06, 70.20]
+  rgb: [245, 222, 179]
+white:
+  hex: "#ffffff"
+  percent: [100, 100, 100]
+  rgb: [255, 255, 255]
+whitesmoke:
+  hex: "#f5f5f5"
+  percent: [96.08, 96.08, 96.08]
+  rgb: [245, 245, 245]
+yellow:
+  hex: "#ffff00"
+  percent: [100, 100, 0]
+  rgb: [255, 255, 0]
+yellowgreen:
+  hex: "#9acd32"
+  percent: [60.39, 80.39, 19.61]
+  rgb: [154, 205, 50]

@@ -1,0 +1,8 @@
+[flake8]
+ignore =
+    E203,  # black add space around ':'
+    # delegate to pylint
+    F401,  # imported but unused
+    F821,  # undefined name
+    F841,  # local variable assigned but never used
+max-line-length = 79

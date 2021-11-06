@@ -1,0 +1,20 @@
+[FORMAT]
+max-line-length=79
+
+[MESSAGES CONTROL]
+disable =
+    # delegate to flake8
+    import-error,
+    # python 2 & 3 compatibility
+    consider-using-f-string,
+    raise-missing-from,
+    super-with-arguments,
+    unspecified-encoding,
+    useless-object-inheritance,
+    # useless
+    broad-except,
+    too-few-public-methods,
+    too-many-branches,
+    too-many-lines,
+    too-many-public-methods,
+    too-many-return-statements,
