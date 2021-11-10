@@ -33,7 +33,7 @@ python install.py --maya-version 2022
 
 ### Manual
 
-_ftd_ is distributed as a maya [module](https://help.autodesk.com/view/MAYAUL/2022/ENU//?guid=Maya_SDK_Distributing_Maya_Plug_ins_DistributingUsingModules_html). This mean that once the package is [downloaded](https://github.com/FabienTaxil/ftd/archive/refs/heads/main.zip), the only thing to do is to add the root directory to the `MAYA_MODULE_PATH` environment variable. Then, in the package, a file called `ftd.mod` takes care of everything else when a maya session starts.
+_ftd_ is distributed as a [maya module](https://help.autodesk.com/view/MAYAUL/2022/ENU//?guid=Maya_SDK_Distributing_Maya_Plug_ins_DistributingUsingModules_html). This mean that once the package is [downloaded](https://github.com/FabienTaxil/ftd/archive/refs/heads/main.zip), the only thing to do is to add the root directory to the `MAYA_MODULE_PATH` environment variable. Then, in the package, a file called `ftd.mod` takes care of everything else when a maya session starts.
 
 There are different possibilities to do this:
 
@@ -117,7 +117,7 @@ Do not hesitate to <a href="mailto:fabien.taxil@gmail.com">contact me</a> if you
 
 ## Documentation
 
-It's possible to localy build the documentation using [sphinx](https://):
+It's possible to localy build this documentation using [sphinx](https://):
 
 ```bash
 sphinx-build docs/ docs/_build/
