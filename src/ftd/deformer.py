@@ -6,7 +6,7 @@ from maya import cmds
 import ftd.graph
 import ftd.name
 
-__all__ = ["blendshape"]
+__all__ = ["blendshape", "clean_orig"]
 
 LOG = logging.getLogger(__name__)
 
@@ -60,3 +60,21 @@ def blendshape(driver, driven, name="blendshape", alias=None, weight=1):
     if alias:
         cmds.aliasAttr(alias, "{}.weight{}]".format(bs_node, index))
     return bs_node
+
+
+def clean_orig(node=None):
+    """Clean the unused original shapes.
+
+    Remove the unused ShapeOrig to increase the FPS of the scene.
+    If no arguments is specified, operate on all nodes in the scene.
+
+    Arguments:
+        node (str, optional): The node that need to be cleaned.
+    """
+    if node:
+        shapes = cmds.ls(node, intermediateObjects=True, dagObjects=True)
+    else:
+        shapes = cmds.ls(intermediateObjects=True, dagObjects=True)
+    for shape in shapes:
+        if not cmds.listConnections(shape, type="groupParts"):
+            cmds.delete(shape)

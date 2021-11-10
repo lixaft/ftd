@@ -22,7 +22,7 @@ def barycentric_coordinates(a, b, c, point):
     coordinates of point :math:`P` are represented by the formula:
 
     .. math::
-        P = w_aA + w_bB + w_c C
+        P = w_aA + w_bB + w_cC
 
     Note:
         The sum of the three weights is equal to one:

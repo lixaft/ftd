@@ -1,14 +1,19 @@
 """This module provides utilities for common tasks involving the graph."""
 import logging
 
-from maya import cmds
+from maya import cmds, mel
 from maya.api import OpenMaya
 
 import ftd.attribute
 
-__all__ = ["find_related", "matrix_to_srt"]
+__all__ = ["find_related", "matrix_to_srt", "delete_unused"]
 
 LOG = logging.getLogger(__name__)
+
+
+def delete_unused():
+    """Delete all the unused nodes in the scene."""
+    mel.eval("MLdeleteUnused")
 
 
 def find_related(root, type, direction="up"):
