@@ -1,0 +1,740 @@
+commands:
+  # Attributes ---
+  at_reset:
+    description: Reset the the selected attributes to their default values.
+    decorators: [undo_repeat]
+    core: |
+      import ftd.attribute
+      from maya import cmds
+      attributes = cmds.channelBox("mainChannelBox", query=True, selectedMainAttributes=True)
+      for each in cmds.ls(selection=True):
+          ftd.attribute.reset(each, attributes)
+
+  # Note Editor ---
+  ne_open:
+    description: Open the node editor.
+    core: |
+      from maya import mel
+      mel.eval("NodeEditorWindow")
+  ne_add:
+    description: Add the selected nodes to the node editor.
+    core: |
+      from maya import mel
+      mel.eval("NodeEditorGraphAddSelected")
+  ne_clear:
+    description: Removes all nodes of the current node editor tab.
+    core: |
+      from maya import mel
+      mel.eval("NodeEditorGraphClearGraph")
+  ne_remove:
+    description: Remove the selected nodes to the node editor.
+    core: |
+      from maya import mel
+      mel.eval("NodeEditorGraphRemoveSelected")
+  ne_show_all:
+    description: Show all attributes of the node.
+    core: |
+      from maya import cmds, mel
+      editor = mel.eval("getCurrentNodeEditor")
+      for each in cmds.ls(selection=True):
+          cmds.nodeEditor(editor, edit=True, showAllNodeAttributes=each)
+
+  # Constraints ---
+  parent_constraint:
+    core: |
+      from maya import mel
+      mel.eval("ParentConstraint")
+  parent_constraint_options:
+    core: |
+      from maya import mel
+      mel.eval("ParentConstraintOptions")
+  point_constraint:
+    core: |
+      from maya import mel
+      mel.eval("PointConstraint")
+  point_constraint_options:
+    core: |
+      from maya import mel
+      mel.eval("PointConstraintOptions")
+  orient_constraint:
+    core: |
+      from maya import mel
+      mel.eval("OrientConstraint")
+  orient_constraint_options:
+    core: |
+      from maya import mel
+      mel.eval("OrientConstraintOptions")
+  scale_constraint:
+    core: |
+      from maya import mel
+      mel.eval("ScaleConstraint")
+  scale_constraint_options:
+    core: |
+      from maya import mel
+      mel.eval("ScaleConstraintOptions")
+  aim_constraint:
+    core: |
+      from maya import mel
+      mel.eval("AimConstraint")
+  aim_constraint_options:
+    core: |
+      from maya import mel
+      mel.eval("AimConstraintOptions")
+  pole_vector_constraint:
+    core: |
+      from maya import mel
+      mel.eval("PoleVectorConstraint")
+  pole_vector_constraint_options:
+    core: |
+      from maya import mel
+      mel.eval("PoleVectorConstraintOptions")
+  tangent_constraint:
+    core: |
+      from maya import mel
+      mel.eval("TangentConstraint")
+  tangent_constraint_options:
+    core: |
+      from maya import mel
+      mel.eval("TangentConstraintOptions")
+  normal_constraint:
+    core: |
+      from maya import mel
+      mel.eval("NormalConstraint")
+  normal_constraint_options:
+    core: |
+      from maya import mel
+      mel.eval("NormalConstraintOptions")
+  matrix_constraint:
+    core: |
+      from maya import cmds
+      import ftd.constraint
+      sel = cmds.ls(selection=True)
+      driver = sel.pop(0)
+      for driven in sel:
+          ftd.constraint.matrix(driver, driven, offset=True)
+  matrix_constraint_translate:
+    core: |
+      from maya import cmds
+      import ftd.constraint
+      sel = cmds.ls(selection=True)
+      driver = sel.pop(0)
+      for driven in sel:
+          ftd.constraint.matrix(driver, driven, offset=True, srt="t")
+  matrix_constraint_rotate:
+    core: |
+      from maya import cmds
+      import ftd.constraint
+      sel = cmds.ls(selection=True)
+      driver = sel.pop(0)
+      for driven in sel:
+          ftd.constraint.matrix(driver, driven, offset=True, srt="r")
+  matrix_constraint_scale:
+    core: |
+      from maya import cmds
+      import ftd.constraint
+      sel = cmds.ls(selection=True)
+      driver = sel.pop(0)
+      for driven in sel:
+          ftd.constraint.matrix(driver, driven, offset=True, srt="s")
+  matrix_constraint_chain:
+    decorators: [undo_repeat]
+    core: |
+      import ftd.constraint
+      from maya import cmds
+      sel = cmds.ls(selection=True)
+      for i, driver in enumerate(sel[:-1]):
+          ftd.constraint.matrix(driver, sel[i + 1], offset=True)
+  rivet:
+    core: |
+      from maya import mel
+      mel.eval("Rivet")
+  motion_path:
+    core: |
+      from maya import mel
+      mel.eval("AttachToPath")
+  motion_path_options:
+    core: |
+      from maya import mel
+      mel.eval("AttachToPathOptions")
+
+  # Script Editor ---
+  se_open:
+    description: Open the script editor.
+    core: |
+      from maya import mel
+      mel.eval("ScriptEditor")
+  charcoal_open:
+    description: Open the charcoal editor.
+    core: |
+      from maya import mel
+      mel.eval("charcoalEditor2")
+
+  # Match ---
+  match_transform:
+    description: Match all the transform attributes of the selected nodes.
+    core: |
+      from maya import mel
+      mel.eval("MatchTransform")
+  match_translate:
+    description: Match the translate attributes of the selected nodes
+    core: |
+      from maya import mel
+      mel.eval("MatchTranslation")
+  match_rotate:
+    description: Match the rotation attributes of the selected nodes
+    core: |
+      from maya import mel
+      mel.eval("MatchRotation")
+  match_scale:
+    description: Match the scale attributes of the selected nodes
+    core: |
+      from maya import mel
+      mel.eval("MatchScaling")
+  match_pivot:
+    description: Match the pivot of the selected nodes
+    core: |
+      from maya import mel
+      mel.eval("MatchPivots")
+
+  # Freeze ---
+  freeze_transform:
+    description: Reset to default the transform attributes.
+    core: |
+      from maya import cmds
+      cmds.makeIdentity(apply=True, translate=True, rotate=True, scale=True)
+  freeze_translate:
+    description: Reset to 0 the translate attributes.
+    core: |
+      from maya import cmds
+      cmds.makeIdentity(apply=True, translate=True)
+  freeze_rotate:
+    description: Reset to 0 the rotate attributes.
+    core: |
+      from maya import cmds
+      cmds.makeIdentity(apply=True, rotate=True)
+  freeze_scale:
+    description: Reset to 1 the scale attributes.
+    core: |
+      from maya import cmds
+      cmds.makeIdentity(apply=True, scale=True)
+  freeze_joint_orient:
+    description: Reset to 0 the jointOrient attributes.
+    core: |
+      from maya import cmds
+      cmds.makeIdentity(apply=True, jointOrient=True)
+
+  # Selection ---
+  select_all:
+    description: Select all nodes in the scene.
+    core: |
+      from maya import mel
+      mel.eval("SelectAll")
+  clear_selection:
+    description: Deselect every selected nodes.
+    core: |
+      from maya import mel
+      mel.eval("SelectNone")
+  select_hierarchy:
+    description: Select all nodes in the hiearchy.
+    core: |
+      from maya import mel
+      mel.eval("SelectHierarchy")
+  invert_selection:
+    description: Invert the current selection.
+    core: |
+      from maya import mel
+      mel.eval("InvertSelection")
+  save_selection:
+    description: Save the current selection to be able to reselect it later.
+    core: |
+      import ftdev
+      from maya import cmds
+      ftdev.SELECTION = cmds.ls(selection=True)
+  load_selection:
+    description: Select the previous saved selection.
+    core: |
+      import ftdev
+      from maya import cmds
+      if hasattr(ftdev, "SELECTION"):
+          cmds.select(ftdev.SELECTION)
+      else:
+          LOG.error("No selection previously saved.")
+
+  # Skincluster ---
+  bind_skin:
+    core: |
+      from maya import mel
+      mel.eval("SmoothBindSkin")
+  bind_skin_options:
+    core: |
+      from maya import mel
+      mel.eval("SmoothBindSkinOptions")
+  interactive_bind_skin:
+    core: |
+      from maya import mel
+      mel.eval("InteractiveBindSkin")
+  interactive_bind_skin_options:
+    core: |
+      from maya import mel
+      mel.eval("InteractiveBindSkinOptions")
+  move_skinned_joint:
+    core: |
+      from maya import mel
+      mel.eval("MoveSkinJointsTool")
+  add_influence:
+    core: |
+      from maya import mel
+      mel.eval("AddInfluence")
+  add_influence_options:
+    core: |
+      from maya import mel
+      mel.eval("AddInfluenceOptions")
+  remove_influence:
+    core: |
+      from maya import mel
+      mel.eval("RemoveInfluence")
+  remove_influence_options:
+    core: |
+      from maya import mel
+      mel.eval("RemoveInfluenceOptions")
+  mirror_joints:
+    core: |
+      from maya import mel
+      mel.eval("MirrorJoint")
+  mirror_joints_options:
+    core: |
+      from maya import mel
+      mel.eval("MirrorJointOptions")
+  paint_weight:
+    core: |
+      from maya import mel
+      mel.eval("ArtPaintSkinWeightsToolOptions")
+  copy_skin:
+    core: |
+      from maya import mel
+      mel.eval("CopySkinWeights")
+  copy_skin_options:
+    core: |
+      from maya import mel
+      mel.eval("CopySkinWeightsOptions")
+  mirror_skin_weights:
+    core: |
+      from maya import mel
+      mel.eval("MirrorSkinWeights")
+  mirror_skin_weights_options:
+    core: |
+      from maya import mel
+      mel.eval("MirrorSkinWeightsOptions")
+  select_influences:
+    core: |
+      import ftdev.skincluster
+      from maya import cmds
+      influences = []
+      for each in cmds.ls(selection=True):
+        influences_ = ftdev.skincluster.get_influences(each)
+        influences.extend(influences_)
+      cmds.select(influences)
+  select_weighted_influences:
+    core: |
+      import ftdev.skincluster
+      from maya import cmds
+      influences = []
+      for each in cmds.ls(selection=True):
+        influences_ = ftdev.skincluster.get_influences(each, weighted=True)
+        influences.extend(influences_)
+      cmds.select(influences)
+  select_unused_influences:
+    core: |
+      import ftdev.skincluster
+      from maya import cmds
+      influences = []
+      for each in cmds.ls(selection=True):
+        influences_ = ftdev.skincluster.get_influences(each, unused=True)
+        influences.extend(influences_)
+      cmds.select(influences)
+
+  # Deformers ---
+  blendshape:
+    description: Create a blendshape deformer.
+    core: |
+      from maya import mel
+      mel.eval("CreateBlendShape")
+  blendshape_options:
+    description: Open the blendshape options window.
+    core: |
+      from maya import mel
+      mel.eval("CreateBlendShapeOptions")
+  cluster:
+    description: Create a cluster deformer.
+    core: |
+      from maya import mel
+      mel.eval("CreateCluster")
+  cluster_options:
+    description: Open the cluster options window.
+    core: |
+      from maya import mel
+      mel.eval("CreateClusterOptions")
+  lattice:
+    description: Create a lattice deformer.
+    core: |
+      from maya import mel
+      mel.eval("CreateLattice")
+  lattice_options:
+    description: Open the lattice options window.
+    core: |
+      from maya import mel
+      mel.eval("CreateLatticeOptions")
+  deltamush:
+    description: Create a deltamush deformer.
+    core: |
+      from maya import cmds
+      selection = cmds.ls(selection=True)
+      name = selection[1]
+      if name.endswith("_msh"):
+          name = name.replace("_msh", "_deltaMush")
+      else:
+          name += "_deltaMush"
+      cmds.deltaMush(selection[0], selection[1], name=name)
+  deltamush_options:
+    description: Open the deltamush options window.
+    core: |
+      from maya import mel
+      mel.eval("DeltaMushOptions")
+  wrap:
+    description: Create a wrap deformer.
+    core: |
+      from maya import mel
+      mel.eval("CreateWrap")
+  wrap_options:
+    description: Open the wrap options window.
+    core: |
+      from maya import mel
+      mel.eval("CreateWrapOptions")
+  wire:
+    description: Create a wire deformer.
+    core: |
+      from maya import mel
+      mel.eval("WireTool")
+  wire_options:
+    description: Open the wire options window.
+    core: |
+      from maya import mel
+      mel.eval("WireToolOptions")
+  wire_dropoff:
+    core: |
+      from maya import mel
+      mel.eval("WireDropoffLocator")
+  wire_dropoff_options:
+    description: Open the wire_dropoff options window.
+    core: |
+      from maya import mel
+      mel.eval("WireDropoffLocatorOptions")
+  shrink_wrap:
+    description: Create a shrink_wrap deformer.
+    core: |
+      from maya import mel
+      mel.eval("CreateShrinkWrap")
+  shrink_wrap_options:
+    description: Open the shrink_wrap options window.
+    core: |
+      from maya import mel
+      mel.eval("CreateShrinkWrapOptions")
+  sculpt:
+    description: Create a sculpt deformer.
+    core: |
+      from maya import mel
+      mel.eval("CreateSculptDeformer")
+  sculpt_options:
+    description: Open the sculpt options window.
+    core: |
+      from maya import mel
+      mel.eval("CreateSculptDeformerOptions")
+  bend:
+    description: Create a bend deformer.
+    core: |
+      from maya import mel
+      mel.eval("Bend")
+  blend_options:
+    description: Open the blend options window.
+    core: |
+      from maya import mel
+      mel.eval("BendOptions")
+  flare:
+    description: Create a flare deformer.
+    core: |
+      from maya import mel
+      mel.eval("Flare")
+  flare_options:
+    description: Open the flare options window.
+    core: |
+      from maya import mel
+      mel.eval("FlareOptions")
+  sine:
+    description: Create a sine deformer.
+    core: |
+      from maya import mel
+      mel.eval("Sine")
+  sine_options:
+    description: Open the sine options window.
+    core: |
+      from maya import mel
+      mel.eval("SineOptions")
+  squash:
+    description: Create a squash deformer.
+    core: |
+      from maya import mel
+      mel.eval("Squash")
+  squash_options:
+    description: Open the squash options window.
+    core: |
+      from maya import mel
+      mel.eval("SquashOptions")
+  twist:
+    description: Create a twist deformer.
+    core: |
+      from maya import mel
+      mel.eval("Twist")
+  twist_options:
+    description: Open the twist options window.
+    core: |
+      from maya import mel
+      mel.eval("TwistOptions")
+  wave:
+    description: Create a wave deformer.
+    core: |
+      from maya import mel
+      mel.eval("Wave")
+  wave_options:
+    description: Open the wave options window.
+    core: |
+      from maya import mel
+      mel.eval("WaveOptions")
+  mirror:
+    description: Mirror the weight map of a deformer.
+    core: |
+      from maya import mel
+      mel.eval("MirrorDeformerWeightsOptions")
+  softmod:
+    description: Create a softmod deformer.
+    core: |
+      from maya import mel
+      mel.eval("SoftModTool")
+  softmod_options:
+    description: Open the softmod options window.
+    core: |
+      from maya import mel
+      mel.eval("SoftModToolOptions")
+  intermediate:
+    description: Toggle the visibility of the intermediate shapes.
+    # icon: displayIntermObj.png
+    core: |
+      from maya import mel
+      mel.eval("cycleIntermediateObjectSibling 1")
+  show_intermediate:
+    description: Turn to on the visibility of the intermediate shapes.
+    core: |
+      from maya import mel
+      mel.eval("DisplayIntermediateObjects")
+  hide_intermediate:
+    description: Turn to off the visibility of the intermediate shapes.
+    core: |
+      from maya import mel
+      mel.eval("HideIntermediateObjects")
+
+decorators:
+  undo: ftd.decorator.undo
+  repeat: ftd.decorator.repeat
+  undo_repeat: ftd.decorator.undo_repeat
+  # timing: ftd.decorator.timing()
+  # create: ftd.decorator.create
+  keep_selected: ftd.decorator.keep_selected
+
+hotkey_sets:
+  ftd:
+    base: Maya_Default
+    hotkeys:
+      # Common ---
+      - command: at_reset
+        key: z
+        category: attribute
+
+      # Node Editor ---
+      - command: ne_open
+        key: "n"
+        category: node_editor
+      - command: ne_add
+        key: alt+a
+        category: node_editor
+      - command: ne_remove
+        key: alt+r
+        category: node_editor
+      - command: ne_clear
+        key: alt+c
+        category: node_editor
+      - command: ne_show_all
+        key: alt+g
+        category: node_editor
+
+      # Script editor ---
+      - command: se_open
+        category: script_editor
+        key: o
+      - command: charcoal_open
+        category: script_editor
+        key: alt+o
+
+marking_menus:
+  ftd:
+    parent: MainPane
+    key: ctrl+alt+left
+    items:
+      - name: match
+        menu: true
+        position: sw
+        items:
+          - main: match_transform
+            position: "n"
+          - main: match_translate
+            position: w
+          - main: match_rotate
+            position: e
+          - main: match_scale
+            position: s
+          - main: match_pivot
+      - name: freeze
+        menu: true
+        position: s
+        items:
+          - main: freeze_transform
+            position: "n"
+          - main: freeze_translate
+            position: w
+          - main: freeze_rotate
+            position: e
+          - main: freeze_scale
+            position: s
+          - main: freeze_joint_orient
+            position: se
+      - name: selection
+        menu: true
+        position: w
+        items:
+          - main: select_all
+            position: "n"
+          - main: clear_selection
+            position: w
+          - main: select_hierarchy
+            position: s
+          - main: invert_selection
+            position: e
+          - main: save_selection
+            position: sw
+          - main: load_selection
+            position: nw
+      - name: defomers
+        menu: true
+        position: ne
+        items:
+          - main: bind_skin
+            option: bind_skin_options
+            position: "n"
+          - main: cluster
+            position: e
+            option: cluster_options
+          - main: blendshape
+            option: blendshape_options
+            position: s
+          - main: lattice
+            option: lattice_options
+            position: w
+          - main: sculpt
+            option: sculpt_options
+            position: ne
+          - main: deltamush
+            option: deltamush_options
+            position: nw
+          - main: wire
+            option: wire_options
+            position: sw
+          - name: non_linear
+            menu: true
+            position: se
+            items:
+              - main: bend
+                options: bend_options
+                position: "n"
+              - main: flare
+                option: flare_options
+                position: e
+              - main: sine
+                option: sine_options
+                position: w
+              - main: squash
+                option: squash_options
+                position: s
+              - main: twist
+                option: twist_options
+                position: ne
+              - main: wave
+                option: wave_options
+                position: nw
+          - main: softmod
+            option: softmod_options
+          - divider: true
+          - main: paint_weight
+          - main: mirror_skin_weights
+            option: mirror_skin_weights_options
+      - name: constraints
+        menu: true
+        position: "n"
+        items:
+          - main: parent_constraint
+            option: parent_constraint_options
+            position: "n"
+          - main: point_constraint
+            option: point_constraint_options
+            position: nw
+          - main: orient_constraint
+            option: orient_constraint_options
+            position: ne
+          - main: scale_constraint
+            option: scale_constraint_options
+            position: s
+          - main: aim_constraint
+            option: aim_constraint_options
+            position: e
+          - main: pole_vector_constraint
+            option: pole_vector_constraint_options
+            position: w
+          - main: normal_constraint
+            option: normal_constraint_options
+            position: se
+          - main: tangent_constraint
+            option: tangent_constraint_options
+            position: sw
+          - main: rivet
+          - main: motion_path
+            option: motion_path_options
+
+colors:
+  # Grid ---
+  gridHighlight: 3
+  grid: 2
+  gridAxis: 16
+  # Objects ---
+  polymesh: 4
+  fkJoints: 1
+  segment: 1
+  # Viewport ---
+  headsUpDisplayLabels: 3
+  background: [0.251, 0.251, 0.251]
+  # Script Editor ---
+  syntaxKeywords: [1, 0.0979934, 0.379995]
+  syntaxStrings: [0.955993, 0.882048, 0.384314]
+  syntaxComments: [0.420005, 0.420005, 0.420005]
+  syntaxCommands: [0.677897, 0.5019, 1]
+
+options:
+  useSaveScenePanelConfig: false
+  useScenePanelConfig: false
+  displayDivisionLines: false
