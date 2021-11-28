@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving mathematica."""
+"""Provide mathematical algorithms."""
 from __future__ import division
 
 import logging

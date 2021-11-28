@@ -1,18 +1,20 @@
-"""This module provides utilities for common tasks involving colors."""
+"""Provide utilities related to colors."""
 import logging
 import os
 
 import yaml
 from maya import cmds
 
-# __all__ = []
+__all__ = ["index", "name", "rgb"]
 
 LOG = logging.getLogger(__name__)
 
+COLORS = {}
+"""dict: The available colors."""
+
 _PATH = os.path.join(os.path.dirname(__file__), "configs", "colors.yaml")
 with open(_PATH, "r") as _stream:
-    COLORS = yaml.load(_stream, Loader=yaml.FullLoader)
-    """dict: The available colors."""
+    COLORS.update(yaml.load(_stream, Loader=yaml.FullLoader))
 del _PATH, _stream
 
 
@@ -47,6 +49,30 @@ def index(node, value=0):
     cmds.setAttr(node + ".overrideColor", value)
 
 
+def name(node, value):
+    """Set the RGB color using CSS color names.
+
+    The website `w3schools`_ references all the available
+    colors classed by names, values or groups.
+
+    Examples:
+        >>> from maya import cmds
+        >>> _ = cmds.file(new=True, force=True)
+        >>> node = cmds.circle()[0]
+        >>> name(node, "red")
+        >>> cmds.getAttr(node + ".overrideColorRGB")[0]
+        (1.0, 0.0, 0.0)
+
+    Arguments:
+        node (str): The target node.
+        value (str): The color name.
+
+    .. _w3schools:
+        https://www.w3schools.com/colors/colors_groups.asp
+    """
+    rgb(node, COLORS[value]["rgb"])
+
+
 def rgb(node, values, max_range=255):
     """Set the color of a node using RGB values.
 
@@ -74,27 +100,3 @@ def rgb(node, values, max_range=255):
     cmds.setAttr(node + ".overrideEnabled", True)
     cmds.setAttr(node + ".overrideRGBColors", True)
     cmds.setAttr(node + ".overrideColorRGB", *(x / max_range for x in values))
-
-
-def name(node, value):
-    """Set the RGB color using CSS color names.
-
-    The website `w3schools`_ references all the available
-    colors classed by names, values or groups.
-
-    Examples:
-        >>> from maya import cmds
-        >>> _ = cmds.file(new=True, force=True)
-        >>> node = cmds.circle()[0]
-        >>> name(node, "red")
-        >>> cmds.getAttr(node + ".overrideColorRGB")[0]
-        (1.0, 0.0, 0.0)
-
-    Arguments:
-        node (str): The target node.
-        value (str): The color name.
-
-    .. _w3schools:
-        https://www.w3schools.com/colors/colors_groups.asp
-    """
-    rgb(node, COLORS[value]["rgb"])

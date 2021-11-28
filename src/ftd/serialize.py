@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving serialization."""
+"""Provide utilities related to serialization."""
 import json
 import logging
 import re

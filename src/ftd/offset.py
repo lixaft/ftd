@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving transforms."""
+"""Provide utilities related to offsets."""
 import logging
 import math
 
@@ -6,7 +6,6 @@ from maya import cmds
 from maya.api import OpenMaya
 
 import ftd.attribute
-import ftd.context
 import ftd.graph
 
 __all__ = [
@@ -66,7 +65,7 @@ def unmatrix(node):
     tmatrix = OpenMaya.MTransformationMatrix(matrix_)
     space = OpenMaya.MSpace.kTransform
 
-    with ftd.context.unlock(node):
+    with ftd.attribute.unlock(node):
         cmds.setAttr(node + ".translate", *tmatrix.translation(space))
         cmds.setAttr(node + ".rotate", *map(math.degrees, tmatrix.rotation()))
         cmds.setAttr(node + ".scale", *tmatrix.scale(space))

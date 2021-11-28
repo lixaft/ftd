@@ -1,4 +1,4 @@
-"""Utilities on viewport."""
+"""Provide utilities related to viewport."""
 import logging
 
 from maya import cmds

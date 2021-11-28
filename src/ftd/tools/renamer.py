@@ -5,7 +5,7 @@ import re
 from maya import cmds
 from maya.api import OpenMaya
 
-import ftd.decorator
+import ftd.interaction
 
 __all__ = ["Core"]
 
@@ -57,7 +57,7 @@ class Core(object):
         self._nodes = list(map(self._encode, value))
 
     # Public methods ---
-    @ftd.decorator.undo
+    @ftd.interaction.undo
     def hash(self, name, start=0):
         """Rename the nodes by replacing the hash characters by a unique index.
 
@@ -89,7 +89,7 @@ class Core(object):
             new = name.replace("#" * length, str(index).zfill(length))
             self._rename(node, new)
 
-    @ftd.decorator.undo
+    @ftd.interaction.undo
     def search_replace(self, search, replace):
         """Replace all occurrences of a substring with another substring.
 
@@ -116,7 +116,7 @@ class Core(object):
         for node in self._iter_nodes():
             self._rename(node, regex.sub(replace, node.name()))
 
-    @ftd.decorator.undo
+    @ftd.interaction.undo
     def tokens(self, index, add=None, replace=None, remove=False):
         """Manipulates the name after separating it at each underscore.
 
@@ -160,7 +160,7 @@ class Core(object):
 
             self._rename(node, "_".join(tokens))
 
-    @ftd.decorator.undo
+    @ftd.interaction.undo
     def switch_case(self):
         """Switch the name case between lower and upper.
 
@@ -185,7 +185,7 @@ class Core(object):
                 new = name.upper()
             self._rename(node, new)
 
-    @ftd.decorator.undo
+    @ftd.interaction.undo
     def switch_side(self):
         """Switch the node side.
 
@@ -215,7 +215,7 @@ class Core(object):
                     break
             self._rename(node, "_".join(tokens))
 
-    @ftd.decorator.undo
+    @ftd.interaction.undo
     def add_type(self, overrided=None):
         """Add the type of the node as suffix.
 

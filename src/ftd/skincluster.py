@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving skinclusters."""
+"""Provide utilities related to skinclusters."""
 import logging
 
 from maya import cmds, mel

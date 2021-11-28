@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving names."""
+"""Provide utilities related to names."""
 import logging
 
 from maya import cmds

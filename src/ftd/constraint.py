@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving constraints."""
+"""Provide utilities related to constraints."""
 import logging
 
 from maya import cmds

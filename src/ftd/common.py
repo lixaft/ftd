@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks."""
+"""Provides utilities for tasks unrelated to maya."""
 import logging
 import os
 import sys
@@ -86,13 +86,13 @@ def mayapy(version):
 
     Usually the returned value should be:
 
-    .. csv-table::
-        :header: System, Path
-        :widths: auto
-
-        MacOs,``/Applications/Autodesk/maya<...>/Maya.app/Contents/bin/mayapy``
-        Windows,``C:/Program Files/Autodesk/Maya<...>/bin/mayapy.exe``
-        Linux,  ``/usr/autodesk/maya<...>/bin/mayapy``
+    ======= =================================================================
+    System                         File path
+    ======= =================================================================
+    MacOs   ``/Applications/Autodesk/maya<...>/Maya.app/Contents/bin/mayapy``
+    Windows ``C:/Program Files/Autodesk/Maya<...>/bin/mayapy.exe``
+    Linux   ``/usr/autodesk/maya<...>/bin/mayapy``
+    ======= =================================================================
 
     Arguments:
         version (int): The version of maya.
