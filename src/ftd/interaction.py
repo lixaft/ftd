@@ -106,7 +106,7 @@ def undo_chunk(name=None):
         within the same undo chunk which can be undo at once:
 
         >>> _ = cmds.file(new=True, force=True)
-        >>> with undo(name="create_transform"):
+        >>> with undo_chunk(name="create_transform"):
         ...     _ = cmds.createNode("transform", name="A")
         ...     _ = cmds.createNode("transform", name="B")
         >>> cmds.undoInfo(query=True, undoName=True)

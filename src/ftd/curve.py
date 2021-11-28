@@ -58,7 +58,7 @@ def default_knots(count, degree=3):
     """Find each knot value that can be used to generate a curve.
 
     Examples:
-        >>> default_knots(5, 1)
+        >>> default_knots(5, 3)
         [0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0, 2.0]
 
     Arguments:
