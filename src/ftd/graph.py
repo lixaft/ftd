@@ -10,8 +10,8 @@ import ftd.attribute
 __all__ = [
     "find_related",
     "matrix_to_srt",
-    "delete_unused",
     "lock_node_editor",
+    "delete_unused",
 ]
 
 LOG = logging.getLogger(__name__)
@@ -74,6 +74,21 @@ def find_related(root, type, direction="up"):
     return None
 
 
+@contextlib.contextmanager
+def lock_node_editor():
+    """Prevents adding new nodes in the Node Editor.
+
+    This context manager can be useful when building rigs as adding nodes to
+    the editor at creation can be very time consuming when many nodes are
+    generated at the same time.
+    """
+    panel = mel.eval("getCurrentNodeEditor")
+    state = cmds.nodeEditor(panel, query=True, addNewNodes=True)
+    cmds.nodeEditor(panel, edit=True, addNewNodes=False)
+    yield
+    cmds.nodeEditor(panel, edit=True, addNewNodes=state)
+
+
 def matrix_to_srt(plug, transform):
     """Connect a matrix plug to scale/rotate/translate attributes.
 
@@ -101,18 +116,3 @@ def matrix_to_srt(plug, transform):
             "{}.{}".format(transform, attribute),
         )
     return decompose
-
-
-@contextlib.contextmanager
-def lock_node_editor():
-    """Prevents adding new nodes in the Node Editor.
-
-    This context manager can be useful when building rigs as adding nodes to
-    the editor at creation can be very time consuming when many nodes are
-    generated at the same time.
-    """
-    panel = mel.eval("getCurrentNodeEditor")
-    state = cmds.nodeEditor(panel, query=True, addNewNodes=True)
-    cmds.nodeEditor(panel, edit=True, addNewNodes=False)
-    yield
-    cmds.nodeEditor(panel, edit=True, addNewNodes=state)
