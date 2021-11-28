@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving user interface."""
+"""Provide utilities related to user interface."""
 import inspect
 import logging
 import os

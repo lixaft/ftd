@@ -28,12 +28,12 @@ def find_related(root, type, direction="up"):
 
     `The following are the valid value for type parameter:`
 
-    ========= ===========================
-      Value          Description
-    ========= ===========================
-    ``up``    From destination to source.
-    ``down``  From source to destination
-    ========= ===========================
+    ======= ===========================
+     Value         Description
+    ======= ===========================
+    ``up``  From destination to source.
+    ``dn``  From source to destination
+    ======= ===========================
 
     Examples:
         >>> from maya import cmds

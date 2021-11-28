@@ -42,73 +42,73 @@ commands:
   # Polygons ---
   poly_sphere:
     icon: polySphere.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polySphere()[0]
   poly_cube:
     icon: polyCube.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyCube()[0]
   poly_cylinder:
     icon: polyCylinder.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyCylinder()[0]
   poly_cone:
     icon: polyCone.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyCone()[0]
   poly_torus:
     icon: polyTorus.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyTorus()[0]
   poly_plane:
     icon: polyMesh.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyPlane()[0]
   poly_disc:
     icon: polyDisc.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyDisc()[0]
   poly_pyramid:
     icon: polyPyramid.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyPyramid()[0]
   poly_prism:
     icon: polyPrism.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyPrism()[0]
   poly_pipe:
     icon: polyPipe.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyPipe()[0]
   poly_helix:
     icon: polyHelix.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyHelix()[0]
   poly_gear:
     icon: polyGear.png
-    decorator: [create, undo_repeat]
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.polyGear()[0]
@@ -253,7 +253,7 @@ commands:
       sel = cmds.ls(selection=True)
       driver = sel.pop(0)
       for driven in sel:
-          ftd.constraint.matrix(driver, driven, offset=True)
+          ftd.constraint.matrix(driver, driven, offset=True, decompose=True)
   matrix_constraint_translate:
     label: translate
     core: |
@@ -262,7 +262,7 @@ commands:
       sel = cmds.ls(selection=True)
       driver = sel.pop(0)
       for driven in sel:
-          ftd.constraint.matrix(driver, driven, offset=True, srt="t")
+          ftd.constraint.matrix(driver, driven, offset=True, srt="t", decompose=True)
   matrix_constraint_rotate:
     label: rotate
     core: |
@@ -271,7 +271,7 @@ commands:
       sel = cmds.ls(selection=True)
       driver = sel.pop(0)
       for driven in sel:
-          ftd.constraint.matrix(driver, driven, offset=True, srt="r")
+          ftd.constraint.matrix(driver, driven, offset=True, srt="r", decompose=True)
   matrix_constraint_scale:
     label: scale
     core: |
@@ -280,7 +280,7 @@ commands:
       sel = cmds.ls(selection=True)
       driver = sel.pop(0)
       for driven in sel:
-          ftd.constraint.matrix(driver, driven, offset=True, srt="s")
+          ftd.constraint.matrix(driver, driven, offset=True, srt="s", decompose=True)
   matrix_constraint_chain:
     label: chain
     decorators: [undo_repeat]
@@ -289,7 +289,7 @@ commands:
       from maya import cmds
       sel = cmds.ls(selection=True)
       for i, driver in enumerate(sel[:-1]):
-          ftd.constraint.matrix(driver, sel[i + 1], offset=True)
+          ftd.constraint.matrix(driver, sel[i + 1], offset=True, decompose=True)
   rivet:
     core: |
       from maya import mel
@@ -872,13 +872,13 @@ commands:
   # Rigging ---
   locator:
     icon: locator.png
-    decorator: create repeat undo
+    decorators: create repeat undo
     core: |
       from maya import cmds
       return cmds.spaceLocator()[0]
   joint:
     icon: kinJoint.png
-    decorator: create repeat undo
+    decorators: create repeat undo
     core: |
       from maya import cmds
       cmds.createNode("joint")
@@ -923,37 +923,37 @@ commands:
   # Surface ---
   sphere:
     icon: sphere.png
-    decorator: create repeat undo
+    decorators: create repeat undo
     core: |
       from maya import cmds
       return cmds.sphere()[0]
   cube:
     icon: cube.png
-    decorator: create repeat undo
+    decorators: create repeat undo
     core: |
       from maya import cmds
       cmds.nurbsCube()
   cylinder:
     icon: cylinder.png
-    decorator: create repeat undo
+    decorators: create repeat undo
     core: |
       from maya import cmds
       return cmds.cylinder()[0]
   cone:
     icon: cone.png
-    decorator: create repeat undo
+    decorators: create repeat undo
     core: |
       from maya import cmds
       return cmds.cone()[0]
   plane:
     icon: plane.png
-    decorator: create repeat undo
+    decorators: create repeat undo
     core: |
       from maya import cmds
       cmds.nurbsPlane(axis=(0, 1, 0))
   torus:
     icon: torus.png
-    decorator: create repeat undo
+    decorators: create repeat undo
     core: |
       from maya import cmds
       return cmds.torus()[0]
@@ -1133,7 +1133,7 @@ commands:
           ftd.offset.inverse_group(each)
   chain:
     description: Parent under each nodes under the previous one.
-    decorator: [repeat, undo]
+    decorators: [undo_repeat]
     label: chain
     short: chain
     core: |
@@ -1335,7 +1335,7 @@ marking_menus:
         items: {}
       - name: scene
         menu: true
-        icon: browseFolder.png
+        icon: fileNew.png
         position: se
         items: {}
       - name: editors
@@ -1361,6 +1361,7 @@ toolbar:
         - main: poly_helix
         - main: poly_gear
     - name: Sculpting
+      visible: false
       items:
         - main: brush_sculpt
         - main: brush_smooth
@@ -1369,6 +1370,7 @@ toolbar:
         - main: brush_bulge
         - main: brush_old_paint
     - name: Surfaces
+      visible: false
       items:
         - main: sphere
         - main: cube
@@ -1531,12 +1533,14 @@ toolbar:
             - command: show_intermediate
             - command: hide_intermediate
     - name: Animation
+      visible: false
       items:
         - main: delete_animation
         - main: bake_simulation
           options:
             - command: bake_simulation_options
     - name: Editors
+      visible: false
       items:
         - main: icon_browser
           options:
@@ -1547,7 +1551,6 @@ colors:
   gridHighlight: 3
   grid: 2
   gridAxis: 16
-  # Objects ---
   # Viewport ---
   headsUpDisplayLabels: 3
   background: [0.251, 0.251, 0.251]

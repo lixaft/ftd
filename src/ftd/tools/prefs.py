@@ -134,8 +134,8 @@ class Command(object):
         self._description = kwargs.get("description")
         self._icon = kwargs.get("icon")
         self._short = kwargs.get("short")
-
         self._used_decorators = kwargs.get("decorators", [])
+
         self._registered[name] = self
 
     # Read properties ---
@@ -177,6 +177,7 @@ class Command(object):
     # Public methods ---
     def execute(self):
         """Execute the command."""
+        print(self._used_decorators)
         return self.build_callable()()
 
     def build_string(self):
@@ -226,8 +227,8 @@ class Command(object):
     def register_decorator(cls, name, decorator):
         """Register a decorator to make it available via its name."""
         if isinstance(decorator, str):
-            mod, name = decorator.rsplit(".", 1)
-            decorator = getattr(importlib.import_module(mod), name)
+            mod, func_name = decorator.rsplit(".", 1)
+            decorator = getattr(importlib.import_module(mod), func_name)
         cls._decorators[name] = decorator
 
     # Private methods ---

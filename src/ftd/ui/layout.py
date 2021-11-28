@@ -1,8 +1,5 @@
 # pylint: disable=invalid-name, no-self-use
-"""This module provides utilities for common tasks involving layouts.
-
-:author: Fabien TAXIL <fabien.taxil@gmail.com>
-"""
+"""Provide pyside2 layouts to use in UI."""
 import logging
 
 from PySide2 import QtCore, QtWidgets

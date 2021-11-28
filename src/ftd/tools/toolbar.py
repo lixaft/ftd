@@ -1,4 +1,5 @@
 """Create a toolbar windows."""
+import logging
 from functools import partial
 
 import yaml
@@ -8,6 +9,10 @@ import ftd.tools.prefs
 import ftd.ui.layout
 import ftd.ui.widget
 import ftd.ui.window
+
+__all__ = ["show", "Window"]
+
+LOG = logging.getLogger(__name__)
 
 
 def show(path):
@@ -81,17 +86,17 @@ class Window(ftd.ui.window.Dockable):
 
         ftd.tools.prefs.load_commands(config)
         for tab, data in config["toolbar"].items():
-            widget = TabWidget(data)
+            widget = Tab(data)
             action = partial(self.widgets["tab"].setCurrentWidget, widget)
             self.widgets["tab"].addTab(widget, tab)
             self.widgets["tabs_menu"].addAction(tab, action)
 
 
-class TabWidget(QtWidgets.QScrollArea):
+class Tab(QtWidgets.QScrollArea):
     """Custom QScrollArea for the toolbar tabs."""
 
     def __init__(self, data, parent=None):
-        super(TabWidget, self).__init__(parent=parent)
+        super(Tab, self).__init__(parent=parent)
         self.data = data
 
         self.setWidgetResizable(True)
@@ -109,15 +114,15 @@ class TabWidget(QtWidgets.QScrollArea):
     def populate(self):
         """Populate the widget."""
         for data in self.data:
-            widget = FrameBox(data["name"], data)
+            widget = Category(data["name"], data)
             self._layout.addWidget(widget)
 
 
-class FrameBox(ftd.ui.widget.FrameBox):
+class Category(ftd.ui.widget.FrameBox):
     """Custom widget for the toolbar categories."""
 
     def __init__(self, title, data, parent=None):
-        super(FrameBox, self).__init__(title, parent)
+        super(Category, self).__init__(title, parent=parent)
         self.data = data
 
         widget = QtWidgets.QWidget()
@@ -127,18 +132,17 @@ class FrameBox(ftd.ui.widget.FrameBox):
         self._layout.setContentsMargins(1, 5, 1, 5)
         self._layout.setSpacing(1)
 
-        self.setState(data.get("visible", True))
-
         self.populate()
+        self.setState(data.get("visible", True))
 
     def populate(self):
         """Populate the widget."""
         for data in self.data["items"]:
-            widget = CommandButton(data)
+            widget = Command(data)
             self._layout.addWidget(widget)
 
 
-class CommandButton(ftd.ui.widget.IconButton):
+class Command(ftd.ui.widget.IconButton):
     """Custom widget for toolbar button."""
 
     css2 = """
@@ -151,7 +155,7 @@ class CommandButton(ftd.ui.widget.IconButton):
     """
 
     def __init__(self, data, parent=None):
-        super(CommandButton, self).__init__(parent=parent)
+        super(Command, self).__init__(parent=parent)
         cmd = ftd.tools.prefs.Command.get(data["main"])
 
         self.setStyleSheet(self.css + self.css2)

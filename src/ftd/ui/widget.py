@@ -1,8 +1,5 @@
 # pylint: disable=invalid-name
-"""This module provides utilities for common tasks involving widgets.
-
-:author: Fabien Taxil <fabien.taxil@gmail.com>
-"""
+"""Provide pyside2 widgets to use in UI."""
 import logging
 
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -89,9 +86,11 @@ class FrameBox(QtWidgets.QWidget):
     open_icon = ftd.ui.utility.find_icon("framebox/open.svg", qt=True)
     close_icon = ftd.ui.utility.find_icon("framebox/close.svg", qt=True)
 
-    def __init__(self, title, parent=None):
+    def __init__(self, title, state=True, parent=None):
         super(FrameBox, self).__init__(parent)
         self.setStyleSheet(self.css)
+
+        self.__state = state
 
         self.__button = QtWidgets.QPushButton(title)
         self.__button.setCheckable(True)
@@ -109,18 +108,48 @@ class FrameBox(QtWidgets.QWidget):
         self.__layout.setSpacing(0)
         self.__layout.addWidget(self.__button)
 
-        self.__button.toggled.connect(self.setState)
+        self.setState(self.__state)
+        self.__button.toggled.connect(self.toggle)
+
+    @property
+    def __attached_widget(self):
+        widget = self.__layout.itemAt(1)
+        return widget.wid if widget else None
+
+    def expand(self):
+        """Expand the visibility of the attached widget."""
+        self.__icon.setIcon(self.open_icon)
+        widget = self.__attached_widget
+        if widget:
+            widget.setVisible(True)
+        self.__state = True
+        self.toggled.emit(True)
+
+    def shrink(self):
+        """Shrink the visibility of the attached widget."""
+        self.__icon.setIcon(self.close_icon)
+        widget = self.__attached_widget
+        if widget:
+            widget.setVisible(False)
+        self.__state = False
+        self.toggled.emit(False)
+
+    def toggle(self):
+        """Switch between :meth:`shrink` and :meth:`expand` methods."""
+        if self.__state:
+            self.shrink()
+        else:
+            self.expand()
 
     def setState(self, state):
         """Set the visibility state of the sub-widget."""
-        widget = self.__layout.itemAt(1)
-        if widget:
-            widget.wid.setVisible(state)
-        self.__icon.setIcon(self.open_icon if state else self.close_icon)
-        self.toggled.emit(state)
+        if state:
+            self.expand()
+        else:
+            self.shrink()
 
     def setWidget(self, widget):
         """Set the sub-widget."""
         self.__layout.takeAt(1)
         self.__layout.addWidget(widget)
-        self.setState(self.__button.isChecked())
+        self.setState(self.__state)
