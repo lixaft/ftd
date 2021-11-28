@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving joints."""
+"""Provide utilities related to joints."""
 import logging
 
 from maya import cmds

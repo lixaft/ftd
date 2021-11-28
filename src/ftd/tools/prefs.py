@@ -8,6 +8,8 @@ import six
 import yaml
 from maya import cmds
 
+import ftd.ui.utility
+
 LOG = logging.getLogger(__name__)
 
 ENVIRON = os.getenv("FTD_PREFS", None)
@@ -41,6 +43,17 @@ def initialize():
             load_file(path)
 
 
+def load_commands(data):
+    """Load the commands and the decorators from the data."""
+    # commands
+    for name, kwargs in data.get("commands", {}).items():
+        Command(name, **kwargs)
+
+    # decorators
+    for name, decorator in data.get("decorators", {}).items():
+        Command.register_decorator(name, decorator)
+
+
 def load_file(path):
     """Load all the content of a serialized file and dispatch it into the api.
 
@@ -49,13 +62,8 @@ def load_file(path):
     """
     filedata = _unserialize(path)
 
-    # commands
-    for name, kwargs in filedata.get("commands", {}).items():
-        Command(name, **kwargs)
-
-    # decorators
-    for name, decorator in filedata.get("decorators", {}).items():
-        Command.register_decorator(name, decorator)
+    # commands and decorators
+    load_commands(filedata)
 
     # hotkeys
     for name, data in filedata.get("hotkey_sets", {}).items():
@@ -119,12 +127,15 @@ class Command(object):
     _registered = {}
     _decorators = {}
 
-    def __init__(self, name, core, decorators=None, description=""):
+    def __init__(self, name, core, **kwargs):
         self._name = name
         self._core = core
-        self._description = description
-        self._used_decorators = decorators or []
+        self._label = kwargs.get("label")
+        self._description = kwargs.get("description")
+        self._icon = kwargs.get("icon")
+        self._short = kwargs.get("short")
 
+        self._used_decorators = kwargs.get("decorators", [])
         self._registered[name] = self
 
     # Read properties ---
@@ -132,6 +143,26 @@ class Command(object):
     def name(self):
         """str: The name of the command."""
         return self._name
+
+    @property
+    def label(self):
+        """str: The display name of the command."""
+        return self._label
+
+    @property
+    def short(self):
+        """str: The short name of the command."""
+        return self._short
+
+    @property
+    def icon(self):
+        """str: The icon associated to the command."""
+        return self._icon
+
+    @property
+    def description(self):
+        """str: A short text that describes the command."""
+        return self._description
 
     @property
     def core(self):
@@ -142,11 +173,6 @@ class Command(object):
     def decorators(self):
         """list: The decorators that will be applied to the command."""
         return self._used_decorators
-
-    @property
-    def description(self):
-        """str: A short text that describes the command."""
-        return self._description
 
     # Public methods ---
     def execute(self):
@@ -265,7 +291,7 @@ def create_marking_menu(name, key, items, parent="MainPane"):
     if cmds.popupMenu(name, exists=True):
         cmds.deleteUI(name)
 
-    # find the menus hotkey
+    # find the flags that will be used to trigger the marking menu
     flags = {}
     for key_ in ("ctrl", "alt", "shift"):
         flags[key_ + "Modifier"] = key_ in key
@@ -281,14 +307,17 @@ def create_marking_menu(name, key, items, parent="MainPane"):
         if "menu" in data:
             flags["subMenu"] = True
             flags["label"] = data["name"]
+            if "icon" in data:
+                flags["image"] = ftd.ui.utility.find_icon(data["icon"])
 
         elif "divider" in data:
             flags["divider"] = True
-
         else:
             cmd = Command.get(data["main"])
-            flags["label"] = cmd.name
+            flags["label"] = cmd.label or cmd.name
             flags["command"] = lambda _: cmd.execute()
+            if cmd.icon:
+                flags["image"] = ftd.ui.utility.find_icon(cmd.icon)
 
         item = cmds.menuItem(parent=parent, **flags)
         # children
@@ -314,6 +343,5 @@ def create_marking_menu(name, key, items, parent="MainPane"):
         allowOptionBoxes=True,
         parent=parent,
         postMenuCommand=main_build,
-        # postMenuCommandOnce=True,
-        **flags,
+        **flags
     )

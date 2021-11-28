@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving deformers."""
+"""Provide utilities related to deformers."""
 import logging
 
 from maya import cmds
@@ -11,7 +11,7 @@ __all__ = ["blendshape", "clean_orig"]
 LOG = logging.getLogger(__name__)
 
 
-def blendshape(driver, driven, name="blendshape", alias=None, weight=1):
+def blendshape(driver, driven, name="blendshape", alias=None, weight=1.0):
     """Create a new blendshape between the two specified shapes.
 
     First look in the history of the shape if there is not already a

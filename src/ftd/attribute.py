@@ -1,11 +1,12 @@
-"""This module provides utilities for common tasks involving attributes."""
+"""Provide utilities related to attributes."""
+import contextlib
 import logging
 
 from maya import cmds
 
 import ftd.name
 
-__all__ = ["divider", "move", "reset"]
+__all__ = ["divider", "move", "reset", "unlock"]
 
 LOG = logging.getLogger(__name__)
 
@@ -19,10 +20,11 @@ def divider(node, label=None, look="basic"):
 
     It's possible to choose between different divider style:
 
-    .. csv-table::
-        :header: Value, Look
-
-        ``basic``,
+    ========= =============
+      Value   Look
+    ========= =============
+    ``basic`` Default value
+    ========= =============
 
     Warning:
         The actual name of the attribute created has nothing to do with the
@@ -96,7 +98,7 @@ def move(node, attribute, offset):
         # and therefore cannot be simply redirected with sys.stdout.
         cmds.undo()
 
-    with ftd.context.unlock(node):
+    with unlock(node):
         attributes = cmds.listAttr(userDefined=True)
 
         # this function can only move the attributes created by the user,
@@ -145,3 +147,43 @@ def reset(node, attributes=None):
         if cmds.getAttr(plug, settable=True):
             value = cmds.attributeQuery(attr, node=node, listDefault=True)[0]
             cmds.setAttr(plug, value)
+
+
+@contextlib.contextmanager
+def unlock(*args):
+    """Temporarily unlock all attributes during the execution of the block.
+
+    This function can be used to easily edit the locked attributes of a node.
+    The attributes are first unlocked before the code is executed, and when the
+    execution is finished,  the attributes are relocked.
+
+    Examples:
+        >>> from maya import cmds
+        >>> _ = cmds.file(new=True, force=True)
+        >>> node = cmds.createNode("transform")
+        >>> plug = node + ".translateX"
+        >>> cmds.setAttr(plug, lock=True)
+        >>> cmds.setAttr(plug, 1)  # doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+          ...
+        RuntimeError
+        >>> with unlock(node):
+        ...     cmds.setAttr(plug, 1)
+        >>> cmds.getAttr(plug, lock=True)
+        True
+
+    Arguments:
+        *args: The name of the node to unlock
+    """
+    plugs = []
+    for node in args:
+        attributes = cmds.listAttr(node, locked=True) or []
+        plugs.extend(["{}.{}".format(node, x) for x in attributes])
+
+    for plug in plugs:
+        cmds.setAttr(plug, lock=False)
+    try:
+        yield attributes
+    finally:
+        for plug in plugs:
+            cmds.setAttr(plug, lock=True)

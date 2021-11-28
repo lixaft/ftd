@@ -1,4 +1,4 @@
-"""This module provides utilities for common tasks involving meshes."""
+"""Provide utilities related to meshes."""
 import logging
 import operator
 
