@@ -19,7 +19,7 @@ __all__ = [
 
 LOG = logging.getLogger(__name__)
 
-CurveError = type("CurveError", (BaseException,), {})
+CurveError = type("CurveError", (Exception,), {})
 
 
 def cvs_position(node, world=False):
@@ -180,7 +180,7 @@ def generate_weights(cvs, time, degree=3, knots=None):
         if knot <= time:
             segment = index + order
 
-    # filters out cvs not used in the segment.
+    # filters out cvs not used in the segment
     indices = list(range(len(cvs)))
     used_indices = [indices[j + segment - degree] for j in range(0, order)]
 

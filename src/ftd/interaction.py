@@ -26,6 +26,17 @@ def keep_selected(func):
     return _wrapper
 
 
+@contextlib.contextmanager
+def restore_nodes(nodes):
+    """Restore the nodes before the action."""
+    for node in nodes:
+        cmds.nodePreset(save=(node, node))
+    yield
+    for node in nodes:
+        cmds.nodePreset(load=(node, node))
+        cmds.nodePreset(delete=(node, node))
+
+
 def repeat(func):
     """Decorate a function to make it repeatable.
 

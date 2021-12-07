@@ -173,7 +173,7 @@ class Command(ftd.ui.widget.IconButton):
         self.setIconSize(size * 0.9)
 
         # text
-        if cmd.short:
+        if data.get("label"):
             layout = QtWidgets.QVBoxLayout(self)
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(0)
@@ -190,5 +190,5 @@ class Command(ftd.ui.widget.IconButton):
                 menu.addSeparator()
                 continue
             cmd_ = ftd.tools.prefs.Command.get(option["command"])
-            action = partial(cmd_.execute)
-            menu.addAction(cmd_.label or cmd_.name, action)
+            name = "options" if "options" in cmd_.tags else cmd_.long
+            menu.addAction(name, cmd_.execute)

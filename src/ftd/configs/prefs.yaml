@@ -1,6 +1,32 @@
 commands:
+  # Animation
+  bake_simulation:
+    description: Bake the existing anim curves.
+    short: bake
+    icon: bakeAnimation.png
+    core: |
+      from maya import mel
+      mel.eval("BakeSimulation")
+  delete_animation:
+    description: Delete all the existing anim curves.
+    icon: setKeyframe.png
+    short: delete
+    decorators: [undo_repeat]
+    core: |
+      from maya import cmds
+      keyframes = cmds.ls(type="animCurve")
+      if keyframes:
+          cmds.delete(keyframes)
+
+  bake_simulation_options:
+    description: Open the bake simulation settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("BakeSimulationOptions")
+
   # Attributes ---
-  at_reset:
+  reset_attributes:
     description: Reset the the selected attributes to their default values.
     decorators: [undo_repeat]
     core: |
@@ -10,278 +36,26 @@ commands:
       for each in cmds.ls(selection=True):
           ftd.attribute.reset(each, attributes)
 
-  # Note Editor ---
-  ne_open:
-    description: Open the node editor.
-    core: |
-      from maya import mel
-      mel.eval("NodeEditorWindow")
-  ne_add:
-    description: Add the selected nodes to the node editor.
-    core: |
-      from maya import mel
-      mel.eval("NodeEditorGraphAddSelected")
-  ne_clear:
-    description: Removes all nodes of the current node editor tab.
-    core: |
-      from maya import mel
-      mel.eval("NodeEditorGraphClearGraph")
-  ne_remove:
-    description: Remove the selected nodes to the node editor.
-    core: |
-      from maya import mel
-      mel.eval("NodeEditorGraphRemoveSelected")
-  ne_show_all:
-    description: Show all attributes of the node.
-    core: |
-      from maya import cmds, mel
-      editor = mel.eval("getCurrentNodeEditor")
-      for each in cmds.ls(selection=True):
-          cmds.nodeEditor(editor, edit=True, showAllNodeAttributes=each)
-
-  # Polygons ---
-  poly_sphere:
-    icon: polySphere.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polySphere()[0]
-  poly_cube:
-    icon: polyCube.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyCube()[0]
-  poly_cylinder:
-    icon: polyCylinder.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyCylinder()[0]
-  poly_cone:
-    icon: polyCone.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyCone()[0]
-  poly_torus:
-    icon: polyTorus.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyTorus()[0]
-  poly_plane:
-    icon: polyMesh.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyPlane()[0]
-  poly_disc:
-    icon: polyDisc.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyDisc()[0]
-  poly_pyramid:
-    icon: polyPyramid.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyPyramid()[0]
-  poly_prism:
-    icon: polyPrism.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyPrism()[0]
-  poly_pipe:
-    icon: polyPipe.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyPipe()[0]
-  poly_helix:
-    icon: polyHelix.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyHelix()[0]
-  poly_gear:
-    icon: polyGear.png
-    decorators: [create, undo_repeat]
-    core: |
-      from maya import cmds
-      return cmds.polyGear()[0]
-
-  # Animation
-  delete_animation:
-    icon: setKeyframe.png
-    short: delete
-    core: |
-      from maya import cmds
-      keyframes = cmds.ls(type="animCurve")
-      if keyframes:
-          cmds.delete(keyframes)
-  bake_simulation:
-    icon: bakeAnimation.png
-    label: bake
-    core: |
-      from maya import mel
-      mel.eval("BakeSimulation")
-  bake_simulation_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("BakeSimulationOptions")
-
-  # Editors
-  icon_browser:
-    description: Show the icon browser.
-    icon: menuIconWindow.png
-    short: icon
-    core: |
-      from maya.app.general import resourceBrowser
-      x = resourceBrowser.resourceBrowser()
-      x.run()
-  cra_icons:
-    description: Open craIcons.
-    label: cra icons
-    core: |
-      from maya import mel
-      mel.eval("craIcons")
-
   # Constraints ---
-  parent_constraint:
-    label: parent
-    short: parent
-    icon: parentConstraint.png
-    core: |
-      from maya import mel
-      mel.eval("ParentConstraint")
-  parent_constraint_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("ParentConstraintOptions")
-  point_constraint:
-    label: point
-    short: point
-    icon: posConstraint.png
-    core: |
-      from maya import mel
-      mel.eval("PointConstraint")
-  point_constraint_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("PointConstraintOptions")
-  orient_constraint:
-    label: orient
-    short: orient
-    icon: orientConstraint.png
-    core: |
-      from maya import mel
-      mel.eval("OrientConstraint")
-  orient_constraint_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("OrientConstraintOptions")
-  scale_constraint:
-    label: scale
-    short: scale
-    icon: scaleConstraint.png
-    core: |
-      from maya import mel
-      mel.eval("ScaleConstraint")
-  scale_constraint_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("ScaleConstraintOptions")
   aim_constraint:
-    label: aim
-    short: aim
+    description: Create a new aim constraint.
     icon: aimConstraint.png
+    short: aim
     core: |
       from maya import mel
       mel.eval("AimConstraint")
-  aim_constraint_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("AimConstraintOptions")
-  pole_vector_constraint:
-    label: pole vector
-    short: pv
-    icon: poleVectorConstraint.png
-    core: |
-      from maya import mel
-      mel.eval("PoleVectorConstraint")
-  pole_vector_constraint_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("PoleVectorConstraintOptions")
-  tangent_constraint:
-    label: tangent
-    icon: tangentConstraint.png
-    core: |
-      from maya import mel
-      mel.eval("TangentConstraint")
-  tangent_constraint_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("TangentConstraintOptions")
-  normal_constraint:
-    label: normal
-    icon: normalConstraint.png
-    core: |
-      from maya import mel
-      mel.eval("NormalConstraint")
-  normal_constraint_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("NormalConstraintOptions")
   matrix_constraint:
+    description: Create a constraint using matrix nodes.
     icon: toolbar/matrix_constraint.svg
+    decorators: [undo_repeat]
     core: |
       from maya import cmds
       import ftd.constraint
       sel = cmds.ls(selection=True)
       driver = sel.pop(0)
       for driven in sel:
-          ftd.constraint.matrix(driver, driven, offset=True, decompose=True)
-  matrix_constraint_translate:
-    label: translate
-    core: |
-      from maya import cmds
-      import ftd.constraint
-      sel = cmds.ls(selection=True)
-      driver = sel.pop(0)
-      for driven in sel:
-          ftd.constraint.matrix(driver, driven, offset=True, srt="t", decompose=True)
-  matrix_constraint_rotate:
-    label: rotate
-    core: |
-      from maya import cmds
-      import ftd.constraint
-      sel = cmds.ls(selection=True)
-      driver = sel.pop(0)
-      for driven in sel:
-          ftd.constraint.matrix(driver, driven, offset=True, srt="r", decompose=True)
-  matrix_constraint_scale:
-    label: scale
-    core: |
-      from maya import cmds
-      import ftd.constraint
-      sel = cmds.ls(selection=True)
-      driver = sel.pop(0)
-      for driven in sel:
-          ftd.constraint.matrix(driver, driven, offset=True, srt="s", decompose=True)
-  matrix_constraint_chain:
+          ftd.constraint.matrix(driver, driven, offset=True, decompose=True, hierarchy=True)
+  matrix_chain_constraint:
     label: chain
     decorators: [undo_repeat]
     core: |
@@ -289,148 +63,1006 @@ commands:
       from maya import cmds
       sel = cmds.ls(selection=True)
       for i, driver in enumerate(sel[:-1]):
-          ftd.constraint.matrix(driver, sel[i + 1], offset=True, decompose=True)
-  rivet:
+          ftd.constraint.matrix(driver, sel[i + 1], offset=True, decompose=True, hierarchy=True)
+  matrix_orient_constraint:
+    description: Create a orient constraint using matrix nodes.
+    icon: rotate_M.png
+    decorators: [undo_repeat]
     core: |
-      from maya import mel
-      mel.eval("Rivet")
+      from maya import cmds
+      import ftd.constraint
+      sel = cmds.ls(selection=True)
+      driver = sel.pop(0)
+      for driven in sel:
+          ftd.constraint.matrix(driver, driven, offset=True, srt="r", decompose=True, hierarchy=True)
+  matrix_point_constraint:
+    description: Create a point constraint using matrix nodes.
+    icon: move_M.png
+    decorators: [undo_repeat]
+    core: |
+      from maya import cmds
+      import ftd.constraint
+      sel = cmds.ls(selection=True)
+      driver = sel.pop(0)
+      for driven in sel:
+          ftd.constraint.matrix(driver, driven, offset=True, srt="t", decompose=True, hierarchy=True)
+  matrix_scale_constraint:
+    description: Create a scale constraint using matrix nodes.
+    icon: scale_M.png
+    core: |
+      from maya import cmds
+      import ftd.constraint
+      sel = cmds.ls(selection=True)
+      driver = sel.pop(0)
+      for driven in sel:
+          ftd.constraint.matrix(driver, driven, offset=True, srt="s", decompose=True)
   motion_path:
-    label: motion path
+    description: Create a motion path constraint.
     icon: motionPath.png
     core: |
       from maya import mel
       mel.eval("AttachToPath")
+  normal_constraint:
+    description: Create a normal tangent constraint.
+    icon: normalConstraint.png
+    core: |
+      from maya import mel
+      mel.eval("NormalConstraint")
+  orient_constraint:
+    description: Create a new orient constraint.
+    short: orient
+    icon: orientConstraint.png
+    core: |
+      from maya import mel
+      mel.eval("OrientConstraint")
+  parent_constraint:
+    description: Create a new parent constraint.
+    short: parent
+    icon: parentConstraint.png
+    core: |
+      from maya import mel
+      mel.eval("ParentConstraint")
+  point_constraint:
+    description: Create a new point constraint.
+    short: point
+    icon: posConstraint.png
+    core: |
+      from maya import mel
+      mel.eval("PointConstraint")
+  pole_vector_constraint:
+    description: Create a new pole vector constraint.
+    short: pv
+    icon: poleVectorConstraint.png
+    core: |
+      from maya import mel
+      mel.eval("PoleVectorConstraint")
+  rivet:
+    description: Create a new rivet locator attach to two edges.
+    # icon: rivet.bmp
+    core: |
+      from maya import mel
+      mel.eval("Rivet")
+  scale_constraint:
+    description: Create a new scale constraint.
+    icon: scaleConstraint.png
+    short: scale
+    core: |
+      from maya import mel
+      mel.eval("ScaleConstraint")
+  tangent_constraint:
+    description: Create a new tangent constraint.
+    icon: tangentConstraint.png
+    core: |
+      from maya import mel
+      mel.eval("TangentConstraint")
+
+  aim_constraint_options:
+    description: Open the aim constraint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("AimConstraintOptions")
   motion_path_options:
+    description: Open the motion path constraint settings.
+    tags: [options]
     core: |
       from maya import mel
       mel.eval("AttachToPathOptions")
+  normal_constraint_options:
+    description: Open the normal constraint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("NormalConstraintOptions")
+  orient_constraint_options:
+    description: Open the orient constraint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("OrientConstraintOptions")
+  parent_constraint_options:
+    description: Open the parent constraint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("ParentConstraintOptions")
+  point_constraint_options:
+    description: Open the point constraint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("PointConstraintOptions")
+  pole_vector_constraint_options:
+    description: Open the aim constraint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("PoleVectorConstraintOptions")
+  scale_constraint_options:
+    description: Open the scale constraint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("ScaleConstraintOptions")
+  tangent_constraint_options:
+    description: Open the tangent constraint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("TangentConstraintOptions")
 
-  # Script Editor ---
-  se_open:
-    description: Open the script editor.
+  # Curve ---
+  add_point:
+    description: Add a new point on the curve.
+    icon: curveAddPt.png
     core: |
       from maya import mel
-      mel.eval("ScriptEditor")
-  charcoal_open:
-    description: Open the charcoal editor.
+      mel.eval("AddPointsTool")
+  attach_curve:
+    description: Attach two curve together.
+    icon: attachCurves.png
     core: |
       from maya import mel
-      mel.eval("charcoalEditor2")
+      mel.eval("AttachCurve")
+  create_bezier_curve:
+    description: Create a new bezier curve.
+    icon: curveBezier.png
+    core: |
+      from maya import mel
+      mel.eval("CreateBezierCurveTool")
+  create_curve:
+    description: Create a new curve.
+    icon: curveEP.png
+    core: |
+      from maya import mel
+      mel.eval("EPCurveTool")
+  curve_from_poly:
+    description: Create a new curve based on the selected edges.
+    icon: polyEdgeToCurves.png
+    core: |
+      from maya import mel
+      mel.eval("CreateCurveFromPoly")
+  detach_curve:
+    description: Separate two curve on the selected points.
+    icon: detachCurve.png
+    core: |
+      from maya import mel
+      mel.eval("DetachCurve")
+  edit_curve:
+    description: Edit a curve.
+    icon: curveEditor.png
+    core: |
+      from maya import mel
+      mel.eval("CurveEditTool")
+  extend_curve:
+    description: Extend the curve in the specified direction.
+    icon: extend.png
+    core: |
+      from maya import mel
+      mel.eval("ExtendCurve")
+  insert_knot:
+    description: Insert a knot in the curve.
+    icon: insertKnot.png
+    core: |
+      from maya import mel
+      mel.eval("InsertKnot")
+  offset_curve:
+    descriptiom: Offset the curve.
+    icon: offsetCurve.png
+    core: |
+      from maya import mel
+      mel.eval("OffsetCurve")
+  open_close_curve:
+    description: Switch between periodic and non-periodic curve.
+    icon: closeGeom.png
+    core: |
+      from maya import mel
+      mel.eval("OpenCloseCurve")
+  pencil_curve:
+    description: Create a curve by drawing a path.
+    icon: pencil.png
+    core: |
+      from maya import mel
+      mel.eval("PencilCurveTool")
+  rebuild_curve:
+    descriptiom: Rebuild the curve with the specified parameters.
+    icon: rebuildCurve.png
+    core: |
+      from maya import mel
+      mel.eval("RebuildCurve")
+  reverse_curve:
+    description: Reverse a curve.
+    icon: reverse.png
+    core: |
+      from maya import mel
+      mel.eval("ReverseCurve")
+  smooth_curve:
+    description: Smooth a curve.
+    icon: modifySmooth.png
+    core: |
+      from maya import mel
+      mel.eval("SmoothHairCurves")
+  three_point_arc:
+    description: Create a three point curve object.
+    icon: threePointArc.png
+    core: |
+      from maya import mel
+      mel.eval("ThreePointArcTool")
 
-  # Match ---
-  match_transform:
-    description: Match all the transform attributes of the selected nodes.
-    label: transform
-    icon: srt_M.png
+  attach_curve_options:
+    description: Open the attach curve settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("MatchTransform")
-  match_translate:
-    description: Match the translate attributes of the selected nodes
-    label: translate
-    icon: move_M.png
+      mel.eval("AttachCurveOptions")
+  create_bezier_curve_options:
+    description: Open the bezier curve settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("MatchTranslation")
-  match_rotate:
-    description: Match the rotation attributes of the selected nodes
-    label: rotate
-    icon: rotate_M.png
+      mel.eval("CreateBezierCurveToolOptions")
+  create_curve_options:
+    description: Open the curve settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("MatchRotation")
-  match_scale:
-    description: Match the scale attributes of the selected nodes
-    label: scale
-    icon: scale_M.png
+      mel.eval("EPCurveToolOptions")
+  curve_from_poly_options:
+    description: Open the curve from poly settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("MatchScaling")
-  match_pivot:
-    description: Match the pivot of the selected nodes
-    label: pivot
-    icon: buttonManip.svg
+      mel.eval("CreateCurveFromPolyOptions")
+  detach_curve_options:
+    description: Open the detach curve settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("MatchPivots")
+      mel.eval("DetachCurveOptions")
+  extend_curve_options:
+    description: Open the extend curve settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("ExtendCurveOptions")
+  insert_knot_options:
+    description: Open the detach curve settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("InsertKnotOptions")
+  offset_curve_options:
+    description: Open the offset curve settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("OffsetCurveOptions")
+  open_close_curve_options:
+    description: Open the open/close curve settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("OpenCloseCurveOptions")
+  pencil_curve_options:
+    description: Open the pencil curve settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("PencilCurveToolOptions")
+  rebuild_curve_options:
+    description: Open the rebuild curve settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("RebuildCurveOptions")
+  reverse_curve_options:
+    description: Open the reverse curve settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("ReverseCurveOptions")
+  smooth_curve_options:
+    description: Open the smooth curve settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("SmoothHairCurvesOptions")
+  three_point_arc_options:
+    description: Open the three point arc settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("ThreePointArcToolOptions")
+
+  # Deformers ---
+  bend:
+    description: Bends geometry relative to a central handle.
+    icon: bendNLD.png
+    core: |
+      from maya import mel
+      mel.eval("Bend")
+  blendshape:
+    description: Create a new Blend Shape on an object/group that can blend between other deformations / the original mesh shape.
+    icon: blendShape.png
+    core: |
+      from maya import mel
+      mel.eval("CreateBlendShape")
+  cluster:
+    description: Creates a transform driven deformation for a set of points on an object (CVs, vertices, or lattice points).
+    icon: cluster.png
+    core: |
+      from maya import mel
+      mel.eval("CreateCluster")
+  deltamush:
+    description: Filters deformation artifacts and creates smoothing effects.
+    short: delta
+    icon: menuIconDeformations.png
+    core: |
+      from maya import mel
+      mel.eval("DeltaMush")
+  flare:
+    description: Tapers geometry along two axes.
+    icon: flareNLD.png
+    core: |
+      from maya import mel
+      mel.eval("Flare")
+  hide_intermediate:
+    description: Turn to off the visibility of the intermediate objects.
+    label: hide
+    core: |
+      from maya import mel
+      mel.eval("HideIntermediateObjects")
+  lattice:
+    description: Surrounds geometry with a flexible grid that you can use to change the object's shape.
+    icon: lattice.png
+    core: |
+      from maya import mel
+      mel.eval("CreateLattice")
+  mirror:
+    description: Mirror the weights of a specific deformer across an object on either the same deformer or a newly created one.
+    icon: mirrorSkinWeight.png
+    core: |
+      from maya import mel
+      mel.eval("MirrorDeformerWeights")
+      mel.eval("CreateShrinkWrap")
+  sculpt:
+    description: Creates rounded deformations on a surface relative to an origin locator.
+    short: sculpt
+    icon: sculpt.png
+    core: |
+      from maya import mel
+      mel.eval("CreateSculptDeformer")
+  show_intermediate:
+    description: Turn to on the visibility of the intermediate objects.
+    label: show
+    core: |
+      from maya import mel
+      mel.eval("DisplayIntermediateObjects")
+  shrink_wrap:
+    description: Deform objects by wrapping them around another mesh.
+    short: shrink
+    icon: shrinkwrap.png
+    core: |
+      from maya import mel
+  sine:
+    description: Deforms geometry along a sine wave relative to a central handle.
+    icon: sineNLD.png
+    core: |
+      from maya import mel
+      mel.eval("Sine")
+  softmod:
+    description: Select objects or components to modify with a curve based falloff.
+    icon: softMod.png
+    core: |
+      from maya import mel
+      mel.eval("SoftModTool")
+  squash:
+    description: Deforms a geometry by squashing and stretching along an axis.
+    icon: squashNLD.png
+    core: |
+      from maya import mel
+      mel.eval("Squash")
+  toggle_intermediate:
+    description: Toggle the visibility of the intermediate shapes.
+    icon: displayIntermObj.png
+    core: |
+      from maya import mel
+      mel.eval("cycleIntermediateObjectSibling 1")
+  twist:
+    description: Twists points on a surface around their center.
+    icon: twistNLD.png
+    core: |
+      from maya import mel
+      mel.eval("Twist")
+  wave:
+    description: Deforms geometry along a circular sine wave.
+    icon: waveNLD.png
+    core: |
+      from maya import mel
+      mel.eval("Wave")
+  wire:
+    description: Deform objects by having their surfaces follow the shape of a curve.
+    short: wire
+    icon: wire.png
+    core: |
+      from maya import mel
+      mel.eval("WireTool")
+  wire_dropoff:
+    description: Creates a locatorShape at a curve point, which you can use to modify the deformation at that spot.
+    icon: wireDropoff.png
+    core: |
+      from maya import mel
+      mel.eval("WireDropoffLocator")
+  wrap:
+    description: Deform objects by modifying a mesh that surrounds them.
+    short: wrap
+    icon: wrap.png
+    core: |
+      from maya import mel
+      mel.eval("CreateWrap")
+
+  blend_options:
+    description: Open the blend options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("BendOptions")
+  blendshape_options:
+    description: Open the blendshape options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("CreateBlendShapeOptions")
+  cluster_options:
+    description: Open the cluster options window.
+    tags: [options]
+    core: |
+      from maya import mel
+  deltamush_options:
+    description: Open the deltamush options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("DeltaMushOptions")
+      mel.eval("CreateClusterOptions")
+  flare_options:
+    description: Open the flare options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("FlareOptions")
+  lattice_options:
+    description: Open the lattice options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("CreateLatticeOptions")
+  mirror_options:
+    description: Open the mirror deformers weight options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("MirrorDeformerWeightsOptions")
+  sculpt_options:
+    description: Open the sculpt options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("CreateSculptDeformerOptions")
+  shrink_wrap_options:
+    description: Open the shrink_wrap options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("CreateShrinkWrapOptions")
+  sine_options:
+    description: Open the sine options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("SineOptions")
+  softmod_options:
+    label: options
+    description: Open the softmod options window.
+    core: |
+      from maya import mel
+      mel.eval("SoftModToolOptions")
+  squash_options:
+    description: Open the squash options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("SquashOptions")
+  twist_options:
+    description: Open the twist options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("TwistOptions")
+  wave_options:
+    description: Open the wave options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("WaveOptions")
+  wire_options:
+    description: Open the wire options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("WireToolOptions")
+  wire_dropoff_options:
+    description: Open the wire_dropoff options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("WireDropoffLocatorOptions")
+  wrap_options:
+    description: Open the wrap options window.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("CreateWrapOptions")
+
+  # File ---
+  new_scene:
+    description: Create a new scene.
+    short: new
+    icon: fileNew.png
+    core: |
+      from maya import mel
+      import ftd.interaction
+      nodes = cmds.ls(type="camera")
+      nodes += [cmds.listRelatives(x, parent=True)[0] for x in nodes]
+      nodes += ["hardwareRenderGlobals", "hardwareRenderingGlobals", "defaultHardwareRenderGlobals"]
+      with ftd.interaction.restore_nodes(nodes):
+        mel.eval("NewScene")
 
   # Freeze ---
-  freeze_transform:
-    description: Reset to default the transform attributes.
-    label: transform
-    icon: srt_M.png
+  freeze_joint_orient:
+    description: Reset to 0 the jointOrient attributes.
+    icon: kinJoint.png
     core: |
       from maya import cmds
-      cmds.makeIdentity(apply=True, translate=True, rotate=True, scale=True)
-  freeze_translate:
-    description: Reset to 0 the translate attributes.
-    label: translate
-    icon: move_M.png
-    core: |
-      from maya import cmds
-      cmds.makeIdentity(apply=True, translate=True)
+      cmds.makeIdentity(apply=True, jointOrient=True)
   freeze_rotate:
     description: Reset to 0 the rotate attributes.
-    label: rotate
     icon: rotate_M.png
     core: |
       from maya import cmds
       cmds.makeIdentity(apply=True, rotate=True)
   freeze_scale:
     description: Reset to 1 the scale attributes.
-    label: scale
     icon: scale_M.png
     core: |
       from maya import cmds
       cmds.makeIdentity(apply=True, scale=True)
-  freeze_joint_orient:
-    description: Reset to 0 the jointOrient attributes.
-    label: joint orient
-    icon: kinJoint.png
+  freeze_transform:
+    description: Reset to default the transform attributes.
+    icon: srt_M.png
     core: |
       from maya import cmds
-      cmds.makeIdentity(apply=True, jointOrient=True)
+      cmds.makeIdentity(apply=True, translate=True, rotate=True, scale=True)
+  freeze_translate:
+    description: Reset to 0 the translate attributes.
+    icon: move_M.png
+    core: |
+      from maya import cmds
+      cmds.makeIdentity(apply=True, translate=True)
 
-  # Selection ---
-  select_all:
-    label: all
-    description: Select all nodes in the scene.
+  # Icon Editor ---
+  cra_icons:
+    description: Open craIcons window.
     core: |
       from maya import mel
-      mel.eval("SelectAll")
+      mel.eval("craIcons")
+  icon_browser:
+    description: Show the maya icon browser.
+    icon: menuIconWindow.png
+    core: |
+      from maya.app.general import resourceBrowser
+      x = resourceBrowser.resourceBrowser()
+      x.run()
+
+  # Maya ---
+  startup:
+    description: Execute all the user setup scripts that was run at startup.
+    icon: fuse.svg
+    core: |
+      import maya.app.startup.basic
+      maya.app.startup.basic.executeUserSetup()
+
+  # Match ---
+  match_pivot:
+    description: Match the pivot of the selected nodes
+    icon: buttonManip.svg
+    core: |
+      from maya import mel
+      mel.eval("MatchPivots")
+  match_rotate:
+    description: Match the rotation attributes of the selected nodes
+    icon: rotate_M.png
+    core: |
+      from maya import mel
+      mel.eval("MatchRotation")
+  match_scale:
+    description: Match the scale attributes of the selected nodes
+    icon: scale_M.png
+    core: |
+      from maya import mel
+      mel.eval("MatchScaling")
+  match_transform:
+    description: Match all the transform attributes of the selected nodes.
+    icon: srt_M.png
+    core: |
+      from maya import mel
+      mel.eval("MatchTransform")
+  match_translate:
+    description: Match the translate attributes of the selected nodes
+    icon: move_M.png
+    core: |
+      from maya import mel
+      mel.eval("MatchTranslation")
+
+  # Node Editor ---
+  node_editor:
+    description: Open the node editor.
+    core: |
+      from maya import mel
+      mel.eval("NodeEditorWindow")
+  node_editor_add:
+    description: Add the selected nodes to the node editor.
+    icon: nodeGrapherAddNodes.png
+    core: |
+      from maya import mel
+      mel.eval("NodeEditorGraphAddSelected")
+  node_editor_clear:
+    description: Removes all nodes of the current node editor tab.
+    icon: hsClearView.png
+    core: |
+      from maya import mel
+      mel.eval("NodeEditorGraphClearGraph")
+  node_editor_remove:
+    description: Remove the selected nodes to the node editor.
+    icon: nodeGrapherRemoveNodes.png
+    core: |
+      from maya import mel
+      mel.eval("NodeEditorGraphRemoveSelected")
+  node_editor_show_all:
+    description: Show all attributes of the node.
+    icon: nodeGrapherToggleView.png
+    core: |
+      from maya import cmds, mel
+      editor = mel.eval("getCurrentNodeEditor")
+      for each in cmds.ls(selection=True):
+          cmds.nodeEditor(editor, edit=True, showAllNodeAttributes=each)
+
+  # Polygons ---
+  poly_cone:
+    description: Create a new polygonal cone.
+    icon: polyCone.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyCone()[0]
+  poly_cube:
+    description: Create a new polygonal cube.
+    icon: polyCube.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyCube()[0]
+  poly_cylinder:
+    description: Create a new polygonal cylinder.
+    icon: polyCylinder.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyCylinder()[0]
+  poly_disc:
+    description: Create a new polygonal disc.
+    icon: polyDisc.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyDisc()[0]
+  poly_gear:
+    description: Create a new polygonal gear.
+    icon: polyGear.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyGear()[0]
+  poly_helix:
+    description: Create a new polygonal helix.
+    icon: polyHelix.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyHelix()[0]
+  poly_pipe:
+    description: Create a new polygonal pipe.
+    icon: polyPipe.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyPipe()[0]
+  poly_plane:
+    description: Create a new polygonal plane.
+    icon: polyMesh.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyPlane()[0]
+  poly_prism:
+    description: Create a new polygonal prism.
+    icon: polyPrism.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyPrism()[0]
+  poly_pyramid:
+    description: Create a new polygonal pyramid.
+    icon: polyPyramid.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyPyramid()[0]
+  poly_sphere:
+    description: Create a new polygonal sphere.
+    icon: polySphere.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polySphere()[0]
+  poly_torus:
+    description: Create a new polygonal torus.
+    icon: polyTorus.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.polyTorus()[0]
+
+  # Rigging ---
+  hide_joint_orient:
+    description: Turn to off the visibility of the joint orient for all joints in the scene.
+    core: |
+      import ftd.joint
+      ftd.joint.show_orient(False)
+  ik_handle:
+    description: Create IK handle on joint chain.
+    icon: kinHandle.png
+    core: |
+      from maya import mel
+      mel.eval("IKHandleTool")
+  ik_spline_handle:
+    description: Create IK spline handle on joint chain.
+    icon: kinSplineHandle.png
+    core: |
+      from maya import mel
+      mel.eval("IKSplineHandleTool")
+  joint:
+    description: Create a new joint.
+    icon: kinJoint.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.createNode("joint")
+  joint_tool:
+    description: Create joints using the joint tool.
+    core: |
+      from maya import mel
+      mel.eval("JointTool")
+  locator:
+    description: Create a new locator.
+    icon: locator.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.spaceLocator()[0]
+  orient_joint:
+    description: Align the rotate axis of a joint hierarchy.
+    icon: orientJoint.png
+    core: |
+      from maya import mel
+      mel.eval("OrientJoint")
+  show_joint_orient:
+    description: Turn to on the visibility of the joint orient for all joints in the scene.
+    core: |
+      import ftd.joint
+      ftd.joint.show_orient(True)
+
+  toggle_joint_orient:
+    description: Toggle the visibility of the joint orient for all joints in the scene.
+    short: jo
+    core: |
+      from maya import cmds
+      for joint in cmds.ls(type="joint"):
+        plug = joint + ".displayLocalAxis"
+        cmds.setAttr(plug, not cmds.getAttr(plug))
+  ik_handle_options:
+    description: Open the ik handle settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("IKHandleToolOptions")
+  ik_spline_handle_options:
+    description: Open the IK spline settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("IKSplineHandleToolOptions")
+  joint_tool_options:
+    description: Open the joint tool settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("JointToolOptions")
+  orient_joint_options:
+    description: Open the orient joint settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("OrientJointOptions")
+
+  # Script editor ---
+  charcoal_editor:
+    description: Open the charcoal editor.
+    core: |
+      from maya import mel
+      mel.eval("charcoalEditor2")
+  script_editor:
+    description: Open the script editor.
+    core: |
+      from maya import mel
+      mel.eval("ScriptEditor")
+
+  # Sculpting ---
+  geometry_tool:
+    description: Sculpt a geometry object
+    icon: putty.png
+    core: |
+      from maya import mel
+      mel.eval("SculptGeometryToolOptions")
+  mesh_amplify:
+    description: Accentuate surface detail.
+    icon: Amplify.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshAmplifyTool")
+  mesh_bulge:
+    description: Inflate an area on a surface.
+    icon: Bulge.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshBulgeTool")
+  mesh_fill:
+    description: Fill in the valleys on a surface.
+    icon: Fill.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshFillTool")
+  mesh_flatten:
+    description: Level a surface.
+    icon: Pinch.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshFlattenTool")
+  mesh_foamy:
+    description: Softly lift a surface.
+    icon: Foamy.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshFoamyTool")
+  mesh_grab:
+    description: Pull a single vertex along a surface in any direction.
+    icon: Grab.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshGrabTool")
+  mesh_imprint:
+    description: Imprint a single copy of a stamp on a surface.
+    icon: Imprint.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshImprintTool")
+  mesh_knife:
+    description: Cut fine strokes into a surface.
+    icon: Knife.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshKnifeTool")
+  mesh_pinch:
+    description: Sharpen soft edges.
+    icon: Pinch.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshPinchTool")
+  mesh_relax:
+    description: Smooth the surface of a mesh without changing its original shape.
+    icon: Relax.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshRelaxTool")
+  mesh_repeat:
+    description: Stamp a pattern on a surface repeatedly.
+    icon: Repeat.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshRepeatTool")
+  mesh_scrape:
+    description: Minimize or remove raised areas on a surface.
+    icon: Scrape.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshScrapeTool")
+  mesh_sculpt:
+    description: Lift a surface.
+    icon: Sculpt.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshSculptTool")
+  mesh_smear:
+    description: Pull a surface in the direction of the stroke.
+    icon: Smear.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshSmearTool")
+  mesh_smooth:
+    description: Smooth the surface of a mesh.
+    icon: Smooth.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshSmoothTool")
+  mesh_spray:
+    description: Randomly spray a stamp imprint on a surface.
+    icon: Spray.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshSprayTool")
+  mesh_wax:
+    description: Build up a surface.
+    icon: Wax.png
+    core: |
+      from maya import mel
+      mel.eval("SetMeshWaxTool")
+
+  # Selection ---
   clear_selection:
-    icon: trash.png
-    label: clear
     description: Deselect every selected nodes.
+    icon: trash.png
     core: |
       from maya import mel
       mel.eval("SelectNone")
-  select_hierarchy:
-    label: hierarchy
-    icon: outliner.png
-    description: Select all nodes in the hiearchy.
-    core: |
-      from maya import mel
-      mel.eval("SelectHierarchy")
   invert_selection:
-    label: invert
-    icon: reverseOrder.png
     description: Invert the current selection.
+    icon: reverseOrder.png
     core: |
       from maya import mel
       mel.eval("InvertSelection")
-  save_selection:
-    label: save
-    icon: greasePencilExport.png
-    description: Save the current selection to be able to reselect it later.
-    core: |
-      import ftdev
-      from maya import cmds
-      ftdev.SELECTION = cmds.ls(selection=True)
   load_selection:
-    label: load
-    icon: greasePencilImport.png
     description: Select the previous saved selection.
+    icon: greasePencilImport.png
     core: |
       import ftdev
       from maya import cmds
@@ -438,89 +1070,83 @@ commands:
           cmds.select(ftdev.SELECTION)
       else:
           LOG.error("No selection previously saved.")
+  save_selection:
+    description: Save the current selection to be able to reselect it later.
+    icon: greasePencilExport.png
+    core: |
+      import ftdev
+      from maya import cmds
+      ftdev.SELECTION = cmds.ls(selection=True)
+  select_all:
+    description: Select all nodes in the scene.
+    core: |
+      from maya import mel
+      mel.eval("SelectAll")
+  select_hierarchy:
+    description: Select all descendant nodes in the outliner.
+    icon: outliner.png
+    core: |
+      from maya import mel
+      mel.eval("SelectHierarchy")
 
   # Skincluster ---
-  bind_skin:
-    label: bind skin
-    icon: smoothSkin.png
-    core: |
-      from maya import mel
-      mel.eval("SmoothBindSkin")
-  bind_skin_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("SmoothBindSkinOptions")
-  interactive_bind_skin:
-    core: |
-      from maya import mel
-      mel.eval("InteractiveBindSkin")
-  interactive_bind_skin_options:
-    core: |
-      from maya import mel
-      mel.eval("InteractiveBindSkinOptions")
-  move_skinned_joint:
-    core: |
-      from maya import mel
-      mel.eval("MoveSkinJointsTool")
   add_influence:
+    description: Add the selected object as an influence to the selceted skinCluster.
     icon: addWrapInfluence.png
     core: |
       from maya import mel
       mel.eval("AddInfluence")
-  add_influence_options:
-    label: options
+  bind_skin:
+    description: Create and attach a skincluster to the selected node.
+    icon: smoothSkin.png
     core: |
       from maya import mel
-      mel.eval("AddInfluenceOptions")
-  remove_influence:
-    icon: removeWrapInfluence.png
-    core: |
-      from maya import mel
-      mel.eval("RemoveInfluence")
-  remove_influence_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("RemoveInfluenceOptions")
-  mirror_joints:
-    icon: kinMirrorJoint_S.png
-    core: |
-      from maya import mel
-      mel.eval("MirrorJoint")
-  mirror_joints_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("MirrorJointOptions")
-  paint_weight:
-    label: paint
-    icon: paintSkinWeights.png
-    core: |
-      from maya import mel
-      mel.eval("ArtPaintSkinWeightsToolOptions")
+      mel.eval("SmoothBindSkin")
   copy_skin:
+    description: Copy the weight of a vertex to paste it onto other vertices.
     icon: copySkinWeight.png
     core: |
       from maya import mel
       mel.eval("CopySkinWeights")
-  copy_skin_options:
-    label: options
+  interactive_bind_skin:
+    description: Adjust volume based weights on smooth bound skins.
+    icon: interactiveBindTool.png
     core: |
       from maya import mel
-      mel.eval("CopySkinWeightsOptions")
+      mel.eval("InteractiveBindSkin")
+  mirror_joints:
+    description: Mirror the joints on the opposite side.
+    icon: kinMirrorJoint_S.png
+    core: |
+      from maya import mel
+      mel.eval("MirrorJoint")
   mirror_skin_weights:
-    label: mirror
+    description: Mirror the skin weights on the selected bound mesh.
     icon: mirrorSkinWeight.png
     core: |
       from maya import mel
       mel.eval("MirrorSkinWeights")
-  mirror_skin_weights_options:
-    label: options
+  move_skinned_joint:
+    description: Move joints on smooth bound skins
+    icon: moveSkinnedJoint.png
     core: |
       from maya import mel
-      mel.eval("MirrorSkinWeightsOptions")
+      mel.eval("MoveSkinJointsTool")
+  paint_weight:
+    description: Paint weights on smooth bound skins.
+    icon: paintSkinWeights.png
+    core: |
+      from maya import mel
+      mel.eval("ArtPaintSkinWeightsToolOptions")
+  remove_influence:
+    description: Remove the selected influence from the selected skinCluster.
+    icon: removeWrapInfluence.png
+    core: |
+      from maya import mel
+      mel.eval("RemoveInfluence")
   select_influences:
+    description: Select all the influence nodes of a skincluster.
+    short: skc inf
     core: |
       import ftdev.skincluster
       from maya import cmds
@@ -529,16 +1155,8 @@ commands:
         influences_ = ftdev.skincluster.get_influences(each)
         influences.extend(influences_)
       cmds.select(influences)
-  select_weighted_influences:
-    core: |
-      import ftdev.skincluster
-      from maya import cmds
-      influences = []
-      for each in cmds.ls(selection=True):
-        influences_ = ftdev.skincluster.get_influences(each, weighted=True)
-        influences.extend(influences_)
-      cmds.select(influences)
   select_unused_influences:
+    description: Select the unused influence nodes of a skincluster.
     core: |
       import ftdev.skincluster
       from maya import cmds
@@ -547,575 +1165,119 @@ commands:
         influences_ = ftdev.skincluster.get_influences(each, unused=True)
         influences.extend(influences_)
       cmds.select(influences)
-  interactive_bind_skin:
-    icon: interactiveBindTool.png
+  select_weighted_influences:
+    description: Select the weighted influence nodes of a skincluster.
+    core: |
+      import ftdev.skincluster
+      from maya import cmds
+      influences = []
+      for each in cmds.ls(selection=True):
+        influences_ = ftdev.skincluster.get_influences(each, weighted=True)
+        influences.extend(influences_)
+      cmds.select(influences)
+
+  add_influence_options:
+    description: Open the add influence settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("InteractiveBindSkin")
+      mel.eval("AddInfluenceOptions")
+  bind_skin_options:
+    description: Open the bind skin settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("SmoothBindSkinOptions")
+  copy_skin_options:
+    description: Open the copy skin settings.
+    tags: [options]
+    core: |
+      from maya import mel
+      mel.eval("CopySkinWeightsOptions")
   interactive_bind_skin_options:
-    label: options
+    description: Open the interactive bind skin settings.
+    tags: [options]
     core: |
       from maya import mel
       mel.eval("InteractiveBindSkinOptions")
-  move_skinned_joint:
-    icon: moveSkinnedJoint.png
+  mirror_joints_options:
+    description: Open the mirror joints settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("MoveSkinJointsTool")
-  skincluster_influences:
-    description: Select the node influences of the selected node.
-    short: skc_inf
-    core: |
-      import ftd.skincluster
-      from maya import cmds
-      influences = []
-      for each in cmds.ls(selection=True):
-          influences_ = ftd.skincluster.get_influences(each)
-          influences.extend(influences_)
-      cmds.select(influences)
-  skincluster_weighted_influences:
-    description: Select the node influences of the selected node.
-    label: weighted
-    core: |
-      import ftd.skincluster
-      from maya import cmds
-      influences = []
-      for each in cmds.ls(selection=True):
-          influences_ = ftd.skincluster.get_influences(each, weighted=True)
-          influences.extend(influences_)
-      cmds.select(influences)
-  skincluster_unused_influences:
-    description: Select the node influences of the selected node.
-    label: unused
-    core: |
-      import ftd.skincluster
-      from maya import cmds
-      influences = []
-      for each in cmds.ls(selection=True):
-          influences_ = ftd.skincluster.get_influences(each, unused=True)
-          influences.extend(influences_)
-      cmds.select(influences)
-
-  # Deformers ---
-  blendshape:
-    description: Create a blendshape deformer.
-    label: blend shape
-    icon: blendShape.png
+      mel.eval("MirrorJointOptions")
+  mirror_skin_weights_options:
+    description: Open the mirror skin weights settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("CreateBlendShape")
-  blendshape_options:
-    label: options
-    description: Open the blendshape options window.
+      mel.eval("MirrorSkinWeightsOptions")
+  remove_influence_options:
+    description: Open the remove influence settings.
+    tags: [options]
     core: |
       from maya import mel
-      mel.eval("CreateBlendShapeOptions")
-  cluster:
-    description: Create a cluster deformer.
-    icon: cluster.png
-    core: |
-      from maya import mel
-      mel.eval("CreateCluster")
-  cluster_options:
-    label: options
-    description: Open the cluster options window.
-    core: |
-      from maya import mel
-      mel.eval("CreateClusterOptions")
-  lattice:
-    description: Create a lattice deformer.
-    icon: lattice.png
-    core: |
-      from maya import mel
-      mel.eval("CreateLattice")
-  lattice_options:
-    label: options
-    description: Open the lattice options window.
-    core: |
-      from maya import mel
-      mel.eval("CreateLatticeOptions")
-  deltamush:
-    description: Create a deltamush deformer.
-    label: delta mush
-    icon: menuIconDeformations.png
-    core: |
-      from maya import cmds
-      selection = cmds.ls(selection=True)
-      name = selection[1]
-      if name.endswith("_msh"):
-          name = name.replace("_msh", "_deltaMush")
-      else:
-          name += "_deltaMush"
-      cmds.deltaMush(selection[0], selection[1], name=name)
-  deltamush_options:
-    label: options
-    description: Open the deltamush options window.
-    core: |
-      from maya import mel
-      mel.eval("DeltaMushOptions")
-  wrap:
-    description: Create a wrap deformer.
-    icon: wrap.png
-    core: |
-      from maya import mel
-      mel.eval("CreateWrap")
-  wrap_options:
-    label: options
-    description: Open the wrap options window.
-    core: |
-      from maya import mel
-      mel.eval("CreateWrapOptions")
-  wire:
-    description: Create a wire deformer.
-    icon: wire.png
-    core: |
-      from maya import mel
-      mel.eval("WireTool")
-  wire_options:
-    label: options
-    description: Open the wire options window.
-    core: |
-      from maya import mel
-      mel.eval("WireToolOptions")
-  wire_dropoff:
-    core: |
-      from maya import mel
-      mel.eval("WireDropoffLocator")
-  wire_dropoff_options:
-    label: options
-    description: Open the wire_dropoff options window.
-    core: |
-      from maya import mel
-      mel.eval("WireDropoffLocatorOptions")
-  shrink_wrap:
-    description: Create a shrink_wrap deformer.
-    icon: shrinkwrap.png
-    core: |
-      from maya import mel
-      mel.eval("CreateShrinkWrap")
-  shrink_wrap_options:
-    label: options
-    description: Open the shrink_wrap options window.
-    core: |
-      from maya import mel
-      mel.eval("CreateShrinkWrapOptions")
-  sculpt:
-    icon: sculpt.png
-    description: Create a sculpt deformer.
-    core: |
-      from maya import mel
-      mel.eval("CreateSculptDeformer")
-  sculpt_options:
-    label: options
-    description: Open the sculpt options window.
-    core: |
-      from maya import mel
-      mel.eval("CreateSculptDeformerOptions")
-  bend:
-    description: Create a bend deformer.
-    icon: bendNLD.png
-    core: |
-      from maya import mel
-      mel.eval("Bend")
-  blend_options:
-    label: options
-    description: Open the blend options window.
-    core: |
-      from maya import mel
-      mel.eval("BendOptions")
-  flare:
-    description: Create a flare deformer.
-    icon: flareNLD.png
-    core: |
-      from maya import mel
-      mel.eval("Flare")
-  flare_options:
-    label: options
-    description: Open the flare options window.
-    core: |
-      from maya import mel
-      mel.eval("FlareOptions")
-  sine:
-    description: Create a sine deformer.
-    icon: sineNLD.png
-    core: |
-      from maya import mel
-      mel.eval("Sine")
-  sine_options:
-    label: options
-    description: Open the sine options window.
-    core: |
-      from maya import mel
-      mel.eval("SineOptions")
-  squash:
-    description: Create a squash deformer.
-    icon: squashNLD.png
-    core: |
-      from maya import mel
-      mel.eval("Squash")
-  squash_options:
-    label: options
-    description: Open the squash options window.
-    core: |
-      from maya import mel
-      mel.eval("SquashOptions")
-  twist:
-    description: Create a twist deformer.
-    icon: twistNLD.png
-    core: |
-      from maya import mel
-      mel.eval("Twist")
-  twist_options:
-    label: options
-    description: Open the twist options window.
-    core: |
-      from maya import mel
-      mel.eval("TwistOptions")
-  wave:
-    description: Create a wave deformer.
-    icon: waveNLD.png
-    core: |
-      from maya import mel
-      mel.eval("Wave")
-  wave_options:
-    label: options
-    description: Open the wave options window.
-    core: |
-      from maya import mel
-      mel.eval("WaveOptions")
-  mirror:
-    description: Mirror the weight map of a deformer.
-    icon: mirrorSkinWeight.png
-    core: |
-      from maya import mel
-      mel.eval("MirrorDeformerWeightsOptions")
-  softmod:
-    description: Create a softmod deformer.
-    icon: softMod.png
-    core: |
-      from maya import mel
-      mel.eval("SoftModTool")
-  softmod_options:
-    label: options
-    description: Open the softmod options window.
-    core: |
-      from maya import mel
-      mel.eval("SoftModToolOptions")
-  intermediate:
-    description: Toggle the visibility of the intermediate shapes.
-    icon: displayIntermObj.png
-    core: |
-      from maya import mel
-      mel.eval("cycleIntermediateObjectSibling 1")
-  toggle_intermediate:
-    icon: displayIntermObj.png
-    core: |
-      from maya import mel
-      mel.eval("cycleIntermediateObjectSibling 1")
-  show_intermediate:
-    description: Turn to on the visibility of the intermediate shapes.
-    label: show
-    core: |
-      from maya import mel
-      mel.eval("DisplayIntermediateObjects")
-  hide_intermediate:
-    description: Turn to off the visibility of the intermediate shapes.
-    label: hide
-    core: |
-      from maya import mel
-      mel.eval("HideIntermediateObjects")
-
-  # Sculpting
-  brush_sculpt:
-    icon: Sculpt.png
-    core: |
-      from maya import mel
-      mel.eval("SetMeshSculptTool")
-  brush_smooth:
-    icon: Smooth.png
-    core: |
-      from maya import mel
-      mel.eval("SetMeshSmoothTool")
-  brush_relax:
-    icon: Relax.png
-    core: |
-      from maya import mel
-      mel.eval("SetMeshRelaxTool")
-  brush_grab:
-    icon: Grab.png
-    core: |
-      from maya import mel
-      mel.eval("SetMeshGrabTool")
-  brush_bulge:
-    icon: Bulge.png
-    core: |
-      from maya import mel
-      mel.eval("SetMeshBulgeTool")
-  brush_old_paint:
-    icon: putty.png
-    core: |
-      from maya import mel
-      mel.eval("SculptGeometryToolOptions")
-
-  # viewport
-  toggle_joints:
-    description: Toggle the visibility of the joints node in the viewport.
-    core: |
-      import ftd.viewport
-      ftd.viewport.toogle_view("joints")
-  toggle_grid:
-    description: Toggle the grid visibility.
-    core: |
-      import ftdev.viewport
-      ftdev.viewport.toggle_view("grid")
-
-  # Rigging ---
-  locator:
-    icon: locator.png
-    decorators: create repeat undo
-    core: |
-      from maya import cmds
-      return cmds.spaceLocator()[0]
-  joint:
-    icon: kinJoint.png
-    decorators: create repeat undo
-    core: |
-      from maya import cmds
-      cmds.createNode("joint")
-  joint_tool:
-    core: |
-      from maya import mel
-      mel.eval("JointTool")
-  joint_tool_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("JointToolOptions")
-  orient_joint:
-    icon: orientJoint.png
-    core: |
-      from maya import mel
-      mel.eval("OrientJoint")
-  orient_joint_options:
-    core: |
-      from maya import mel
-      mel.eval("OrientJointOptions")
-  ik_handle:
-    icon: kinHandle.png
-    core: |
-      from maya import mel
-      mel.eval("IKHandleTool")
-  ik_handle_options:
-    core: |
-      from maya import mel
-      mel.eval("IKHandleToolOptions")
-  ik_spline_handle:
-    icon: kinSplineHandle.png
-    core: |
-      from maya import mel
-      mel.eval("IKSplineHandleTool")
-  ik_spline_handle_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("IKSplineHandleToolOptions")
+      mel.eval("RemoveInfluenceOptions")
 
   # Surface ---
-  sphere:
-    icon: sphere.png
-    decorators: create repeat undo
+  cone:
+    description: Create a NURBS cone.
+    icon: cone.png
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
-      return cmds.sphere()[0]
+      return cmds.cone()[0]
   cube:
+    description: Create a NURBS cube.
     icon: cube.png
-    decorators: create repeat undo
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       cmds.nurbsCube()
   cylinder:
+    description: Create a NURBS cylinder.
     icon: cylinder.png
-    decorators: create repeat undo
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.cylinder()[0]
-  cone:
-    icon: cone.png
-    decorators: create repeat undo
-    core: |
-      from maya import cmds
-      return cmds.cone()[0]
   plane:
+    description: Create a NURBS plane.
     icon: plane.png
-    decorators: create repeat undo
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       cmds.nurbsPlane(axis=(0, 1, 0))
+  sphere:
+    description: Create a NURBS sphere.
+    icon: sphere.png
+    decorators: [create, undo_repeat]
+    core: |
+      from maya import cmds
+      return cmds.sphere()[0]
   torus:
+    description: Create a NURBS torus.
     icon: torus.png
-    decorators: create repeat undo
+    decorators: [create, undo_repeat]
     core: |
       from maya import cmds
       return cmds.torus()[0]
 
-  # Curve ---
-  curve:
-    icon: curveEP.png
-    core: |
-      from maya import mel
-      mel.eval("EPCurveTool")
-  curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("EPCurveToolOptions")
-  pencil_curve:
-    icon: pencil.png
-    core: |
-      from maya import mel
-      mel.eval("PencilCurveTool")
-  pencil_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("PencilCurveToolOptions")
-  three_point_arc:
-    icon: threePointArc.png
-    core: |
-      from maya import mel
-      mel.eval("ThreePointArcTool")
-  three_point_arc_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("ThreePointArcToolOptions")
-  attach_curve:
-    icon: attachCurves.png
-    core: |
-      from maya import mel
-      mel.eval("AttachCurve")
-  attach_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("AttachCurveOptions")
-  detach_curve:
-    icon: detachCurve.png
-    core: |
-      from maya import mel
-      mel.eval("DetachCurve")
-  detach_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("DetachCurveOptions")
-  insert_knot:
-    icon: insertKnot.png
-    core: |
-      from maya import mel
-      mel.eval("InsertKnot")
-  insert_knot_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("InsertKnotOptions")
-  extend_curve:
-    icon: extend.png
-    core: |
-      from maya import mel
-      mel.eval("ExtendCurve")
-  extend_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("ExtendCurveOptions")
-  offset_curve:
-    icon: offsetCurve.png
-    core: |
-      from maya import mel
-      mel.eval("OffsetCurve")
-  offset_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("OffsetCurveOptions")
-  rebuild_curve:
-    icon: rebuildCurve.png
-    core: |
-      from maya import mel
-      mel.eval("RebuildCurve")
-  rebuild_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("RebuildCurveOptions")
-  add_point:
-    icon: curveAddPt.png
-    core: |
-      from maya import mel
-      mel.eval("AddPointsTool")
-  edit_curve:
-    icon: curveEditor.png
-    core: |
-      from maya import mel
-      mel.eval("CurveEditTool")
-  bezier_curve:
-    icon: curveBezier.png
-    core: |
-      from maya import mel
-      mel.eval("CreateBezierCurveTool")
-    menu:
-      options:
-        core: |
-          from maya import mel
-          mel.eval("CreateBezierCurveToolOptions")
-  reverse_curve:
-    icon: reverse.png
-    core: |
-      from maya import mel
-      mel.eval("ReverseCurve")
-  reverse_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("ReverseCurveOptions")
-  open_close_curve:
-    icon: closeGeom.png
-    core: |
-      from maya import mel
-      mel.eval("OpenCloseCurveO")
-  open_close_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("OpenCloseCurveOptions")
-  smooth_curve:
-    icon: modifySmooth.png
-    core: |
-      from maya import mel
-      mel.eval("SmoothHairCurves")
-  smooth_curve_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("SmoothHairCurvesOptions")
-  curve_from_poly:
-    icon: polyEdgeToCurves.png
-    core: |
-      from maya import mel
-      mel.eval("CreateCurveFromPoly")
-  curve_from_poly_options:
-    label: options
-    core: |
-      from maya import mel
-      mel.eval("CreateCurveFromPolyOptions")
-
   # Utilities ---
+  chain:
+    description: Parent each nodes under the previous one.
+    short: chain
+    decorators: [undo_repeat]
+    core: |
+      from maya import cmds
+      selection = cmds.ls(selection=True)[::-1]
+      for i, each in enumerate(selection[1:]):
+          cmds.parent(selection[i], each)
   offset:
     description: Create an offset group under the current selected node.
-    decorators: [undo_repeat]
     icon: transform.svg
     short: "off"
+    decorators: [undo_repeat]
     core: |
       import ftd.offset
       from maya import cmds
@@ -1123,24 +1285,26 @@ commands:
           ftd.offset.group(each)
   inverse_offset:
     description: Create a negate offset.
-    decorators: [undo_repeat]
     icon: transform.svg
     short: off-1
+    decorators: [undo_repeat]
     core: |
       import ftd.offset
       from maya import cmds
       for each in cmds.ls(selection=True):
           ftd.offset.inverse_group(each)
-  chain:
-    description: Parent under each nodes under the previous one.
-    decorators: [undo_repeat]
-    label: chain
-    short: chain
+
+  # Viewport ---
+  toggle_grid:
+    description: Toggle the grid visibility.
     core: |
-      from maya import cmds
-      selection = cmds.ls(selection=True)[::-1]
-      for i, each in enumerate(selection[1:]):
-          cmds.parent(selection[i], each)
+      import ftdev.viewport
+      ftdev.viewport.toggle_view("grid")
+  toggle_joints:
+    description: Toggle the visibility of the joints node in the viewport.
+    core: |
+      import ftd.viewport
+      ftd.viewport.toogle_view("joints")
 
 decorators:
   undo: ftd.interaction.undo
@@ -1153,43 +1317,38 @@ hotkey_sets:
   ftd:
     base: Maya_Default
     hotkeys:
-      # Common ---
-      - command: at_reset
+      - command: reset_attributes
         key: z
         category: attribute
-
-      # Node Editor ---
-      - command: ne_open
+      - command: node_editor
         key: "n"
         category: node_editor
-      - command: ne_add
+      - command: node_editor_add
         key: alt+a
         category: node_editor
-      - command: ne_remove
+      - command: node_editor_remove
         key: alt+r
         category: node_editor
-      - command: ne_clear
+      - command: node_editor_clear
         key: alt+c
         category: node_editor
-      - command: ne_show_all
+      - command: node_editor_show_all
         key: alt+g
         category: node_editor
-
-      # Script editor ---
-      - command: se_open
+      - command: script_editor
         category: script_editor
         key: o
-      - command: charcoal_open
+      - command: charcoal_editor
         category: script_editor
         key: alt+o
-
-      # Viewport
       - command: toggle_joints
         category: viewport
         key: alt+3
       - command: toggle_grid
         category: viewport
         key: alt+x
+      - command: new_scene
+        key: ctrl+n
 
 marking_menus:
   ftd:
@@ -1248,25 +1407,25 @@ marking_menus:
         position: ne
         items:
           - main: bind_skin
-            option: bind_skin_options
+            box: bind_skin_options
             position: "n"
           - main: cluster
             position: e
-            option: cluster_options
+            box: cluster_options
           - main: blendshape
-            option: blendshape_options
+            box: blendshape_options
             position: s
           - main: lattice
-            option: lattice_options
+            box: lattice_options
             position: w
           - main: sculpt
-            option: sculpt_options
+            box: sculpt_options
             position: ne
           - main: deltamush
-            option: deltamush_options
+            box: deltamush_options
             position: nw
           - main: wire
-            option: wire_options
+            box: wire_options
             position: sw
           - name: nonlinear
             menu: true
@@ -1276,58 +1435,58 @@ marking_menus:
                 options: bend_options
                 position: "n"
               - main: flare
-                option: flare_options
+                box: flare_options
                 position: e
               - main: sine
-                option: sine_options
+                box: sine_options
                 position: w
               - main: squash
-                option: squash_options
+                box: squash_options
                 position: s
               - main: twist
-                option: twist_options
+                box: twist_options
                 position: ne
               - main: wave
-                option: wave_options
+                box: wave_options
                 position: nw
           - main: softmod
-            option: softmod_options
+            box: softmod_options
           - divider: true
           - main: paint_weight
           - main: mirror_skin_weights
-            option: mirror_skin_weights_options
+            box: mirror_skin_weights_options
       - name: constraints
         menu: true
         icon: parentConstraint.png
         position: "n"
         items:
           - main: parent_constraint
-            option: parent_constraint_options
+            box: parent_constraint_options
             position: "n"
           - main: point_constraint
-            option: point_constraint_options
+            box: point_constraint_options
             position: nw
           - main: orient_constraint
-            option: orient_constraint_options
+            box: orient_constraint_options
             position: ne
           - main: scale_constraint
-            option: scale_constraint_options
+            box: scale_constraint_options
             position: s
           - main: aim_constraint
-            option: aim_constraint_options
+            box: aim_constraint_options
             position: e
           - main: pole_vector_constraint
-            option: pole_vector_constraint_options
+            box: pole_vector_constraint_options
             position: w
           - main: normal_constraint
-            option: normal_constraint_options
+            box: normal_constraint_options
             position: se
           - main: tangent_constraint
-            option: tangent_constraint_options
+            box: tangent_constraint_options
             position: sw
           - main: rivet
           - main: motion_path
-            option: motion_path_options
+            box: motion_path_options
       - name: objects
         menu: true
         icon: parentConstraint.png
@@ -1344,8 +1503,20 @@ marking_menus:
         position: nw
         items: {}
 
+shelves:
+  ftd:
+    parent: ShelfLayout
+    items:
+      - command: startup
+      - separator: true
+
 toolbar:
   ftd:
+    - name: File
+      visible: false
+      items:
+        - main: new_scene
+          label: true
     - name: Polygons
       items:
         - main: poly_sphere
@@ -1363,12 +1534,12 @@ toolbar:
     - name: Sculpting
       visible: false
       items:
-        - main: brush_sculpt
-        - main: brush_smooth
-        - main: brush_relax
-        - main: brush_grab
-        - main: brush_bulge
-        - main: brush_old_paint
+        - main: mesh_sculpt
+        - main: mesh_smooth
+        - main: mesh_relax
+        - main: mesh_grab
+        - main: mesh_bulge
+        - main: geometry_tool
     - name: Surfaces
       visible: false
       items:
@@ -1379,10 +1550,11 @@ toolbar:
         - main: plane
         - main: torus
     - name: Curves
+      visible: true
       items:
-        - main: curve
+        - main: create_curve
           options:
-            - command: curve_options
+            - command: create_curve_options
         - main: pencil_curve
           options:
             - command: pencil_curve_options
@@ -1409,7 +1581,7 @@ toolbar:
             - command: rebuild_curve_options
         - main: add_point
         - main: edit_curve
-        - main: bezier_curve
+        - main: create_bezier_curve
         - main: reverse_curve
           options:
             - command: reverse_curve_options
@@ -1422,12 +1594,21 @@ toolbar:
     - name: Utilities
       items:
         - main: offset
+          label: true
         - main: inverse_offset
+          label: true
         - main: chain
-        - main: skincluster_influences
+          label: true
+        - main: select_influences
+          label: true
           options:
-            - command: skincluster_weighted_influences
-            - command: skincluster_unused_influences
+            - command: select_weighted_influences
+            - command: select_unused_influences
+        - main: toggle_joint_orient
+          label: true
+          options:
+            - command: hide_joint_orient
+            - command: show_joint_orient
     - name: Rigging
       items:
         - main: locator
@@ -1437,7 +1618,7 @@ toolbar:
             - command: joint_tool_options
         - main: orient_joint
           options:
-            - command: joint_tool_options
+            - command: orient_joint_options
         - main: ik_handle
           options:
             - command: ik_handle_options
@@ -1445,30 +1626,36 @@ toolbar:
           options:
             - command: ik_spline_handle_options
         - main: parent_constraint
+          label: true
           options:
             - command: parent_constraint_options
         - main: point_constraint
+          label: true
           options:
             - command: point_constraint_options
         - main: orient_constraint
+          label: true
           options:
             - command: orient_constraint_options
         - main: scale_constraint
+          label: true
           options:
             - command: scale_constraint_options
         - main: aim_constraint
+          label: true
           options:
             - command: aim_constraint_options
         - main: pole_vector_constraint
+          label: true
           options:
             - command: pole_vector_constraint_options
         - main: matrix_constraint
           options:
-            - command: matrix_constraint_translate
-            - command: matrix_constraint_rotate
-            - command: matrix_constraint_scale
+            - command: matrix_point_constraint
+            - command: matrix_orient_constraint
+            - command: matrix_scale_constraint
             - divider: true
-            - command: matrix_constraint_chain
+            - command: matrix_chain_constraint
         - main: bind_skin
           options:
             - command: bind_skin_options
@@ -1504,20 +1691,25 @@ toolbar:
           options:
             - command: lattice_options
         - main: deltamush
+          label: true
           options:
             - command: deltamush_options
         - main: wrap
+          label: true
           options:
             - command: wrap_options
         - main: wire
+          label: true
           options:
             - command: wire_options
-        - main: sculpt
-          options:
-            - command: sculpt_options
         - main: shrink_wrap
+          label: true
           options:
             - command: shrink_wrap_options
+        - main: sculpt
+          label: true
+          options:
+            - command: sculpt_options
         - main: bend
         - main: flare
         - main: sine
@@ -1536,13 +1728,16 @@ toolbar:
       visible: false
       items:
         - main: delete_animation
+          label: true
         - main: bake_simulation
+          label: true
           options:
             - command: bake_simulation_options
     - name: Editors
       visible: false
       items:
         - main: icon_browser
+          label: true
           options:
             - command: cra_icons
 

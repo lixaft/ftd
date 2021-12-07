@@ -82,6 +82,13 @@ def load_file(path):
             parent=data.get("parent"),
         )
 
+    for name, data in filedata.get("shelves", {}).items():
+        create_shelf(
+            name=name,
+            items=data["items"],
+            parent=data.get("parent"),
+        )
+
     # colors
     for key, value in filedata.get("colors", {}).items():
         if isinstance(value, int):
@@ -129,14 +136,21 @@ class Command(object):
 
     def __init__(self, name, core, **kwargs):
         self._name = name
-        self._core = core
-        self._label = kwargs.get("label")
         self._description = kwargs.get("description")
         self._icon = kwargs.get("icon")
-        self._short = kwargs.get("short")
-        self._used_decorators = kwargs.get("decorators", [])
 
+        split = name.split("_")
+        self._long = kwargs.get("long", " ".join(split))
+        self._nice = kwargs.get("nice", self._long.title())
+        self._short = kwargs.get("short", "".join(x[0] for x in split))
+
+        self._used_decorators = kwargs.get("decorators", [])
+        self._core = core
+
+        self._label = kwargs.get("label")
         self._registered[name] = self
+
+        self.tags = kwargs.get("tags", [])
 
     # Read properties ---
     @property
@@ -148,6 +162,16 @@ class Command(object):
     def label(self):
         """str: The display name of the command."""
         return self._label
+
+    @property
+    def nice(self):
+        """str: The nice name of the command."""
+        return self._nice
+
+    @property
+    def long(self):
+        """str: The long name of the command."""
+        return self._long
 
     @property
     def short(self):
@@ -177,7 +201,6 @@ class Command(object):
     # Public methods ---
     def execute(self):
         """Execute the command."""
-        print(self._used_decorators)
         return self.build_callable()()
 
     def build_string(self):
@@ -315,15 +338,15 @@ def create_marking_menu(name, key, items, parent="MainPane"):
             flags["divider"] = True
         else:
             cmd = Command.get(data["main"])
-            flags["label"] = cmd.label or cmd.name
+            flags["label"] = cmd.long
             flags["command"] = lambda _: cmd.execute()
             if cmd.icon:
                 flags["image"] = ftd.ui.utility.find_icon(cmd.icon)
 
         item = cmds.menuItem(parent=parent, **flags)
         # children
-        if "option" in data:
-            cmd = Command.get(data["option"])
+        if "box" in data:
+            cmd = Command.get(data["box"])
             cmds.menuItem(
                 command=lambda _: cmd.execute(),
                 optionBox=True,
@@ -345,4 +368,42 @@ def create_marking_menu(name, key, items, parent="MainPane"):
         parent=parent,
         postMenuCommand=main_build,
         **flags
+    )
+
+
+def create_shelf(name, items, parent="ShelfLayout"):
+    """Create a new maya shelf."""
+    if cmds.shelfLayout(name, exists=True):
+        cmds.deleteUI(name)
+
+    cmds.shelfLayout(name, parent=parent)
+
+    for item in items:
+
+        if "separator" in item:
+            cmds.separator(
+                width=34,
+                height=35,
+                horizontal=False,
+                style="shelf",
+            )
+
+        elif "command" in item:
+            cmd = Command.get(item["command"])
+            icon = ftd.ui.utility.find_icon(cmd.icon or "commandButton.png")
+            flags = {}
+            if item.get("label", False):
+                flags["imageOverlayLabel"] = cmd.short
+            cmds.shelfButton(
+                label=cmd.name,
+                command=cmd.build_string(),
+                parent=name,
+                image=icon,
+                annotation=cmd.description,
+                **flags
+            )
+
+    array = cmds.shelfTabLayout(parent, query=True, childArray=True)
+    cmds.shelfTabLayout(
+        parent, edit=True, selectTabIndex=array.index(name) + 1
     )
