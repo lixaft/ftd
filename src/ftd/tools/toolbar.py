@@ -36,7 +36,7 @@ class Window(ftd.ui.window.Dockable):
     def setup(self):
         self.setMinimumWidth(137)
 
-        # Widgets ---
+        # widget
         widgets = {
             "tab": QtWidgets.QTabWidget(),
             "tabs_menu": QtWidgets.QMenu(),
@@ -58,7 +58,7 @@ class Window(ftd.ui.window.Dockable):
 
         self.widgets = widgets
 
-        # -- layouts ---------------------------------------------------------
+        # layout
         layouts = {
             "main": QtWidgets.QVBoxLayout(self),
             "header": QtWidgets.QHBoxLayout(),
@@ -137,7 +137,7 @@ class Category(ftd.ui.widget.FrameBox):
 
     def populate(self):
         """Populate the widget."""
-        for data in self.data["items"]:
+        for data in self.data["children"]:
             widget = Command(data)
             self._layout.addWidget(widget)
 
@@ -156,7 +156,7 @@ class Command(ftd.ui.widget.IconButton):
 
     def __init__(self, data, parent=None):
         super(Command, self).__init__(parent=parent)
-        cmd = ftd.tools.prefs.Command.get(data["main"])
+        cmd = ftd.tools.prefs.Command.get(data["command"])
 
         self.setStyleSheet(self.css + self.css2)
         self.setToolTip(cmd.description or cmd.name)

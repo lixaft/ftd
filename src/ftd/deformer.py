@@ -6,7 +6,7 @@ from maya import cmds
 import ftd.graph
 import ftd.name
 
-__all__ = ["blendshape", "clean_orig"]
+__all__ = ["blendshape", "clean_orig", "cluster"]
 
 LOG = logging.getLogger(__name__)
 
@@ -78,3 +78,26 @@ def clean_orig(node=None):
     for shape in shapes:
         if not cmds.listConnections(shape, type="groupParts"):
             cmds.delete(shape)
+
+
+def cluster(obj, name=None):
+    """Create a new cluster with world transformation."""
+    if not name:
+        name = ftd.name.generate_unique("cluster#")
+
+    old = cmds.cluster(obj)[1]
+    new = cmds.createNode("transform", name=name)
+    shape = cmds.listRelatives(old, shapes=True)[0]
+
+    cmds.matchTransform(new, old)
+    cmds.setAttr(shape + ".origin", 0, 0, 0)
+    cmds.cluster(
+        shape,
+        edit=True,
+        weightedNode=[new, new],
+        bindState=True,
+    )
+    cmds.delete(old)
+    new = cmds.rename(new, name)
+    cmds.rename(shape, new + "Shape")
+    return new

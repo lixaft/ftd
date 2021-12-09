@@ -6,12 +6,42 @@ from maya import cmds
 
 import ftd.name
 
-__all__ = ["divider", "move", "reset", "unlock"]
+__all__ = ["disconnect", "divider", "move", "reset", "unlock"]
 
 LOG = logging.getLogger(__name__)
 
 SRT = tuple(x + y for x in "srt" for y in "xyz")
 """tuple: The translate, rotation, scale attributes for each axis."""
+
+
+def disconnect(plug):
+    """Disconnect the input connection of the given plug.
+
+    Examples:
+        >>> from maya import cmds
+        >>> _ = cmds.file(new=True, force=True)
+        >>> a = cmds.createNode("transform", name="A")
+        >>> b = cmds.createNode("transform", name="B")
+        >>> _ = cmds.connectAttr(a + ".translateX", b + ".translateX")
+        >>> disconnect(b + ".translateX")
+        'A.translateX'
+
+    Arguments:
+        plug (str): The plug that should be disconnected.
+
+    Returns:
+        str: The source of the disconnected plug.
+    """
+    sources = cmds.listConnections(
+        plug,
+        source=True,
+        destination=False,
+        plugs=True,
+    )
+    source = (sources or [None])[0]
+    if source:
+        cmds.disconnectAttr(source, plug)
+    return source
 
 
 def divider(node, label=None, look="basic"):
@@ -144,9 +174,13 @@ def reset(node, attributes=None):
     """
     for attr in attributes or cmds.listAttr(node, keyable=True):
         plug = "{}.{}".format(node, attr)
-        if cmds.getAttr(plug, settable=True):
+        if not cmds.getAttr(plug, settable=True):
+            continue
+        try:
             value = cmds.attributeQuery(attr, node=node, listDefault=True)[0]
             cmds.setAttr(plug, value)
+        except RuntimeError:
+            LOG.warning("Failed to reset '%s' plug.", plug)
 
 
 @contextlib.contextmanager

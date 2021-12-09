@@ -35,7 +35,7 @@ def closest_vertex(mesh, origin):
     mfn = OpenMaya.MFnMesh(sel.getDagPath(0).extendToShape())
     point = OpenMaya.MPoint(origin)
 
-    # First find the closest face on the mesh
+    # first find the closest face on the mesh
     face = mfn.getClosestPoint(point, space=space)[1]
 
     # then iterates through each vertex of the face to compare their distance

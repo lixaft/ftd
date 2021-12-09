@@ -78,14 +78,14 @@ def load_file(path):
         create_marking_menu(
             name=name,
             key=data["key"],
-            items=data["items"],
+            items=data["children"],
             parent=data.get("parent"),
         )
 
     for name, data in filedata.get("shelves", {}).items():
         create_shelf(
             name=name,
-            items=data["items"],
+            items=data["children"],
             parent=data.get("parent"),
         )
 
@@ -129,6 +129,7 @@ def run_command(name):
 
 # Core
 class Command(object):
+    # pylint: disable=too-many-instance-attributes
     """A command that can be executed."""
 
     _registered = {}
@@ -337,7 +338,7 @@ def create_marking_menu(name, key, items, parent="MainPane"):
         elif "divider" in data:
             flags["divider"] = True
         else:
-            cmd = Command.get(data["main"])
+            cmd = Command.get(data["command"])
             flags["label"] = cmd.long
             flags["command"] = lambda _: cmd.execute()
             if cmd.icon:
@@ -353,7 +354,7 @@ def create_marking_menu(name, key, items, parent="MainPane"):
                 parent=parent,
             )
         elif "menu" in data:
-            for each in data["items"]:
+            for each in data["children"]:
                 build_item(each, item)
 
     def main_build(name, _):

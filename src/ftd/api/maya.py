@@ -1,6 +1,8 @@
+# pylint: disable=all
 """Pythonic api for Autodesk Maya."""
+from __future__ import absolute_import
+
 import logging
-import os
 import sys
 
 from maya import cmds
@@ -29,11 +31,9 @@ def _add_metaclass(metaclass):
     return _decorator
 
 
-# Global configuration
-RECKLESS_MODE = bool(os.environ.get("RECKLESS_MODE", None))
-
 # General
 Fn = OpenMaya.MFn
+Space = OpenMaya.MSpace
 ExistsError = type("ExistsError", (Exception,), {})
 
 
@@ -394,6 +394,29 @@ class DependencyNode(object):
         """Return ``repr(self)``."""
         return "<{} '{}'>".format(self.__class__.__name__, self)
 
+    def __hash__(self):
+        """Support storing in :ojb:`set` and as key in :obj:`dict`
+
+        Warnings:
+            The hash comparison is made with the node name. Thus, if two
+            instances refer to the same node, their hash keys will be equal
+            and will overwrite each other. See exemples.
+
+        Examples:
+            >>> a = node.create("transform", name="A")
+            >>> b = node.create("transform", name="B")
+            >>> data = {a: 0, b: 1}
+            >>> data[a]
+            1
+            >>> c = encode("A")
+            >>> c == a and c is a
+            True
+            >>> data[c] = 3
+            >>> data[a]  # warning: hash(c) == hash(a)
+            3
+        """
+        return hash(str(self))
+
     # Conversion methods ---
     def __str__(self):
         """Return ``str(self)``."""
@@ -433,7 +456,7 @@ class DependencyNode(object):
         """Set ``self[key]`` to ``value``."""
         print(key, value)
 
-    # ---
+    # Constructor ---
     def __init__(self, mobject):
         self._object = mobject
         self._fn = self._fn_set(mobject)
@@ -517,6 +540,43 @@ class DependencyNode(object):
         self.fn.isLocked = value
 
     # Public methods ---
+    def duplicate(self, name=None):
+        """Duplicate the node.
+
+        Examples:
+            >>> newscene()
+            >>> node = create("transform", name="A")
+            >>> node
+            <DagNode 'A'>
+            >>> node.duplicate(name="B")
+            <DagNode 'B'>
+
+        Arguments:
+            name (str): The name of the duplicate node.
+
+        Returns:
+            DgNode: The duplicated node instance.
+        """
+        return wrap(cmds.duplicate, self, name=name)[0]
+
+    def delete(self):
+        """Delete the node.
+
+        Warning:
+            Even if the node is deleted, its instance still exists in memory.
+            Attempting to access a deleted node may cause a crash.
+
+        Examples:
+            >>> newscene()
+            >>> node = create("transform")
+            >>> exists(node)
+            True
+            >>> node.delete()
+            >>> cpre.exists(node)
+            False
+        """
+        wrap(cmds.delete, self)
+
     def findplug(self, attribute):
         # pylint: disable=protected-access
         """Attempt to find a plug for the given attribute.
@@ -658,7 +718,7 @@ def delete(*args, **kwargs):
     return wrap(cmds.delete, *args, **kwargs)
 
 
-# plug
+# Plug
 class Plug(object):
     """Plug object."""
 
@@ -685,8 +745,491 @@ class Plug(object):
         """DependencyNode: The node associated to self."""
         return self._node
 
+    # Read write properties ---
+    @property
+    def value(self):
+        return self.read()
+
+    @value.setter
+    def value(self, value):
+        self.write(value)
+
+    # Public methods ---
+    def read(self):
+        pass
+
+    def write(self, value):
+        pass
+
+
+# Mathematica
+class Point(OpenMaya.MPoint):
+    """This class provides an implementation of a point."""
+
+    def __repr__(self):
+        return "<Point {}>".format(str(self))
+
+    # arithmetic operator
+    def __add__(self, other):
+        return encode(super(Point, self).__add__(other))
+
+    def __mul__(self, other):
+        return encode(super(Point, self).__mul__(other))
+
+    def __sub__(self, other):
+        return encode(super(Point, self).__sub__(other))
+
+    def __truediv__(self, other):
+        return encode(super(Point, self).__truediv__(other))
+
+    # reflected arithmetic operator
+    def __radd__(self, other):
+        return encode(super(Point, self).__radd__(other))
+
+    def __rmul__(self, other):
+        return encode(super(Point, self).__rmul__(other))
+
+    def __rsub__(self, other):
+        return encode(super(Point, self).__rsub__(other))
+
+    def __rtruediv__(self, other):
+        return encode(super(Point, self).__rtruediv__(other))
+
+    # constructor
+    def __init__(self, *args, **kwargs):
+        if args and isinstance(args[0], Plug):
+            super(Point, self).__init__(args[0].read())
+        else:
+            super(Point, self).__init__(*args, **kwargs)
+
+    # public
+    def decode(self):
+        """Decode the point into a four elements tuple."""
+        return tuple(self)
+
+
+class Vector(OpenMaya.MVector):
+    # pylint: disable=invalid-name
+    """Allow vectors to be handled easily."""
+
+    def __repr__(self):
+        return "<Vector {}>".format(str(self))
+
+    # arithmetic operator
+    def __add__(self, other):
+        return encode(super(Vector, self).__add__(other))
+
+    def __mul__(self, other):
+        return encode(super(Vector, self).__mul__(other))
+
+    def __sub__(self, other):
+        return encode(super(Vector, self).__sub__(other))
+
+    def __truediv__(self, other):
+        return encode(super(Vector, self).__truediv__(other))
+
+    # reflected arithmetic operator
+    def __radd__(self, other):
+        return encode(super(Vector, self).__radd__(other))
+
+    def __rmul__(self, other):
+        return encode(super(Vector, self).__rmul__(other))
+
+    def __rsub__(self, other):
+        return encode(super(Vector, self).__rsub__(other))
+
+    def __rtruediv__(self, other):
+        return encode(super(Vector, self).__rtruediv__(other))
+
+    # bitwise operator
+    def __xor__(self, other):
+        return encode(super(Vector, self).__xor__(other))
+
+    # reflected bitwise operators
+    def __rxor__(self, other):
+        return encode(super(Vector, self).__rxor__(other))
+
+    # constructor
+    def __init__(self, *args, **kwargs):
+        if args and isinstance(args[0], Plug):
+            super(Vector, self).__init__(args[0].read())
+        else:
+            super(Vector, self).__init__(*args, **kwargs)
+
+    # public
+    def decode(self):
+        """Decode the vector into a three elements tuple."""
+        return tuple(self)
+
+    def normal(self):
+        """Create a new vector containing the normalized version of this one.
+
+        Returns:
+            Vector: The normalized vector.
+        """
+        return encode(super(Vector, self).normal())
+
+    def rotateBy(self, *args, **kwargs):
+        """The vector resulting from rotating this one by the given amount."""
+        return encode(super(Vector, self).rotateBy(*args, **kwargs))
+
+    def rotateTo(self, target):
+        """Returns the quaternion which will rotate this vector into another.
+
+        Arguments:
+            target (Vector):
+
+        Returns:
+            Quaternion: The resulting quaternion.
+        """
+        return encode(super(Vector, self).rotateTo(target))
+
+    def transformAsNormal(self, matrix):
+        """Treats the vector as a normal vector.
+
+        Arguments:
+            matrix (Matrix): The transformation matrix.
+
+        Returns:
+            Vector: The resulting transformed vector.
+        """
+        return encode(super(Vector, self).transformAsNormal(matrix))
+
+
+class Matrix(OpenMaya.MMatrix):
+    """A matrix math class for 4x4 matrices of doubles."""
+
+    def __repr__(self):
+        return "<Matrix \n{}\n>".format(str(self))
+
+    # conversion
+    def __str__(self):
+        return (("{:7.2f} " * 4 + "\n") * 4).format(*self.decode(True))[:-1]
+
+    # unary operator
+    def __pos__(self):
+        return self
+
+    def __neg__(self):
+        return self
+
+    # arithmetic operator
+    def __add__(self, other):
+        return encode(super(Matrix, self).__add__(_read(other)))
+
+    def __mul__(self, other):
+        return encode(super(Matrix, self).__mul__(_read(other)))
+
+    def __sub__(self, other):
+        return encode(super(Matrix, self).__sub__(_read(other)))
+
+    # reflected arithmetic operator
+    def __radd__(self, other):
+        return encode(super(Matrix, self).__radd__(_read(other)))
+
+    def __rmul__(self, other):
+        return encode(super(Matrix, self).__rmul__(_read(other)))
+
+    def __rsub__(self, other):
+        return encode(super(Matrix, self).__rsub__(_read(other)))
+
+    # container type
+    def __getitem__(self, key):
+        if isinstance(key, tuple):
+            return self.getElement(*key)
+        return super(Matrix, self).__getitem__(key)
+
+    def __setitem__(self, key, value):
+        if isinstance(key, tuple):
+            return self.setElement(*(key + (value,)))
+        return super(Matrix, self).__setitem__(key, value)
+
+    # constructor
+    def __init__(self, *args, **kwargs):
+        if args and isinstance(args[0], Plug):
+            super(Matrix, self).__init__(args[0].read())
+        else:
+            super(Matrix, self).__init__(*args, **kwargs)
+
+    # public
+    def decode(self, flat=False):
+        """Decode the matrix into a two-dimensional array.
+
+        Examples:
+            >>> mtx = Matrix()
+            >>> mtx.decode()
+            [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], ...]
+            >>> mtx.decode(flat=True)
+            [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, ...]
+
+        Arguments:
+            flat (bool): Flatten the result into a single-dimensional array.
+
+        Returns:
+            list: The decoded matrix.
+        """
+        mtx = [[self.getElement(x, y) for y in range(4)] for x in range(4)]
+        return sum(mtx, []) if flat else mtx
+
+    def transpose(self):
+        """Compute and return the transpose of this instance.
+
+        Returns:
+            Matrix: The transposed matrix.
+        """
+        return encode(super(Matrix, self).transpose())
+
+    def inverse(self):
+        """Compute and return the inverse of this instance.
+
+        Returns:
+            Matrix: The inverted matrix.
+        """
+        return encode(super(Matrix, self).inverse())
+
+    def adjoint(self):
+        """Compute and return the adjoint of this instance.
+
+        Returns:
+            Matrix: The adjoint of this matrix.
+        """
+        return encode(super(Matrix, self).adjoint())
+
+    def homogenize(self):
+        """Compute and return a homogenized version of this instance.
+
+        Returns:
+            Matrix: The homogenized matrix.
+        """
+        return encode(super(Matrix, self).homogenize())
+
+
+class EulerRotation(OpenMaya.MEulerRotation):
+    # pylint: disable=invalid-name
+    """Euler Rotation Math.
+
+    This class provides methods for working with euler angle rotations.
+    Euler angles are described by rotations in radians around the
+    x, y, and z axes, and the order in which those rotations occur.
+    """
+    # constructor
+    def __init__(self, *args, **kwargs):
+        if args and isinstance(args[0], Plug):
+            super(EulerRotation, self).__init__(args[0].read())
+        else:
+            super(EulerRotation, self).__init__(*args, **kwargs)
+
+    # public
+    def decode(self):
+        """Decode the euler rotation into a tuple."""
+        return tuple(self)
+
+    def alternateSolution(self):
+        """Returns an alternate solution to this rotation.
+
+        The resulting rotation will be bound between +/- PI,
+        and the rotation order will remain unchanged.
+
+        Returns:
+            EulerRotation: An alternate solution to this rotation.
+        """
+        return encode(super(EulerRotation, self).alternateSolution())
+
+    def asMatrix(self):
+        """Returns the rotation as an equivalent matrix."""
+        return encode(super(EulerRotation, self).asMatrix())
+
+    def asQuaternion(self):
+        """Returns the rotation as an equivalent quaternion."""
+        return encode(super(EulerRotation, self).asQuaternion())
+
+    def asVector(self):
+        """Returns the X, Y and Z rotations as a vector."""
+        return encode(super(EulerRotation, self).asVector())
+
+    def bound(self):
+        """Returns the result of bounding this rotation to be within +/- PI.
+
+        Bounding a rotation to be within +/- PI is defined to be the result of
+        offsetting the rotation by +/- 2nPI (term by term) such that the offset
+        is within +/- PI.
+
+        Returns:
+            EulerRotation: The euler rotation that results from bounding self.
+        """
+        return encode(super(EulerRotation, self).bound())
+
+    def boundIt(self, *args, **kwargs):
+        """In-place bounding of each rotation component to lie wthin +/- PI."""
+        return encode(super(EulerRotation, self).boundIt(*args, **kwargs))
+
+    def closestCut(self, target):
+        """Returns the closest cut of this rotation to "dst"."""
+        return encode(super(EulerRotation, self).closestCut(target))
+
+    def closestSolution(self, target):
+        """Returns the equivalent rotation which comes closest to a target."""
+        return encode(super(EulerRotation, self).closestSolution(target))
+
+    def decompose(self, matrix, order):
+        """Decompose a rotation matrix into the desired euler angles.
+
+        Arguments:
+            matrix (Matrix): The matrix that will be decomposed.
+            order (int): The rotation order.
+
+        Returns:
+            EulerRotation: The euler rotation that has been decomposed.
+        """
+        return encode(super(EulerRotation, self).decompose(matrix, order))
+
+    def inverse(self):
+        """Returns the inverse of this euler rotation."""
+        return encode(super(EulerRotation, self).inverse())
+
+    def reorder(self, order):
+        """Returns the reordered euler rotation."""
+        return encode(super(EulerRotation, self).reorder(order))
+
+
+class Quaternion(OpenMaya.MQuaternion):
+    """Maya quaternion."""
+
+    # constructor
+    def __init__(self, *args, **kwargs):
+        if args and isinstance(args[0], Plug):
+            super(Quaternion, self).__init__(args[0].read())
+        else:
+            super(Quaternion, self).__init__(*args, **kwargs)
+
+
+class TransformationMatrix(OpenMaya.MTransformationMatrix):
+    # pylint: disable=invalid-name
+    """Allows the manipulation of the individual transformation components."""
+
+    # constructor
+    def __init__(self, *args, **kwargs):
+        if args and isinstance(args[0], Plug):
+            super(TransformationMatrix, self).__init__(args[0].read())
+        else:
+            super(TransformationMatrix, self).__init__(*args, **kwargs)
+
+    # public
+    def asMatrix(self):
+        """Returns the four by four matrix that describes this transformation.
+
+        Returns:
+            Matrix: The matrix.
+        """
+        return encode(super(TransformationMatrix, self).asMatrix())
+
+    def asMatrixInverse(self):
+        """Returns the inverse of the matrix representing the transformation.
+
+        Returns:
+            Matrix: The matrix.
+        """
+        return encode(super(TransformationMatrix, self).asMatrixInverse())
+
+    def asRotateMatrix(self):
+        """Returns rotate space matrix
+
+        Returns:
+            Matrix: The matrix.
+        """
+        return encode(super(TransformationMatrix, self).asRotateMatrix())
+
+    def asScaleMatrix(self):
+        """Returns scale  space matrix
+
+        Returns:
+            Matrix: The matrix.
+        """
+        return Matrix(super(TransformationMatrix, self).asScaleMatrix())
+
+    def rotatePivot(self, space=Space.WORLD):
+        """Returns the pivot around which the rotation is applied.
+
+        Arguments:
+            space (int): Space in which to get the pivot.
+
+        Returns:
+            Point: Rotation pivot point.
+        """
+        return Point(super(TransformationMatrix, self).rotatePivot(space))
+
+    def rotatePivotTranslation(self, space=Space.WORLD):
+        """Returns the rotation pivot translation.
+
+        This is the translation that is used to compensate for
+        the movement of the rotation pivot.
+
+        Arguments:
+            space (int): Space in which to get the pivot.
+
+        Returns:
+            Point: Rotation pivot point.
+        """
+        return encode(
+            super(TransformationMatrix, self).rotatePivotTranslation(space)
+        )
+
+    def translation(self, space=Space.WORLD):
+        """The translation component of the translation.
+
+        Arguments:
+            space (int): Space in which to perform the translation.
+
+        Returns:
+            Vector: Translation vector in centimeters.
+        """
+        return encode(super(TransformationMatrix, self).translation(space))
+
+    def rotation(self, quaternion=False):
+        """Get the rotation component of the transformation matrix in radians.
+
+        Arguments:
+            quaternion (bool): Return a quaternion.
+
+        Returns:
+            EulerRotation: Rotation in radian.
+        """
+        return encode(super(TransformationMatrix, self).rotation(quaternion))
+
+    def scale(self, space=Space.WORLD):
+        # pylint: disable=useless-super-delegation
+        """Get the scale component of the transformation matrix.
+
+        Arguments:
+            space (int): Space in which to perform the translation.
+
+        Returns:
+            list: A list containing the transformation's scale components.
+        """
+        return super(TransformationMatrix, self).scale(space)
+
+
+class BoundingBox(OpenMaya.MBoundingBox):
+    """Bounding box type."""
+
+
+class Color(OpenMaya.MColor):
+    """Color type."""
+
+    # constructor
+    def __init__(self, *args, **kwargs):
+        if args and isinstance(args[0], Plug):
+            super(Color, self).__init__(args[0].read())
+        else:
+            super(Color, self).__init__(*args, **kwargs)
+
 
 # Privates
+def _read(value):
+    """Returns a value, whether the object is a plug or not."""
+    if isinstance(value, Plug):
+        return value.read()
+    return value
 
 
 # MIT License

@@ -211,6 +211,50 @@ commands:
       from maya import mel
       mel.eval("TangentConstraintOptions")
 
+  # Controls ---
+  circle_control:
+    description: Create a circle control.
+    icon: controls/circle.svg
+    decorators: [create, undo_repeat]
+    core: |
+      import ftd.control
+      return ftd.control.create("circle")
+  cube_control:
+    description: Create a cube control.
+    icon: controls/cube.svg
+    decorators: [create, undo_repeat]
+    core: |
+      import ftd.control
+      return ftd.control.create("cube")
+  gear_control:
+    description: Create a gear control.
+    icon: controls/gear.svg
+    decorators: [create, undo_repeat]
+    core: |
+      import ftd.control
+      return ftd.control.create("gear")
+  global_control:
+    description: Create a global control.
+    icon: controls/global.svg
+    decorators: [create, undo_repeat]
+    core: |
+      import ftd.control
+      return ftd.control.create("global")
+  sphere_control:
+    description: Create a sphere control.
+    icon: controls/sphere.svg
+    decorators: [create, undo_repeat]
+    core: |
+      import ftd.control
+      return ftd.control.create("sphere")
+  square_control:
+    description: Create a square control.
+    icon: controls/square.svg
+    decorators: [create, undo_repeat]
+    core: |
+      import ftd.control
+      return ftd.control.create("square")
+
   # Curve ---
   add_point:
     description: Add a new point on the curve.
@@ -1354,159 +1398,159 @@ marking_menus:
   ftd:
     parent: MainPane
     key: ctrl+alt+left
-    items:
+    children:
       - name: match
         menu: true
         icon: makeLive.png
         position: sw
-        items:
-          - main: match_transform
+        children:
+          - command: match_transform
             position: "n"
-          - main: match_translate
+          - command: match_translate
             position: w
-          - main: match_rotate
+          - command: match_rotate
             position: e
-          - main: match_scale
+          - command: match_scale
             position: s
-          - main: match_pivot
+          - command: match_pivot
       - name: freeze
         menu: true
         icon: FreezeTransform.png
         position: s
-        items:
-          - main: freeze_transform
+        children:
+          - command: freeze_transform
             position: "n"
-          - main: freeze_translate
+          - command: freeze_translate
             position: w
-          - main: freeze_rotate
+          - command: freeze_rotate
             position: e
-          - main: freeze_scale
+          - command: freeze_scale
             position: s
-          - main: freeze_joint_orient
+          - command: freeze_joint_orient
             position: se
       - name: selection
         menu: true
         icon: lassoSelect.png
         position: w
-        items:
-          - main: select_all
+        children:
+          - command: select_all
             position: "n"
-          - main: clear_selection
+          - command: clear_selection
             position: w
-          - main: select_hierarchy
+          - command: select_hierarchy
             position: s
-          - main: invert_selection
+          - command: invert_selection
             position: e
-          - main: save_selection
+          - command: save_selection
             position: sw
-          - main: load_selection
+          - command: load_selection
             position: nw
       - name: defomers
         menu: true
         icon: blendShape.png
         position: ne
-        items:
-          - main: bind_skin
+        children:
+          - command: bind_skin
             box: bind_skin_options
             position: "n"
-          - main: cluster
+          - command: cluster
             position: e
             box: cluster_options
-          - main: blendshape
+          - command: blendshape
             box: blendshape_options
             position: s
-          - main: lattice
+          - command: lattice
             box: lattice_options
             position: w
-          - main: sculpt
+          - command: sculpt
             box: sculpt_options
             position: ne
-          - main: deltamush
+          - command: deltamush
             box: deltamush_options
             position: nw
-          - main: wire
+          - command: wire
             box: wire_options
             position: sw
           - name: nonlinear
             menu: true
             position: se
-            items:
-              - main: bend
+            children:
+              - command: bend
                 options: bend_options
                 position: "n"
-              - main: flare
+              - command: flare
                 box: flare_options
                 position: e
-              - main: sine
+              - command: sine
                 box: sine_options
                 position: w
-              - main: squash
+              - command: squash
                 box: squash_options
                 position: s
-              - main: twist
+              - command: twist
                 box: twist_options
                 position: ne
-              - main: wave
+              - command: wave
                 box: wave_options
                 position: nw
-          - main: softmod
+          - command: softmod
             box: softmod_options
           - divider: true
-          - main: paint_weight
-          - main: mirror_skin_weights
+          - command: paint_weight
+          - command: mirror_skin_weights
             box: mirror_skin_weights_options
       - name: constraints
         menu: true
         icon: parentConstraint.png
         position: "n"
-        items:
-          - main: parent_constraint
+        children:
+          - command: parent_constraint
             box: parent_constraint_options
             position: "n"
-          - main: point_constraint
+          - command: point_constraint
             box: point_constraint_options
             position: nw
-          - main: orient_constraint
+          - command: orient_constraint
             box: orient_constraint_options
             position: ne
-          - main: scale_constraint
+          - command: scale_constraint
             box: scale_constraint_options
             position: s
-          - main: aim_constraint
+          - command: aim_constraint
             box: aim_constraint_options
             position: e
-          - main: pole_vector_constraint
+          - command: pole_vector_constraint
             box: pole_vector_constraint_options
             position: w
-          - main: normal_constraint
+          - command: normal_constraint
             box: normal_constraint_options
             position: se
-          - main: tangent_constraint
+          - command: tangent_constraint
             box: tangent_constraint_options
             position: sw
-          - main: rivet
-          - main: motion_path
+          - command: rivet
+          - command: motion_path
             box: motion_path_options
       - name: objects
         menu: true
         icon: parentConstraint.png
         position: e
-        items: {}
+        children: {}
       - name: scene
         menu: true
         icon: fileNew.png
         position: se
-        items: {}
+        children: {}
       - name: editors
         menu: true
         icon: menuIconWindow.png
         position: nw
-        items: {}
+        children: {}
 
 shelves:
   ftd:
     parent: ShelfLayout
-    items:
+    children:
       - command: startup
       - separator: true
 
@@ -1514,229 +1558,237 @@ toolbar:
   ftd:
     - name: File
       visible: false
-      items:
-        - main: new_scene
+      children:
+        - command: new_scene
           label: true
     - name: Polygons
-      items:
-        - main: poly_sphere
-        - main: poly_cube
-        - main: poly_cylinder
-        - main: poly_cone
-        - main: poly_torus
-        - main: poly_plane
-        - main: poly_disc
-        - main: poly_pyramid
-        - main: poly_prism
-        - main: poly_pipe
-        - main: poly_helix
-        - main: poly_gear
+      children:
+        - command: poly_sphere
+        - command: poly_cube
+        - command: poly_cylinder
+        - command: poly_cone
+        - command: poly_torus
+        - command: poly_plane
+        - command: poly_disc
+        - command: poly_pyramid
+        - command: poly_prism
+        - command: poly_pipe
+        - command: poly_helix
+        - command: poly_gear
     - name: Sculpting
       visible: false
-      items:
-        - main: mesh_sculpt
-        - main: mesh_smooth
-        - main: mesh_relax
-        - main: mesh_grab
-        - main: mesh_bulge
-        - main: geometry_tool
+      children:
+        - command: mesh_sculpt
+        - command: mesh_smooth
+        - command: mesh_relax
+        - command: mesh_grab
+        - command: mesh_bulge
+        - command: geometry_tool
     - name: Surfaces
       visible: false
-      items:
-        - main: sphere
-        - main: cube
-        - main: cylinder
-        - main: cone
-        - main: plane
-        - main: torus
+      children:
+        - command: sphere
+        - command: cube
+        - command: cylinder
+        - command: cone
+        - command: plane
+        - command: torus
     - name: Curves
       visible: true
-      items:
-        - main: create_curve
+      children:
+        - command: create_curve
           options:
             - command: create_curve_options
-        - main: pencil_curve
+        - command: pencil_curve
           options:
             - command: pencil_curve_options
-        - main: three_point_arc
+        - command: three_point_arc
           options:
             - command: three_point_arc_options
-        - main: attach_curve
+        - command: attach_curve
           options:
             - command: attach_curve_options
-        - main: detach_curve
+        - command: detach_curve
           options:
             - command: detach_curve_options
-        - main: insert_knot
+        - command: insert_knot
           options:
             - command: insert_knot_options
-        - main: extend_curve
+        - command: extend_curve
           options:
             - command: extend_curve_options
-        - main: offset_curve
+        - command: offset_curve
           options:
             - command: offset_curve_options
-        - main: rebuild_curve
+        - command: rebuild_curve
           options:
             - command: rebuild_curve_options
-        - main: add_point
-        - main: edit_curve
-        - main: create_bezier_curve
-        - main: reverse_curve
+        - command: add_point
+        - command: edit_curve
+        - command: create_bezier_curve
+        - command: reverse_curve
           options:
             - command: reverse_curve_options
-        - main: open_close_curve
+        - command: open_close_curve
           options:
             - command: open_close_curve_options
-        - main: curve_from_poly
+        - command: curve_from_poly
           options:
             - command: curve_from_poly_options
+    - name: Controls
+      children:
+        - command: square_control
+        - command: circle_control
+        - command: global_control
+        - command: cube_control
+        - command: sphere_control
+        - command: gear_control
     - name: Utilities
-      items:
-        - main: offset
+      children:
+        - command: offset
           label: true
-        - main: inverse_offset
+        - command: inverse_offset
           label: true
-        - main: chain
+        - command: chain
           label: true
-        - main: select_influences
+        - command: select_influences
           label: true
           options:
             - command: select_weighted_influences
             - command: select_unused_influences
-        - main: toggle_joint_orient
+        - command: toggle_joint_orient
           label: true
           options:
             - command: hide_joint_orient
             - command: show_joint_orient
     - name: Rigging
-      items:
-        - main: locator
-        - main: joint
+      children:
+        - command: locator
+        - command: joint
           options:
             - command: joint_tool
             - command: joint_tool_options
-        - main: orient_joint
+        - command: orient_joint
           options:
             - command: orient_joint_options
-        - main: ik_handle
+        - command: ik_handle
           options:
             - command: ik_handle_options
-        - main: ik_spline_handle
+        - command: ik_spline_handle
           options:
             - command: ik_spline_handle_options
-        - main: parent_constraint
+        - command: parent_constraint
           label: true
           options:
             - command: parent_constraint_options
-        - main: point_constraint
+        - command: point_constraint
           label: true
           options:
             - command: point_constraint_options
-        - main: orient_constraint
+        - command: orient_constraint
           label: true
           options:
             - command: orient_constraint_options
-        - main: scale_constraint
+        - command: scale_constraint
           label: true
           options:
             - command: scale_constraint_options
-        - main: aim_constraint
+        - command: aim_constraint
           label: true
           options:
             - command: aim_constraint_options
-        - main: pole_vector_constraint
+        - command: pole_vector_constraint
           label: true
           options:
             - command: pole_vector_constraint_options
-        - main: matrix_constraint
+        - command: matrix_constraint
           options:
             - command: matrix_point_constraint
             - command: matrix_orient_constraint
             - command: matrix_scale_constraint
             - divider: true
             - command: matrix_chain_constraint
-        - main: bind_skin
+        - command: bind_skin
           options:
             - command: bind_skin_options
-        - main: interactive_bind_skin
+        - command: interactive_bind_skin
           options:
             - command: interactive_bind_skin_options
-        - main: move_skinned_joint
-        - main: add_influence
+        - command: move_skinned_joint
+        - command: add_influence
           options:
             - command: add_influence_options
-        - main: remove_influence
+        - command: remove_influence
           options:
             - command: remove_influence_options
-        - main: mirror_joints
+        - command: mirror_joints
           options:
             - command: mirror_joints_options
-        - main: paint_weight
-        - main: copy_skin
+        - command: paint_weight
+        - command: copy_skin
           options:
             - command: copy_skin_options
-        - main: mirror_skin_weights
+        - command: mirror_skin_weights
           options:
             - command: mirror_skin_weights_options
     - name: Deformers
-      items:
-        - main: blendshape
+      children:
+        - command: blendshape
           options:
             - command: blendshape_options
-        - main: cluster
+        - command: cluster
           options:
             - command: cluster_options
-        - main: lattice
+        - command: lattice
           options:
             - command: lattice_options
-        - main: deltamush
+        - command: deltamush
           label: true
           options:
             - command: deltamush_options
-        - main: wrap
+        - command: wrap
           label: true
           options:
             - command: wrap_options
-        - main: wire
+        - command: wire
           label: true
           options:
             - command: wire_options
-        - main: shrink_wrap
+        - command: shrink_wrap
           label: true
           options:
             - command: shrink_wrap_options
-        - main: sculpt
+        - command: sculpt
           label: true
           options:
             - command: sculpt_options
-        - main: bend
-        - main: flare
-        - main: sine
-        - main: squash
-        - main: twist
-        - main: wave
-        - main: softmod
+        - command: bend
+        - command: flare
+        - command: sine
+        - command: squash
+        - command: twist
+        - command: wave
+        - command: softmod
           options:
             - command: softmod
-        - main: mirror
-        - main: toggle_intermediate
+        - command: mirror
+        - command: toggle_intermediate
           options:
             - command: show_intermediate
             - command: hide_intermediate
     - name: Animation
       visible: false
-      items:
-        - main: delete_animation
+      children:
+        - command: delete_animation
           label: true
-        - main: bake_simulation
+        - command: bake_simulation
           label: true
           options:
             - command: bake_simulation_options
     - name: Editors
       visible: false
-      items:
-        - main: icon_browser
+      children:
+        - command: icon_browser
           label: true
           options:
             - command: cra_icons
