@@ -1,14 +1,64 @@
-# pylint: disable=all
 """Pythonic api for Autodesk Maya."""
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
+import abc
+import contextlib
+import copy
 import logging
+import math
 import sys
 
 from maya import cmds
 from maya.api import OpenMaya
 
-# __all__ = []
+__all__ = [
+    # enum
+    "Space",
+    # common
+    "encode",
+    "decode",
+    "wrap",
+    "clear",
+    "newscene",
+    # node
+    "DependencyNode",
+    "DagNode",
+    "Set",
+    "ls",
+    "selected",
+    # create
+    "LocatorCreator",
+    "CurveCreator",
+    "create",
+    "exists",
+    "delete",
+    # name
+    "Name",
+    # plug
+    "Plug",
+    "connect",
+    "disconnect",
+    # attribute
+    "Long",
+    "Double",
+    "Double3",
+    "Boolean",
+    "Enum",
+    "Divider",
+    "String",
+    "Compound",
+    "addattr",
+    "hasattr_",
+    "delattr_",
+    # datatype
+    "Point",
+    "Vector",
+    "Matrix",
+    "EulerRotation",
+    "Quaternion",
+    "TransformationMatrix",
+    "Color",
+]
 
 LOG = logging.getLogger(__name__)
 
@@ -32,9 +82,21 @@ def _add_metaclass(metaclass):
 
 
 # General
-Fn = OpenMaya.MFn
-Space = OpenMaya.MSpace
 ExistsError = type("ExistsError", (Exception,), {})
+
+
+class Space(OpenMaya.MSpace):
+    """Space transformation identifiers."""
+
+    TRANSFORM = OpenMaya.MSpace.kTransform
+    PRE_TRANSFORM = OpenMaya.MSpace.kPreTransform
+    POST_TRANSFORM = OpenMaya.MSpace.kPostTransform
+    WORLD = OpenMaya.MSpace.kWorld
+    OBJECT = OpenMaya.MSpace.kObject
+
+
+class Fn(OpenMaya.MFn):
+    """Maya function sets."""
 
 
 def encode(obj, default=object):
@@ -119,7 +181,7 @@ def encode(obj, default=object):
     # now we just need to loop over these values to find the closest type
     # implemented here :)
     for type_ in reversed(OpenMaya.MGlobal.getFunctionSetList(obj)):
-        node = MetaNode._node_types.get(getattr(Fn, type_), None)
+        node = _MetaNode._node_types.get(getattr(Fn, type_), None)
         if node is not None:
             return node(obj)
 
@@ -146,7 +208,7 @@ def decode(obj):
     Returns:
         str | Any: The decoded object.
     """
-    LOG.debug("Decode: %s.", repr(obj))
+    LOG.debug("Decode: %s", repr(obj))
 
     if obj.__class__.__module__ != __name__:
         return obj
@@ -206,7 +268,7 @@ def wrap(func, *args, **kwargs):
 def clear():
     # pylint: disable=protected-access
     """Remove all instances stored in the memory."""
-    MetaNode._instances.clear()
+    _MetaNode._instances.clear()
 
 
 def newscene():
@@ -235,7 +297,7 @@ def ls(*args, **kwargs):
 
     Arguments:
         *args: The arguments passed to the `cmds.ls()`_ command.
-        *kwargs: The keyword arguments passed to the `cmds.ls()`_ command.
+        **kwargs: The keyword arguments passed to the `cmds.ls()`_ command.
 
     Returns:
         list: The nodes list.
@@ -256,7 +318,7 @@ def validate(node):
     """Ensure the node are valid and will not leave Maya in an unstable state.
 
     Arguments:
-        node: The node to validate.
+        node (DependencyNode): The node to validate.
 
     Returns:
         bool: The valid state of the passed nodes.
@@ -271,7 +333,7 @@ def validate(node):
 
 
 # Nodes
-class MetaNode(type):
+class _MetaNode(type):
     """The crossroads of node management!
 
     Anything involving nodes goes through here at least once :)
@@ -290,10 +352,10 @@ class MetaNode(type):
     _instances = {}
     _node_types = {}
 
-    def __new__(cls, name, bases, dict_):
+    def __new__(mcs, name, bases, dict_):
         """Automatically register all new classes that use this metaclass."""
-        node = super(MetaNode, cls).__new__(cls, name, bases, dict_)
-        cls.register(node)
+        node = super(_MetaNode, mcs).__new__(mcs, name, bases, dict_)
+        mcs.register(node)
         return node
 
     def __call__(cls, mobject):
@@ -366,24 +428,24 @@ class MetaNode(type):
             return cls._instances[hash_]
 
         # otherwise, initialize the instance and register it
-        self = super(MetaNode, cls).__call__(mobject)
+        self = super(_MetaNode, cls).__call__(mobject)
         self._handle = handle
         cls._instances[hash_] = self
         return self
 
     @classmethod
-    def register(cls, node):
+    def register(mcs, node):
         # pylint: disable=protected-access
         """Register a new type of node.
 
         This allows the encoder to know all the possibilities it has to encode
         a node to find the closest match to its original type.
         """
-        cls._node_types[node._fn_id] = node
+        mcs._node_types[node._fn_id] = node
         return node
 
 
-@_add_metaclass(MetaNode)
+@_add_metaclass(_MetaNode)
 class DependencyNode(object):
     """A Dependency Graph (DG) node."""
 
@@ -403,11 +465,12 @@ class DependencyNode(object):
             and will overwrite each other. See exemples.
 
         Examples:
-            >>> a = node.create("transform", name="A")
-            >>> b = node.create("transform", name="B")
+            >>> newscene()
+            >>> a = create("transform", name="A")
+            >>> b = create("transform", name="B")
             >>> data = {a: 0, b: 1}
             >>> data[a]
-            1
+            0
             >>> c = encode("A")
             >>> c == a and c is a
             True
@@ -454,7 +517,11 @@ class DependencyNode(object):
 
     def __setitem__(self, key, value):
         """Set ``self[key]`` to ``value``."""
-        print(key, value)
+        if isinstance(value, _Attribute):
+            value.name = key
+            value.create(self)
+        else:
+            self.findplug(key).write(value)
 
     # Constructor ---
     def __init__(self, mobject):
@@ -555,7 +622,7 @@ class DependencyNode(object):
             name (str): The name of the duplicate node.
 
         Returns:
-            DgNode: The duplicated node instance.
+            DependencyNode: The duplicated node instance.
         """
         return wrap(cmds.duplicate, self, name=name)[0]
 
@@ -572,10 +639,59 @@ class DependencyNode(object):
             >>> exists(node)
             True
             >>> node.delete()
-            >>> cpre.exists(node)
+            >>> exists(node)
             False
         """
         wrap(cmds.delete, self)
+
+    def addattr(self, attribute):
+        """Add a new attribute to the node.
+
+        Examples:
+            >>> node = create("transform")
+            >>> attribute = Double(name="foo")
+            >>> node.addattr(attribute)
+            >>> node.hasattr("foo")
+            True
+
+        Arguments:
+            attribute (Attribute): The attribute to add.
+        """
+        attribute.create(self)
+
+    def hasattr(self, attribute):
+        """Check if the node contains the specified attribute.
+
+        Examples:
+            >>> node = create("transform")
+            >>> node.hasattr("translateX")
+            True
+            >>> node.hasattr("foo")
+            False
+
+        Arguments:
+            attribute (str): The attribute to check.
+
+        Returns:
+            bool: True if the node contains the attribute, False otherwise.
+        """
+        return self.fn.hasAttribute(attribute)
+
+    def delattr(self, attribute):
+        """Delete an attribute of the node.
+
+        Examples:
+            >>> node = create("transform")
+            >>> attr = Long(name="foo")
+            >>> node.addattr(attr)
+            >>> node.delattr("foo")
+            >>> node.hasattr("foo")
+            False
+
+        Arguments:
+            attribute (str): The attribute to delete.
+        """
+        wrap(cmds.deleteAttr, self, attribute=attribute)
 
     def findplug(self, attribute):
         # pylint: disable=protected-access
@@ -586,6 +702,9 @@ class DependencyNode(object):
 
         Returns:
             Plug: The instance of the plug.
+
+        Raises:
+            ExistsError: The attribute does not exists on the node.
         """
         try:
             plug = Plug(self.fn.findPlug(attribute, False))
@@ -629,6 +748,256 @@ class DagNode(DependencyNode):
     _fn_id = Fn.kDagNode
     _fn_set = OpenMaya.MFnDagNode
 
+    def __len__(self):
+        return self.childcount
+
+    def __contains__(self, key):
+        return self.hasattr(key)
+
+    def __iter__(self):
+        return self.children()
+
+    def __init__(self, mobject):
+        super(DagNode, self).__init__(mobject)
+        self._dagpath = OpenMaya.MDagPath.getAPathTo(self.object)
+
+    # Read properties ---
+    @property
+    def dagpath(self):
+        """MDagPath: The dag path instance associated to the node."""
+        return self._dagpath
+
+    @property
+    def path(self):
+        """str: The path of the attached object from the root of the DAG."""
+        return self.fn.fullPathName()
+
+    @property
+    def childcount(self):
+        """int: The number of chidren of the node"""
+        return self.fn.childCount()
+
+    # Public methods ---
+    def root(self):
+        """Return the node to the root of the hierarchy in which the node is.
+
+        Returns:
+            DagNode: The root node.
+        """
+        return self.parent(-1)
+
+    def parents(self):
+        """Get the parents of the node.
+
+        Examples:
+            >>> newscene()
+            >>> a = create("transform", name="A")
+            >>> b = create("transform", name="B")
+            >>> c = create("transform", name="C")
+            >>> a.addchild(b)
+            >>> b.addchild(c)
+            >>> list(c.parents())
+            [<DagNode 'B'>, <DagNode 'A'>]
+
+        Yield:
+            DagNode: The next parent node instance.
+        """
+        # The `parentCount` and `parent` (with an index other than 0)
+        # methods seem does not to work...
+        mobject = self.fn.parent(0)
+        while mobject.apiType() != OpenMaya.MFn.kWorld:
+            parent = encode(mobject)
+            yield parent
+            mobject = parent.fn.parent(0)
+
+    def parent(self, index=1):
+        """The first element of :func:`parents` method.
+
+        Returns:
+            DagNode: The parent node instance.
+            index (int): The parent index to return.
+        """
+        parents = self.parents()
+        for _ in range(index - 1):
+            next(parents, None)
+        return next(parents, None)
+
+    def siblings(self):
+        """Iterates on every other node at the same level as this one.
+
+        Yield:
+            DagNode: The next sibling node instance.
+        """
+        parent = self.parent()
+        if parent is None:
+            nodes = ls(assemblies=True)
+        else:
+            nodes = parent.children()
+
+        for node in nodes:
+            if node != self:
+                yield node
+
+    def sibling(self):
+        """The first element of :func:`siblings` method.
+
+        Returns:
+            DagNode: The sibiling node instance.
+        """
+        return next(self.siblings(), None)
+
+    def shapes(self):
+        """Iterates on each _shapes of this node.
+
+        Yield:
+            DagNode: The next shape instance.
+        """
+        for index in range(self.fn.childCount()):
+            mobject = self.fn.child(index)
+            if mobject.hasFn(OpenMaya.MFn.kShape):
+                yield encode(mobject)
+
+    def shape(self):
+        """The first element of :func:`shapes` method.
+
+        Returns:
+            DagNode: The shape node instance.
+        """
+        return next(self.shapes(), None)
+
+    def children(self, filters=None, recursive=False):
+        """Iterates on each child of this node.
+
+        Examples:
+            >>> newscene()
+            >>> a = create("transform", name="A")
+            >>> b = create("transform", name="B")
+            >>> c = create("transform", name="C")
+            >>> a.addchildren(b, c)
+            >>> list(a.children())
+            [<DagNode 'B'>, <DagNode 'C'>]
+
+        Yield:
+            DagNode: The next child instance.
+        """
+        for index in range(self.fn.childCount()):
+            child = encode(self.fn.child(index))
+
+            if not child.object.hasFn(OpenMaya.MFn.kTransform):
+                continue
+
+            if filters is not None:
+                ntype = child.type
+                if isinstance(filters, str) and ntype != filters:
+                    continue
+                if isinstance(filters, (list, tuple)) and ntype not in filters:
+                    continue
+
+            yield child
+
+            if recursive:
+                for each in child.children(filters, recursive=True):
+                    yield each
+
+    def child(self):
+        """The first element of :func:`childrens` method.
+
+        Returns:
+            DagNode: The child node instance.
+        """
+        return next(self.children(), None)
+
+    def addchild(self, node):
+        """Add a child to the node.
+
+        Examples:
+            >>> newscene()
+            >>> a = create("transform", name="A")
+            >>> b = create("transform", name="B")
+            >>> a.addchild(b)
+            >>> list(a.children())
+            [<DagNode 'B'>]
+
+        Arguments:
+            node (DagNode): The node to add.
+        """
+        wrap(cmds.parent, node, self)
+
+    def addchildren(self, *args):
+        """Recursively add multiple children to the node.
+
+        Arguments:
+            *args: The nodes to add as child.
+        """
+        for arg in args:
+            if isinstance(arg, (list, tuple, set)):
+                self.addchildren(*arg)
+            else:
+                self.addchild(arg)
+
+    def addshape(self, shape):
+        """Add a new shape under the node."""
+        wrap(cmds.parent, shape, self, shape=True, relative=True)
+
+    def addshapes(self, *args):
+        """Add multiple shapes under the nodes."""
+        for arg in args:
+            if isinstance(arg, (list, tuple, set)):
+                self.addshapes(*arg)
+            else:
+                self.addshape(arg)
+
+    def hide(self):
+        """Set the visibility plug to False."""
+        self.findplug("visibility").write(False)
+
+    def show(self):
+        """Set the visibility plug to True."""
+        self.findplug("visibility").write(True)
+
+    def goto(self, target, srt="srt"):
+        """Move self to the target transformation.
+
+        Arguments:
+            target (DagNode): The target transformation where self
+                need to go. This value can also be a :class:`Matrix`
+                or :class:`TransformationMatrix` type.
+            srt (str): The attributes that must match the target.
+        """
+        if isinstance(target, DagNode):
+            target = target["worldMatrix"][0].read()
+
+        matrix = Matrix(target)
+        matrix *= self["parentInverseMatrix"].read()
+        tmatrix = TransformationMatrix(matrix)
+        if "t" in srt:
+            self["translate"] = tmatrix.translation()
+        if "r" in srt:
+            self["rotate"] = map(math.degrees, tmatrix.rotation())
+        if "s" in srt:
+            self["scale"] = tmatrix.scale()
+
+    def transformation(self, space=Space.OBJECT):
+        """Returns the node transformation matrix.
+
+        Arguments:
+            space (Space): The space under which the TransformationMatrix
+                will be returned
+
+        Returns:
+            TransformationMatrix: The transformation matrix instance.
+        """
+        plug = self["worldMatrix"] if space == Space.WORLD else self["matrix"]
+        return TransformationMatrix(plug.read())
+
+    def boundingbox(self):
+        """Returns the node bounding box.
+
+        Returns:
+            BoundingBox: The bounding box instance.
+        """
+        return BoundingBox(self.fn.boundingBox)
+
 
 class Set(DependencyNode):
     """An object set node."""
@@ -636,34 +1005,49 @@ class Set(DependencyNode):
     _fn_id = Fn.kSet
     _fn_set = OpenMaya.MFnSet
 
+    def duplicate(self, name=None):
+        new = super(Set, self).duplicate(name)
+        for member in self.members():
+            new.add(member)
+        return new
 
-def create(type_, name=None, **kwargs):
-    """Create a new node.
+    def add(self, node):
+        """Add a new object to the set.
 
-    By default, this function simply wraps the cmds.createNode()`_ command.
+        Arguments:
+            node (DagNode): The node to add.
+        """
+        wrap(cmds.sets, node, forceElement=self)
 
-    Examples:
-        >>> newscene()
-        >>> a = create("transform", name="A")
-        >>> a
-        <DagNode 'A'>
-        >>> create("joint", name="B", parent=a)
-        <DagNode 'B'>
+    def remove(self, node):
+        """Remove a node from the set.
 
-    Arguments:
-        type_ (str): The type of the node to create.
-        name (str): The name of the node to create. If not specified,
-            use the `type_` parameter instead.
-        **kwargs: The additional keyword arguments to pass to the
-            `cmds.createNode()`_ command.
+        Arguments:
+            node (DagNode): The node to remove.
+        """
+        wrap(cmds.sets, node, remove=self)
 
-    Returns:
-        DependencyNode: A node instace based on the type of the node.
+    def clear(self):
+        """Removes all elements from this set."""
+        wrap(cmds.sets, clear=self)
 
-    .. _cmds.createNode():
-        https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Tech-Docs/CommandsPython/createNode.ht
-    """
-    return wrap(cmds.createNode, type_, name=name or type_, **kwargs)
+    def members(self):
+        """Iterates on each members of the set."""
+        for member in wrap(cmds.sets, self, query=True):
+            yield encode(member)
+
+
+class Shape(DagNode):
+    """A shape node."""
+
+    _fn_id = Fn.kShape
+
+
+class NurbsCurve(Shape):
+    """A curve node."""
+
+    _fn_id = Fn.kNurbsCurve
+    _fn_set = OpenMaya.MFnNurbsCurve
 
 
 def exists(obj):
@@ -707,7 +1091,7 @@ def delete(*args, **kwargs):
 
     Arguments:
         *args: The arguments passed to the `cmds.delete()`_ command.
-        *kwargs: The keyword arguments passed to the `cmds.delete()`_ command.
+        **kwargs: The keyword arguments passed to the `cmds.delete()`_ command.
 
     Returns:
         list: The nodes list.
@@ -718,16 +1102,730 @@ def delete(*args, **kwargs):
     return wrap(cmds.delete, *args, **kwargs)
 
 
+# Create
+@_add_metaclass(abc.ABCMeta)
+class _Creator(object):
+    """Allow the customization of node creation."""
+
+    key = None
+    """str: The key to use with :func:`create` to call the creator."""
+
+    registered = {}
+    """dict: The registered creators."""
+
+    @classmethod
+    def register(cls, creator):
+        """Register a creator class to make it available in the api.
+
+        Arguments:
+            creator (class): The class to register.
+
+        Returns:
+            class: The registered class.
+        """
+        if issubclass(cls, _Creator):
+            cls.registered[creator.key] = {"creator": creator}
+        return creator
+
+    @abc.abstractmethod
+    def create(self, name=key):
+        """Create the node.
+
+        Arguments:
+            name (str): The name of the node to create.
+
+        Returns:
+            DependencyNode: The created node.
+        """
+
+
+@_Creator.register
+class LocatorCreator(_Creator):
+    """Create a new locator node.
+
+    Examples:
+        >>> newscene()
+        >>> create("locator")
+        <DagNode 'locator'>
+    """
+
+    key = "locator"
+
+    def create(self, name=key):
+        return wrap(cmds.spaceLocator, name=name)[0]
+
+
+@_Creator.register
+class CurveCreator(_Creator):
+    """Create a new Non-Uniform Rational Basis Splines (NURBS) curve node.
+
+    Examples:
+        >>> creator = CurveCreator(degree=1, close=True)
+        >>> creator.points.append((0, 0, 0))
+        >>> creator.points.append((0, 5, 0))
+        >>> creator.points.append((5, 5, 0))
+        >>> creator.points.append((5, 0, 0))
+        >>> creator.create("square")
+        <DagNode 'square'>
+    """
+
+    key = "curve"
+
+    def __init__(self, points=None, degree=1, close=False, knots=None):
+        self._points = points or []
+        self._degree = degree
+        self._close = close
+        self._knots = knots
+        self._connect = False
+
+    def create(self, name=key):
+        points = []
+        for point in self.points:
+            if isinstance(point, Plug):
+                points.append(point.read())
+            else:
+                points.append(point)
+        flags = {}
+
+        if self.close:
+            if points[: self.degree] != points[-self.degree]:
+                points += points[: self.degree]
+            if self.knots is None:
+                length = len(points) + self.degree - 1
+                flags["knot"] = self.knots or range(length)
+
+        flags["name"] = name
+        flags["point"] = points
+        flags["degree"] = self.degree
+        flags["periodic"] = self.close
+        node = wrap(cmds.curve, **flags)
+        node.shape().name = node + "Shape"
+
+        if self.connect:
+            for index, point in enumerate(self.points):
+                if isinstance(point, Plug):
+                    point.connect(node.shape()["controlPoints"][index])
+
+        return node
+
+    # property (RW)
+    @property
+    def points(self):
+        """list: A list of points for each curve cvs."""
+        return self._points
+
+    @points.setter
+    def points(self, value):
+        self._points = value
+
+    @property
+    def degree(self):
+        """int: The degree of the curve.
+
+        A number of points (degree + 1) is required to create a visible curve.
+        """
+        return self._degree
+
+    @degree.setter
+    def degree(self, value):
+        self._degree = value
+
+    @property
+    def close(self):
+        """bool:"""
+        return self._close
+
+    @close.setter
+    def close(self, value):
+        self._close = value
+
+    @property
+    def knots(self):
+        """list:
+
+        If it not specified, a array will be automaticaly generated during
+        the execution of :func:`create`.
+        """
+        return self._knots
+
+    @knots.setter
+    def knots(self, value):
+        self._knots = value
+
+    @property
+    def connect(self):
+        """bool:"""
+        return self._connect
+
+    @connect.setter
+    def connect(self, value):
+        self._connect = value
+
+
+@_Creator.register
+class ControlCreator(CurveCreator):
+    """Create a new control."""
+
+    key = "control"
+
+
+def create(type, name=None, **kwargs):
+    # pylint: disable=redefined-builtin
+    """Create a new node.
+
+    This function allows to modify the creation of nodes by adding types or
+    replacing existing ones. If a type is known to :obj:`Creator.registered`,
+    then the associated creator will be used in the creation. See the
+    documentation of the :class:`Creator` class for more details.
+
+    Examples:
+        >>> newscene()
+        >>> create("addDoubleLinear")
+        <DependencyNode 'addDoubleLinear'>
+        >>> a = create("transform", name="A")
+        >>> a
+        <DagNode 'A'>
+        >>> b = create("transform", name="B", parent=a)
+        >>> b.path
+        '|A|B'
+
+    Arguments:
+        type (str): The type of the node to create.
+        name (str): The name of the node to create. If not specified,
+            use the ``type`` parameter instead.
+        **kwargs: The additional keyword arguments to pass to the
+            :class:`Creator` or to the `cmds.createNode()`_ command.
+
+    Returns:
+        DependencyNode: A node instace based on the type of the node.
+
+    .. _cmds.createNode():
+        https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Tech-Docs/CommandsPython/createNode.html
+    """
+    if isinstance(name, Name):
+        name = name.decode()
+    if type in _Creator.registered:
+        type = _Creator.registered[type]["creator"](**kwargs)
+
+    if isinstance(type, _Creator):
+        return type.create(name or type.key)
+
+    return wrap(cmds.createNode, type, name=name or type, **kwargs)
+
+
+# Name
+class Name(object):
+    """Improves the creation and modification of node names.
+
+    A name is represented by a list of tokens. During the decoding process,
+    each token will be added with the next one by adding a :obj:`SEPARATOR`.
+
+    Examples:
+        >>> name = Name("my", "node")
+        >>> name.decode()
+        'my_node'
+
+    Arguments:
+        *args: The initial tokens that represented the name.
+
+            Different form are accepted::
+
+                Name("my", "node")
+                Name(["my", "node"])
+                Name("my_node")
+    """
+
+    SEPARATOR = "_"
+    """str: The character used to split or join the :obj:`tokens`."""
+
+    TYPES = {
+        "transform": "grp",
+        "control": "ctrl",
+        "locator": "loc",
+        "mesh": "msh",
+    }
+
+    def __repr__(self):
+        return "<Name '{}'>".format(self.decode())
+
+    # conversion
+    def __str__(self):
+        return self.decode()
+
+    # arithmetic operator
+    def __add__(self, other):
+        if isinstance(other, Name):
+            other = other._tokens
+        return Name(self._tokens + other)
+
+    # augmented assignment
+    __iadd__ = __add__
+
+    # logical operators
+    def __eq__(self, other):
+        if isinstance(other, Name):
+            other = other._tokens
+        return self._tokens == other
+
+    def __ne__(self, other):
+        if isinstance(other, Name):
+            other = other._tokens
+        return self._tokens != other
+
+    # container type
+    def __getitem__(self, index):
+        return self._tokens[index]
+
+    def __setitem__(self, index, value):
+        self._tokens[index] = value
+        self.rename()
+
+    def __delitem__(self, index):
+        del self._tokens[index]
+        self.rename()
+
+    def __iter__(self):
+        return iter(self._tokens)
+
+    def __contains__(self, value):
+        return value in self._tokens
+
+    def __len__(self):
+        return len(self._tokens)
+
+    # constructor
+    def __init__(self, *args):
+        self._node = None
+        self._tokens = []
+        self._parse(args)
+
+    # public
+    def decode(self):
+        """Return a string representation of the name with :obj:`SEPARATOR`.
+
+        The ``__str__`` or ``str()`` method do exactly the same thing.
+
+        Examples:
+            >>> name = Name("my", "node", ["srt"])
+            >>> name.decode()
+            'my_node_srt'
+            >>> name.decode() == str(name)
+            True
+
+        Returns:
+            str: The full name as a string.
+        """
+        return self.SEPARATOR.join(self._tokens)
+
+    def append(self, token):
+        """Append a token to the end.
+
+        Examples:
+            >>> name = Name("my_node")
+            >>> name.append("name")
+            >>> name.decode()
+            'my_node_name'
+
+        Arguments:
+            token (str): The token to be added at the end of the list.
+        """
+        self._tokens.append(token)
+        self.rename()
+
+    def extend(self, tokens):
+        """Extend list by appending elements from the iterable.
+
+        Examples:
+            >>> name = Name("my_node")
+            >>> name.extend(["name", "grp"])
+            >>> name.decode()
+            'my_node_name_grp'
+
+        Arguments:
+            tokens (list): The iterable to be added at the end of the list.
+        """
+        self._tokens.extend(tokens)
+        self.rename()
+
+    def insert(self, index, token):
+        """Insert object before index.
+
+        Examples:
+            >>> name = Name("my_node")
+            >>> name.insert(1, "great")
+            >>> name.decode()
+            'my_great_node'
+
+        Arguments:
+            index (int): The index where the element needs to be inserted.
+            token (str): The token to be inserted in the list.
+        """
+        self._tokens.insert(index, token)
+        self.rename()
+
+    def remove(self, token):
+        """Remove first occurrence of value.
+
+        Examples:
+            >>> name = Name("my_node_name")
+            >>> name.remove("node")
+            >>> name.decode()
+            'my_name'
+
+        Arguments:
+            token (str): The token to be removed from the list.
+        """
+        self._tokens.remove(token)
+        self.rename()
+
+    def pop(self, index=-1):
+        """Remove and return item at index.
+
+        Examples:
+            >>> name = Name("node_grp")
+            >>> name.pop()
+            >>> name.decode()
+            'node'
+
+        Arguments:
+            index (int): The index to removed from the list.
+        """
+        self._tokens.pop(index)
+        self.rename()
+
+    def replace(self, old, new):
+        """Replace all the matching token from the list.
+
+        Examples:
+            >>> name = Name("my_useless_node")
+            >>> name.replace("useless", "useful")
+            >>> name.decode()
+            'my_useful_node'
+
+        Arguments:
+            old (str): The token to be replaced from the list.
+            new (str): The token that will replace the old one.
+        """
+        for key, token in enumerate(self._tokens):
+            if token == old:
+                self._tokens[key] = new
+        self.rename()
+
+    def addtype(self):
+        """Append the node type as suffix."""
+        # find the type by querying the node.
+        if isinstance(self.node, DagNode):
+            nodetype = (self.node.shape() or self.node).type
+        elif isinstance(self.node, DependencyNode):
+            nodetype = self.node.type
+        else:
+            LOG.error("No node associated to the name.")
+            return
+
+        suffix = self.TYPES.get(nodetype, nodetype)
+        if self.suffix != suffix:
+            self.append(suffix)
+        self.rename()
+
+    def rename(self):
+        """Rename the associated node.
+
+        Normally it should not be necessary to call it, it is called
+        automatically each time the tokens are modified.
+        """
+        LOG.debug("Rename: '%s' to '%s'", self.node, self)
+        if self.node is None:
+            return
+        wrap(cmds.rename, self.node, self)
+
+    def copy(self):
+        """Create and return a deep copy of the instance.
+
+        Examples:
+            >>> name_a = Name("my_node")
+            >>> name_b = name_a.copy()
+            >>> name_a.tokens is name_b.tokens
+            False
+
+        Returns:
+            Name: The copied instance.
+        """
+        return Name(list(self._tokens))
+
+    def isunique(self):
+        """Make sure the name does not exist twice in the current scene.
+
+        Returns:
+            bool: True if the name is unique, otherwise False.
+        """
+        return not wrap(cmds.objExists, self)
+
+    # private
+    def _parse(self, tokens):
+        """Parse the passed value and fill in the class tokens."""
+        for token in tokens:
+            if isinstance(token, (list, tuple, set)):
+                self._parse(token)
+            elif isinstance(token, _STRING_TYPES) and self.SEPARATOR in token:
+                self._tokens.extend(token.split(self.SEPARATOR))
+            else:
+                self._tokens.append(str(token))
+
+    # property (R)
+    @property
+    def tokens(self):
+        """list: The list of tokens that compose the name.
+
+        Examples:
+            >>> name = Name("my_node")
+            >>> name.tokens
+            ['my', 'node']
+        """
+        return self._tokens
+
+    @property
+    def node(self):
+        """DependencyNode: The associated node instance."""
+        return self._node
+
+    # property (RW)
+    @property
+    def prefix(self):
+        """str: The first token of the list.
+
+        Examples:
+            >>> name = Name("my_node")
+            >>> name.prefix
+            'my'
+            >>> name.prefix = "a"
+            >>> str(name)
+            'a_node'
+        """
+        return self._tokens[0]
+
+    @prefix.setter
+    def prefix(self, value):
+        self._tokens[0] = value
+        self.rename()
+
+    @property
+    def suffix(self):
+        """str: The last token of the list.
+
+        Examples:
+            >>> name = Name("my_node")
+            >>> name.suffix
+            'node'
+            >>> name.suffix = "name"
+            >>> str(name)
+            'my_name'
+        """
+        return self._tokens[-1]
+
+    @suffix.setter
+    def suffix(self, value):
+        self._tokens[-1] = value
+        self.rename()
+
+
 # Plug
 class Plug(object):
     """Plug object."""
 
     def __repr__(self):
-        return "<Plug '{}'>".format(self)
+        return "<Plug '{}' {}>".format(self, self.read())
 
+    # conversion
     def __str__(self):
         return self.plug.name()
 
+    def __int__(self):
+        return int(self.read())
+
+    def __float__(self):
+        return float(self.read())
+
+    def __bool__(self):
+        return bool(self.read())
+
+    # python 2/3 compatibility
+    __nonzero__ = __bool__
+
+    # unary operator
+    def __pos__(self):
+        return +self.read()
+
+    def __neg__(self):
+        return -self.read()
+
+    def __abs__(self):
+        """Returns the absolute value of self.
+
+        Examples:
+            >>> node = create("transform")
+            >>> node["translateX"] = -3
+            >>> abs(node["translateX"])
+            3.0
+        """
+        return abs(self.read())
+
+    def __round__(self, ndigits=0):
+        """Returns a float number rounded to the specified number of decimals.
+
+        Examples:
+            >>> node = create("transform")
+            >>> node["translateX"] = 0.12345
+            >>> round(node["translateX"], ndigits=2)
+            0.12
+        """
+        return round(self.read(), ndigits)
+
+    def __ceil__(self):
+        """Returns the smallest integer greater than or equal to self.
+
+        Examples:
+            >>> import math
+            >>> node = create("transform")
+            >>> node["translateX"] = 0.1
+            >>> math.ceil(node["translateX"])
+            1
+        """
+        return math.ceil(self.read())
+
+    def __floor__(self):
+        """Returns the largest integer less than or equal to self.
+
+        Examples:
+            >>> import math
+            >>> node = create("transform")
+            >>> node["translateX"] = 0.1
+            >>> math.floor(node["translateX"])
+            0
+        """
+        return math.floor(self.read())
+
+    def __trunc__(self):
+        """Returns the value of self trunced to an integer.
+
+        In other words, remove the decimal part.
+
+        Examples:
+            >>> import math
+            >>> node = create("transform")
+            >>> node["translateX"] = 0.1
+            >>> math.trunc(node["translateX"])
+            0
+        """
+        return math.trunc(self.read())
+
+    # arithmetic operator
+    def __add__(self, other):
+        return self.read() + _read(other)
+
+    def __sub__(self, other):
+        return self.read() - _read(other)
+
+    def __mul__(self, other):
+        return self.read() * _read(other)
+
+    def __truediv__(self, other):
+        return self.read() / _read(other)
+
+    def __floordiv__(self, other):
+        self.disconnect(other)
+
+    def __mod__(self, other):
+        return self.read() % _read(other)
+
+    def __pow__(self, other, modulo=None):
+        return pow(self.read(), _read(other), modulo)
+
+    def __divmod__(self, other):
+        """Returns the quotient and the remainder of self and other.
+
+        Examples:
+            >>> node = create("transform")
+            >>> node["translateX"] = 10
+            >>> divmod(node["translateX"], 3)
+            (3.0, 1.0)
+        """
+        return divmod(self.read(), _read(other))
+
+    # reflected arithmetic operator
+    def __radd__(self, other):
+        return _read(other) + self.read()
+
+    def __rsub__(self, other):
+        return _read(other) - self.read()
+
+    def __rmul__(self, other):
+        return _read(other) * self.read()
+
+    def __rtruediv__(self, other):
+        return _read(other) / self.read()
+
+    def __rmod__(self, other):
+        return _read(other) % self.read()
+
+    def __rpow__(self, other, modulo=None):
+        return pow(_read(other), self.read(), modulo)
+
+    def __rdivmod__(self, other):
+        return divmod(_read(other), self.read())
+
+    # augmented assignment
+    __iadd__ = __add__
+    __isub__ = __sub__
+    __imul__ = __mul__
+    __itruediv__ = __truediv__
+    __imod__ = __mod__
+    __ipow__ = __pow__
+
+    # comparison operator
+    def __eq__(self, other):
+        return self.read() == _read(other)
+
+    def __ne__(self, other):
+        return self.read() != _read(other)
+
+    def __ge__(self, other):
+        return self.read() >= _read(other)
+
+    def __gt__(self, other):
+        return self.read() > _read(other)
+
+    def __le__(self, other):
+        return self.read() <= _read(other)
+
+    def __lt__(self, other):
+        return self.read() < _read(other)
+
+    # bitwise operator
+    def __lshift__(self, other):
+        other.connect(self)
+        return self
+
+    def __rshift__(self, other):
+        self.connect(other)
+        return self
+
+    # container type
+    def __len__(self):
+        return self.childcount
+
+    def __getitem__(self, key):
+        return self.findchild(key)
+
+    def __setitem__(self, key, value):
+        self[key].write(value)
+
+    def __contains__(self, key):
+        return self.haschild(key)
+
+    def __iter__(self):
+        return self.children()
+
+    # constructor
     def __init__(self, mplug):
         self._plug = mplug
         self._node = None
@@ -735,31 +1833,626 @@ class Plug(object):
     # Read properties ---
     @property
     def plug(self):
-        """MPlug: The maya plug attached to self."""
-        if self._plug is None:
-            self._plug = encode(self.plug.node())
+        """MPlug: The mplug instance of the plug."""
         return self._plug
 
     @property
     def node(self):
-        """DependencyNode: The node associated to self."""
+        """Get the associated node."""
         return self._node
+
+    @property
+    def name(self):
+        """str: The plug name."""
+        return self.plug.name()
+
+    @property
+    def attribute(self):
+        """str: THe attribute name of the plug."""
+        return str(self).rsplit(".", 1)[-1]
+
+    @property
+    def type(self):
+        """str: The plug type."""
+        return wrap(cmds.getAttr, self, type=True)
+
+    @property
+    def issettable(self):
+        """bool: The plug is settable."""
+        return self.plug.isFreeToChange() == OpenMaya.MPlug.kFreeToChange
+
+    @property
+    def isdefault(self):
+        """bool: The plug is default value."""
+        return self.plug.isDefaultValue()
+
+    @property
+    def isarray(self):
+        """bool: True if plug is an array of plugs."""
+        return self.plug.isArray
+
+    @property
+    def iscompound(self):
+        """str:  True if plug is compound parent with children."""
+        return self.plug.isCompound
+
+    @property
+    def childcount(self):
+        """int: The number of chidren of the node.
+
+        Raises:
+            TypeError: self has no child.
+        """
+        if self.isarray:
+            return self.plug.evaluateNumElements()
+        if self.iscompound:
+            return self.plug.numChildren()
+        return 0
 
     # Read write properties ---
     @property
     def value(self):
+        """Query the value of the plug."""
         return self.read()
 
     @value.setter
     def value(self, value):
         self.write(value)
 
+    @property
+    def keyable(self):
+        """Return if the plug appair in the keyable or not."""
+        return self.plug.isKeyable
+
+    @keyable.setter
+    def keyable(self, value):
+        if self.iscompound:
+            for child in self.children():
+                child.keyable = value
+        else:
+            wrap(cmds.setAttr, self, keyable=value)
+
+    @property
+    def channelbox(self):
+        """Return if the plug appair in the channelbox or not."""
+        return self.plug.isChannelBox
+
+    @channelbox.setter
+    def channelbox(self, value):
+        if self.iscompound:
+            for child in self.children():
+                child.channelbox = value
+        else:
+            wrap(cmds.setAttr, self, channelBox=value)
+
+    @property
+    def lock(self):
+        """bool: the locked state of the plug."""
+        return self.plug.isLocked
+
+    @lock.setter
+    def lock(self, value):
+        if self.iscompound:
+            for child in self.children():
+                child.lock = value
+        else:
+            wrap(cmds.setAttr, self, lock=value)
+
+    @property
+    def default(self):
+        """any: The plug is default value."""
+        value = wrap(
+            cmds.attributeQuery,
+            self.attribute,
+            node=self.node,
+            listDefault=True,
+        )
+        if isinstance(value, (list, tuple)) and len(value) == 1:
+            value = value[0]
+        return value
+
+    @default.setter
+    def default(self, value):
+        cmds.addAttr(self.name, edit=True, defaultValue=value)
+
     # Public methods ---
     def read(self):
-        pass
+        """Query the value of the plug."""
+        return cmds.getAttr(self.name)
 
     def write(self, value):
-        pass
+        """Set the value of the plug."""
+        cmds.setAttr(self.name, value)
+
+    def hide(self):
+        """Hide the attribute."""
+        self.keyable = False
+        self.channelbox = False
+
+    def show(self):
+        """Show the attribute."""
+        self.channelbox = True
+
+    def reset(self):
+        """Reset the value to it's default.
+
+        Examples:
+            >>> node = create("transform")
+            >>> node["scaleX"] = 10
+            >>> node["scaleX"].reset()
+            >>> node["scaleX"].read()
+            1.0
+        """
+        self.write(self.default)
+
+    def public(self):
+        """Expose the attribute in the channel-box."""
+        self.show()
+        self.keyable = True
+
+    def private(self):
+        """Lock and hide the attribute."""
+        self.lock = True
+        self.hide()
+
+    def connect(self, other):
+        """Connect a plug to another one.
+
+        Examples:
+            >>> newscene()
+            >>> node = create("transform")
+            >>> node["translateX"].connect(node["translateY"])
+            >>> node["translateY"].input()
+            <Plug 'transform.translateX' 0.0>
+
+        Arguments:
+            other (Plug): The other plug to connect.
+        """
+        wrap(cmds.connectAttr, self, other)
+
+    def disconnect(self, other):
+        """Disconnect a plug to another one.
+
+        Examples:
+            >>> newscene()
+            >>> node = create("transform")
+            >>> node["translateX"].connect(node["translateY"])
+            >>> node["translateY"].input()
+            <Plug 'transform.translateX' 0.0>
+            >>> node["translateX"].disconnect(node["translateY"])
+            >>> node["translateY"].input()
+
+        Arguments:
+            other (Plug): The other plug to disconnect.
+        """
+        wrap(cmds.disconnectAttr, self, other)
+
+    def inputs(self):
+        """The plug connected as input.
+
+        Yields:
+            Plug: The input plug instance.
+        """
+        for plug in self._connections(source=True):
+            yield plug
+
+    def input(self):
+        """The plug connected as input.
+
+        Returns:
+            Plug: The input plug instance.
+        """
+        return next(self.inputs(), None)
+
+    def outputs(self):
+        """The plug connected as output.
+
+        Yield:
+            Plug: The next output plug instance.
+        """
+        for plug in self._connections(destination=True):
+            yield plug
+
+    def output(self):
+        """The first output plug.
+
+        Returns:
+            Plug: The plug instance.
+        """
+        return next(self.outputs(), None)
+
+    def findchild(self, attribute):
+        """Find a child plug.
+
+        Examples:
+            >>> newscene()
+            >>> node = create("transform")
+            >>> node["translate"].findchild(0)
+            <Plug 'transform.translateX' 0.0>
+
+        Arguments:
+            attribute (str, int, slice): The child attribute to find.
+
+        Returns:
+            Plug: The child plug instance.
+
+        Raises:
+            RuntimeError: The plug does not exist.
+        """
+        if isinstance(attribute, int):
+            if attribute < 0:
+                attribute = self.childcount - abs(attribute)
+            if self.isarray:
+                mplug = self.plug.elementByLogicalIndex(attribute)
+                return Plug(mplug)
+            if self.iscompound:
+                return Plug(self.plug.child(attribute))
+
+        elif isinstance(attribute, _STRING_TYPES):
+            for index in range(self.childcount):
+                mplug = self.plug.child(index)
+                nshort = mplug.partialName()
+                nlong = mplug.partialName(useLongNames=True)
+                if attribute in [x.split(".")[-1] for x in (nshort, nlong)]:
+                    return Plug(mplug)
+
+        elif isinstance(attribute, slice):
+            indices = attribute.indices(self.childcount)
+            return map(self.findchild, range(*indices))
+
+        raise RuntimeError("Child not found.")
+
+    def haschild(self, attribute):
+        """Check if the plug has the specified has a child.
+
+        Examples:
+            >>> node = encode("transform")
+            >>> node["translate"].haschild("foo")
+            False
+            >>> node["translate"].haschild(0)
+            True
+
+        Arguments:
+            attribute (str, int): The attribute to check.
+
+        Returns:
+            bool: True if the attribute is a child to self, False otherwise.
+        """
+        try:
+            self.findchild(attribute)
+            return True
+        except RuntimeError:
+            return False
+
+    def children(self):
+        """Iterates on each children of this plug.
+
+        Examples:
+            >>> newscene()
+            >>> node = create("transform")
+            >>> for child in node["translate"].children():
+            ...     child
+            <Plug 'transform.translateX' 0.0>
+            <Plug 'transform.translateY' 0.0>
+            <Plug 'transform.translateZ' 0.0>
+
+        Yield:
+            Plug: The child plug instance.
+        """
+        for index in range(self.childcount):
+            yield self.findchild(index)
+
+    # private
+    def _connections(self, source=False, destination=False):
+        """List the conections of the plug."""
+        plugs = wrap(
+            cmds.listConnections,
+            self,
+            source=source,
+            destination=destination,
+            plugs=True,
+        )
+        for plug in plugs or []:
+            yield encode(plug)
+
+
+def _read(value):
+    """Returns a value, whether the object is a plug or not."""
+    if isinstance(value, Plug):
+        return value.read()
+    return value
+
+
+def connect(*args, **kwargs):
+    """Connect two plug."""
+    wrap(cmds.connectAttr, *args, **kwargs)
+
+
+def disconnect(*args, **kwargs):
+    """Sisconnect two plug."""
+    wrap(cmds.disconnectAttr, *args, **kwargs)
+
+
+# Attributes
+@_add_metaclass(abc.ABCMeta)
+class _Attribute(object):
+    """Base class for creating new attribute.
+
+    Examples:
+        >>> newscene()
+        >>> node = create("transform")
+        >>> attribute = Double("myAttr")
+        >>> node.addattr(attribute)
+
+        This api also provides a shorter synthax to add new attributes:
+
+        >>> node = create("transform")
+        >>> node["myAttr"] = Double()
+
+    Arguments:
+        name (str): The name of the attribute.
+        array (bool): Whether the attribute is to have an array of data
+    """
+
+    type = None
+    _typeflag = "attributeType"
+
+    def __init__(self, name=None, array=False):
+        self._name = name
+        self._array = array
+
+    # public
+    def create(self, node, **kwargs):
+        """Create the attribute."""
+        self._addflag(kwargs, self._typeflag, self.type)
+        self._addflag(kwargs, "longName", self.name)
+        self._addflag(kwargs, "multi", self.array)
+        wrap(cmds.addAttr, node, **kwargs)
+
+    # private
+    @staticmethod
+    def _addflag(kwargs, key, value):
+        """Add a flag to the specified dictionary.
+
+        Only add the flag if it has a valid value. Maya seems to dislike
+        some "empty" flags even with a value of None.
+
+        If the flag already exists, keep the existing one.
+        """
+        if value is not None:
+            kwargs.setdefault(key, value)
+
+    # property (RW)
+    @property
+    def name(self):
+        """str: The name of the attribute to create."""
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @property
+    def array(self):
+        """bool: Create an array/simple attribute."""
+        return self._array
+
+    @array.setter
+    def array(self, value):
+        self._array = value
+
+
+@_add_metaclass(abc.ABCMeta)
+class _Numeric(_Attribute):
+    # pylint: disable=redefined-builtin
+    """Base class for creating numerical attributes."""
+
+    def __init__(self, name=None, value=None, min=None, max=None, array=False):
+        super(_Numeric, self).__init__(name, array)
+        self._value = value
+        self._min = min
+        self._max = max
+
+    def create(self, node, **kwargs):
+        self._addflag(kwargs, "defaultValue", self.value)
+        self._addflag(kwargs, "minValue", self.min)
+        self._addflag(kwargs, "maxValue", self.max)
+        super(_Numeric, self).create(node, **kwargs)
+
+    # property (RW)
+    @property
+    def value(self):
+        """int or float: The default value that the attribute should take."""
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
+    @property
+    def min(self):
+        """any: The minimum value that the attribute can take."""
+        return self._min
+
+    @min.setter
+    def min(self, value):
+        self._min = value
+
+    @property
+    def max(self):
+        """any: The maximum value that the attribute can take."""
+        return self._max
+
+    @max.setter
+    def max(self, value):
+        self._max = value
+
+
+class Long(_Numeric):
+    """Long attribute."""
+
+    type = "long"
+
+
+class Double(_Numeric):
+    """Double attribute."""
+
+    type = "double"
+
+
+class Double3(_Numeric):
+    """Double 3 attribute."""
+
+    type = "double3"
+
+    def create(self, node, **kwargs):
+        with _restore(self):
+            self.value = None
+            super(Double3, self).create(node, **kwargs)
+
+        # make a copy of the value to modify it if necessary
+        value = self.value
+        if isinstance(value, (int, float)):
+            value = [value] * 3
+
+        # create the children attributes
+        children_kwargs = kwargs.copy()
+        children_kwargs.pop("parent", None)
+        for index, axis in enumerate("XYZ"):
+            child = Double(name=self.name + axis, value=value[index])
+            child.create(node, parent=self.name, **children_kwargs)
+
+
+class Boolean(_Numeric):
+    """Boolean attribute."""
+
+    type = "bool"
+
+
+class Enum(_Attribute):
+    """Enumerated attribute."""
+
+    type = "enum"
+
+    def __init__(self, name=None, enum=None, value=None, array=False):
+        super(Enum, self).__init__(name, array)
+        self._enum = enum or []
+        self._value = value
+
+    def create(self, node, **kwargs):
+        self._addflag(kwargs, "defaultValue", self.value)
+        self._addflag(kwargs, "enumName", ":".join(self.enum))
+        super(Enum, self).create(node, **kwargs)
+
+    # property (RW)
+    @property
+    def enum(self):
+        """list: A list the containt the enum values."""
+        return self._enum
+
+    @enum.setter
+    def enum(self, value):
+        if isinstance(value, _STRING_TYPES):
+            value = value.split(":")
+        self._enum = value
+
+    @property
+    def value(self):
+        """int or float: The default value that the attribute should take."""
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+
+
+class Divider(Enum):
+    """Divider attribute."""
+
+    def __init__(self, name=None, label=None):
+        super(Divider, self).__init__(name)
+        self._label = label
+
+    def create(self, node, **kwargs):
+        with _restore(self):
+            if self.label is None:
+                self.label = self.name
+
+            self._addflag(kwargs, "enumName", self.label)
+            self._addflag(kwargs, "niceName", " ")
+            super(Divider, self).create(node, **kwargs)
+            node.findplug(self.name).show()
+
+    # property (RW)
+    @property
+    def label(self):
+        """str: The label of the divider."""
+        return self._label
+
+    @label.setter
+    def label(self, value):
+        self._label = value
+
+
+class String(_Attribute):
+    """String attribute."""
+
+    type = "string"
+    _typeflag = "dataType"
+
+
+class MatrixAttribute(_Attribute):
+    """Matrix attribute"""
+
+    type = "matrix"
+
+
+class Message(_Attribute):
+    """Message attribute.
+
+    A message attribute does not do anything except formally declare a
+    relationships between nodes.
+    """
+
+    type = "message"
+
+
+class Compound(_Attribute):
+    """Compound attribute."""
+
+    type = "compound"
+
+    def __init__(self, name=None, children=None, array=False):
+        super(Compound, self).__init__(name, array)
+        self.children = children or []
+        self.array = array
+
+    def add(self, attribute):
+        """Add a new child to the compound."""
+        self.children.append(attribute)
+
+    def create(self, node, **kwargs):
+        kwargs.setdefault("attributeType", self.type)
+        kwargs.setdefault("numberOfChildren", len(self.children))
+        super(Compound, self).create(node, **kwargs)
+        for child in self.children:
+            child.create(node, parent=self.name)
+
+
+def addattr(node, attribute):
+    """Add a new attribute."""
+    node.addattr(attribute)
+    return node[attribute]
+
+
+def hasattr_(node, attribute):
+    """Check if a node has an attribute."""
+    return node.hasattr(attribute)
+
+
+def delattr_(node, attribute):
+    """Delete the given attribute on the node."""
+    node.delattr(attribute)
 
 
 # Mathematica
@@ -767,7 +2460,7 @@ class Point(OpenMaya.MPoint):
     """This class provides an implementation of a point."""
 
     def __repr__(self):
-        return "<Point {}>".format(str(self))
+        return "<Point {}>".format(self)
 
     # arithmetic operator
     def __add__(self, other):
@@ -813,7 +2506,7 @@ class Vector(OpenMaya.MVector):
     """Allow vectors to be handled easily."""
 
     def __repr__(self):
-        return "<Vector {}>".format(str(self))
+        return "<Vector {}>".format(self)
 
     # arithmetic operator
     def __add__(self, other):
@@ -877,7 +2570,7 @@ class Vector(OpenMaya.MVector):
         """Returns the quaternion which will rotate this vector into another.
 
         Arguments:
-            target (Vector):
+            target (Vector): The target vector.
 
         Returns:
             Quaternion: The resulting quaternion.
@@ -900,7 +2593,7 @@ class Matrix(OpenMaya.MMatrix):
     """A matrix math class for 4x4 matrices of doubles."""
 
     def __repr__(self):
-        return "<Matrix \n{}\n>".format(str(self))
+        return "<Matrix \n{}\n>".format(self)
 
     # conversion
     def __str__(self):
@@ -954,13 +2647,6 @@ class Matrix(OpenMaya.MMatrix):
     # public
     def decode(self, flat=False):
         """Decode the matrix into a two-dimensional array.
-
-        Examples:
-            >>> mtx = Matrix()
-            >>> mtx.decode()
-            [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], ...]
-            >>> mtx.decode(flat=True)
-            [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, ...]
 
         Arguments:
             flat (bool): Flatten the result into a single-dimensional array.
@@ -1225,11 +2911,26 @@ class Color(OpenMaya.MColor):
 
 
 # Privates
-def _read(value):
-    """Returns a value, whether the object is a plug or not."""
-    if isinstance(value, Plug):
-        return value.read()
-    return value
+@contextlib.contextmanager
+def _restore(instance):
+    """Create a restore point for the instance.
+
+    The instance can be modified within the with statement and will
+    be restored at the end of the block.
+
+    Examples:
+        >>> class Foo(object):
+        ...     pass
+        >>> foo = Foo()
+        >>> foo.temp = 1
+        >>> with _restore(foo):
+        ...     foo.temp = 2
+        >>> foo.temp
+        1
+    """
+    restore_point = copy.deepcopy(instance.__dict__)
+    yield
+    instance.__dict__ = restore_point
 
 
 # MIT License
