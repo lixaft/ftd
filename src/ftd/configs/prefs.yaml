@@ -255,6 +255,37 @@ commands:
       import ftd.control
       return ftd.control.create("square")
 
+  object_replace_control_shape:
+    description: Replace the shape of a control in object space.
+    decorators: [undo_repeat, keep_selected]
+    short: replace
+    core: |
+      import ftd.control
+      from maya import cmds
+      selection = cmds.ls(selection=True)
+      new = selection[0]
+      for each in cmds.ls(selection=True)[1:]:
+          ftd.control.replace(each, new)
+  world_replace_control_shape:
+    description: Replace the shape of a control in world space.
+    decorators: [undo_repeat, keep_selected]
+    core: |
+      import ftd.control
+      from maya import cmds
+      selection = cmds.ls(selection=True)
+      new = selection[0]
+      for each in cmds.ls(selection=True)[1:]:
+          ftd.control.replace(each, new, absolute=True)
+  mirror_control_shape:
+    description: Mirror the control shape on the X axis.
+    decorators: [undo_repeat, keep_selected]
+    short: mirror
+    core: |
+      import ftd.control
+      from maya import cmds
+      for each in cmds.ls(selection=True):
+          ftd.control.mirror(each)
+
   # Curve ---
   add_point:
     description: Add a new point on the curve.
@@ -488,7 +519,6 @@ commands:
     core: |
       from maya import mel
       mel.eval("MirrorDeformerWeights")
-      mel.eval("CreateShrinkWrap")
   sculpt:
     description: Creates rounded deformations on a surface relative to an origin locator.
     short: sculpt
@@ -508,6 +538,7 @@ commands:
     icon: shrinkwrap.png
     core: |
       from maya import mel
+      mel.eval("CreateShrinkWrap")
   sine:
     description: Deforms geometry along a sine wave relative to a central handle.
     icon: sineNLD.png
@@ -1661,6 +1692,12 @@ toolbar:
           options:
             - command: hide_joint_orient
             - command: show_joint_orient
+        - command: object_replace_control_shape
+          label: true
+          options:
+            - command: world_replace_control_shape
+        - command: mirror_control_shape
+          label: true
     - name: Rigging
       children:
         - command: locator
