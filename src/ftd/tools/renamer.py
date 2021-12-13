@@ -6,6 +6,8 @@ from maya import cmds
 from maya.api import OpenMaya
 
 import ftd.interaction
+import ftd.ui.utility
+import ftd.ui.window
 
 __all__ = ["Core"]
 
@@ -44,7 +46,8 @@ class Core(object):
     def mode(self, value):
         value = value.lower()
         if value not in (self.SELECTED, self.HIERARCHY):
-            raise ValueError("Invalid mode for the renamer.")
+            LOG.error("Invalid rename mode.")
+            return
         self._mode = value
 
     @property

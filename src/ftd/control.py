@@ -4,6 +4,7 @@ import logging
 import os
 
 import yaml
+
 from maya import cmds
 
 import ftd.color
@@ -161,13 +162,13 @@ def _edit_points(points, remap=None, multiplier=None):
         Replace the indices of each points values:
 
         >>> points = [[1, 2, 3], [4, 5, 6]]
-        >>> edit_points(points, remap={0: 1, 1: 0})
+        >>> _edit_points(points, remap={0: 1, 1: 0})
         [[2, 1, 3], [5, 4, 6]]
 
         Multiply the values of each point:
 
         >>> points = [[1, 1, 1], [2, 2, 2]]
-        >>> edit_points(points, multiplier=[-1, 1, 2])
+        >>> _edit_points(points, multiplier=[-1, 1, 2])
         [[-1, 1, 2], [-2, 2, 4]]
 
     Arguments:

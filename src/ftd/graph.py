@@ -46,7 +46,7 @@ def find_related(root, type, direction="up"):
 
     Arguments:
         root (str): The name of the root node.
-        node (str): The node type to search for.
+        type (str): The node type to search for.
         direction (str): The direction of the search.
 
     Returns:

@@ -1,9 +1,9 @@
 [flake8]
-ignore =
+ignore=
     E203,  # black add space around ':'
     # delegate to pylint
     F401,  # imported but unused
     E402,  # module level import not at top of file
     F821,  # undefined name
     F841,  # local variable assigned but never used
-max-line-length = 79
+max-line-length=79

@@ -6,6 +6,7 @@ import os
 
 import six
 import yaml
+
 from maya import cmds
 
 import ftd.ui.utility
@@ -129,7 +130,6 @@ def run_command(name):
 
 # Core
 class Command(object):
-    # pylint: disable=too-many-instance-attributes
     """A command that can be executed."""
 
     _registered = {}
@@ -258,6 +258,7 @@ class Command(object):
     # Private methods ---
     @staticmethod
     def _build_function(core, name="_command"):
+        """Convert the core into a string function."""
         func = (" " * 4).join(["def {}():\n"] + core.splitlines(True))
         return func.format(name)
 

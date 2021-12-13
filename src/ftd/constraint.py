@@ -20,7 +20,6 @@ def matrix(
     decompose=False,
     srt="srt",
 ):
-    # pylint: disable=too-many-arguments, too-many-locals
     """Constrains two nodes using matrices.
 
     Examples:

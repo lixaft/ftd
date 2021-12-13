@@ -19,8 +19,8 @@ def blendshape(driver, driven, name="blendshape", alias=None, weight=1.0):
     available target.
 
     Arguments:
-        str (driver): The name of the driver node.
-        str (driven): The name of the driven node.
+        driver (str): The name of the driver node.
+        driven (str): The name of the driven node.
         name (str): The name of the new blendshape.
         alias (str): The alias name of the driver shape.
         weight (float): The default weight of the target.

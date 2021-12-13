@@ -68,6 +68,7 @@ def bind(node, influences, method="blend"):
         node (str): The node on which creates the skincluster.
         influences (list, optional): The influence objects that will deform
             the skincluster.
+        method (str): The binded method that will be used to deform the mesh.
     """
     skincluster = mel.eval("findRelatedSkinCluster {}".format(node))
 
@@ -118,7 +119,7 @@ def find_influences(node, weighted=True, unused=True):
 
     Arguments:
         node (str): The node on which query the influence objects.
-        weights (bool): Include the influence objects with non-zero weights.
+        weighted (bool): Include the influence objects with non-zero weights.
         unused (bool): Include the influence objects with zero weights.
 
     Returns:

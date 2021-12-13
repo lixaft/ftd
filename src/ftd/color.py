@@ -3,6 +3,7 @@ import logging
 import os
 
 import yaml
+
 from maya import cmds
 
 __all__ = ["index", "name", "rgb"]

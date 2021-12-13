@@ -113,6 +113,7 @@ class FrameBox(QtWidgets.QWidget):
 
     @property
     def __attached_widget(self):
+        """Widget: The attached widget."""
         widget = self.__layout.itemAt(1)
         return widget.wid if widget else None
 

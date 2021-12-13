@@ -1,9 +1,10 @@
 """This module provides some class to easly create windows."""
 import logging
 
-from maya import OpenMayaUI, cmds
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
+
+from maya import OpenMayaUI, cmds
 
 import ftd.ui.utility
 
@@ -23,6 +24,8 @@ class Base(QtWidgets.QDialog):
     """str: The internal name of the window."""
     title = None
     """str: The name of the window displayed to the user."""
+    css = ""
+    """str: The style sheet to apply to the widget."""
 
     def __init__(self, parent=None):
         parent = parent or ftd.ui.utility.get_toplevel()
@@ -31,6 +34,9 @@ class Base(QtWidgets.QDialog):
         self.setObjectName(self.name)
         self.setWindowTitle(self.title or self.name.replace("_", " ").title())
         self.setup()
+
+        if self.css:
+            self.setStyleSheet(self.css)
 
     def show(self):
         """Show the widget, but first checks if it is not already exists."""
