@@ -3,12 +3,12 @@ import logging
 
 from maya import cmds
 
-__all__ = ["toogle_view"]
+__all__ = ["toggle_view"]
 
 LOG = logging.getLogger(__name__)
 
 
-def toogle_view(element, panel=None):
+def toggle_view(element, panel=None):
     """Toggles the visibility of an element in the viewport.
 
     The function simply wraps the :func:`cmds.modelEditor` command to toggle
@@ -19,7 +19,7 @@ def toogle_view(element, panel=None):
     Examples:
         >>> from maya import cmds
         >>> panel = cmds.getPanel(withFocus=True)
-        >>> toogle_view(element="joint")
+        >>> toggle_view(element="joint")
         >>> cmds.modelEditor(panel, query=True, joint=True)
         False
 
