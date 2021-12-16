@@ -1139,19 +1139,19 @@ commands:
     description: Select the previous saved selection.
     icon: greasePencilImport.png
     core: |
-      import ftdev
+      import ftd
       from maya import cmds
-      if hasattr(ftdev, "SELECTION"):
-          cmds.select(ftdev.SELECTION)
+      if hasattr(ftd, "SELECTION"):
+          cmds.select(ftd.SELECTION)
       else:
           LOG.error("No selection previously saved.")
   save_selection:
     description: Save the current selection to be able to reselect it later.
     icon: greasePencilExport.png
     core: |
-      import ftdev
+      import ftd
       from maya import cmds
-      ftdev.SELECTION = cmds.ls(selection=True)
+      ftd.SELECTION = cmds.ls(selection=True)
   select_all:
     description: Select all nodes in the scene.
     core: |
@@ -1223,31 +1223,31 @@ commands:
     description: Select all the influence nodes of a skincluster.
     short: skc inf
     core: |
-      import ftdev.skincluster
+      import ftd.skincluster
       from maya import cmds
       influences = []
       for each in cmds.ls(selection=True):
-        influences_ = ftdev.skincluster.get_influences(each)
+        influences_ = ftd.skincluster.get_influences(each)
         influences.extend(influences_)
       cmds.select(influences)
   select_unused_influences:
     description: Select the unused influence nodes of a skincluster.
     core: |
-      import ftdev.skincluster
+      import ftd.skincluster
       from maya import cmds
       influences = []
       for each in cmds.ls(selection=True):
-        influences_ = ftdev.skincluster.get_influences(each, unused=True)
+        influences_ = ftd.skincluster.get_influences(each, unused=True)
         influences.extend(influences_)
       cmds.select(influences)
   select_weighted_influences:
     description: Select the weighted influence nodes of a skincluster.
     core: |
-      import ftdev.skincluster
+      import ftd.skincluster
       from maya import cmds
       influences = []
       for each in cmds.ls(selection=True):
-        influences_ = ftdev.skincluster.get_influences(each, weighted=True)
+        influences_ = ftd.skincluster.get_influences(each, weighted=True)
         influences.extend(influences_)
       cmds.select(influences)
 
@@ -1373,13 +1373,13 @@ commands:
   toggle_grid:
     description: Toggle the grid visibility.
     core: |
-      import ftdev.viewport
-      ftdev.viewport.toggle_view("grid")
+      import ftd.viewport
+      ftd.viewport.toggle_view("grid")
   toggle_joints:
     description: Toggle the visibility of the joints node in the viewport.
     core: |
       import ftd.viewport
-      ftd.viewport.toogle_view("joints")
+      ftd.viewport.toggle_view("joints")
 
 decorators:
   undo: ftd.interaction.undo
