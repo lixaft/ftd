@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 """Pythonic api for Autodesk Maya."""
 from __future__ import absolute_import, division
 
@@ -206,7 +207,7 @@ def decode(obj):
         obj (str | Any): The object to decode.
 
     Returns:
-        str | Any: The decoded object.
+        str: The decoded object.
     """
     LOG.debug("Decode: %s", repr(obj))
 
@@ -921,7 +922,7 @@ class DagNode(DependencyNode):
         Arguments:
             node (DagNode): The node to add.
         """
-        wrap(cmds.parent, node, self)
+        node._set_parent(self)
 
     def addchildren(self, *args):
         """Recursively add multiple children to the node.
@@ -934,18 +935,6 @@ class DagNode(DependencyNode):
                 self.addchildren(*arg)
             else:
                 self.addchild(arg)
-
-    def addshape(self, shape):
-        """Add a new shape under the node."""
-        wrap(cmds.parent, shape, self, shape=True, relative=True)
-
-    def addshapes(self, *args):
-        """Add multiple shapes under the nodes."""
-        for arg in args:
-            if isinstance(arg, (list, tuple, set)):
-                self.addshapes(*arg)
-            else:
-                self.addshape(arg)
 
     def hide(self):
         """Set the visibility plug to False."""
@@ -998,6 +987,11 @@ class DagNode(DependencyNode):
         """
         return BoundingBox(self.fn.boundingBox)
 
+    # Private methods ----
+    def _set_parent(self, parent):
+        """Set the parent of self in the outliner."""
+        wrap(cmds.parent, self, parent)
+
 
 class Set(DependencyNode):
     """An object set node."""
@@ -1041,6 +1035,9 @@ class Shape(DagNode):
     """A shape node."""
 
     _fn_id = Fn.kShape
+
+    def _set_parent(self, parent):
+        wrap(cmds.parent, self, parent, shape=True, relative=True)
 
 
 class NurbsCurve(Shape):
