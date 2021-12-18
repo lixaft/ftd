@@ -1,4 +1,6 @@
 """Provide utilities to measure performance."""
+from __future__ import division
+
 import contextlib
 import cProfile
 import functools
@@ -6,13 +8,109 @@ import logging
 import pstats
 import time
 
-__all__ = ["profile", "timing"]
+from maya import cmds, mel
+
+__all__ = ["fps", "profile", "timing"]
 
 LOG = logging.getLogger(__name__)
 
 
+def fps(loop=5, mode="parallel", gpu=True, cache=False, renderer="vp2"):
+    """Measure the fps of the current scene.
+
+    It take the active range of the scene, play it view time and show the
+    result in the stdout.
+
+    The values for the evulation mode parameter are (the case does not matter):
+
+    ============ ======= ===========================
+        Long      Short         Description
+    ============ ======= ===========================
+    ``parallel`` ``emp`` Evaluation Manager Parallel
+    ``serial``   ``ems`` Evaluation Manager Serial
+    ``dirty``    ``dg``  Maya evaluation
+    ============ ======= ===========================
+
+    The default available renderer are:
+
+    ======================== =======
+               Long           Short
+    ======================== =======
+    ``base_OpenGL_Renderer`` ``vp1``
+    ``vp2Renderer``          ``vp2``
+    ======================== =======
+
+    Arguments:
+        loop (int): The number of times the test should be run.
+        mode (str): The evaluation mode to use.
+        gpu (bool): Turn on/off the gpu override.
+        cache (bool): Turn on/off the cached playback.
+        renderer (str): The viewport that will be used to run the test.
+    """
+    panel = cmds.getPanel(withFocus=True)
+
+    # set the playback speed to free
+    playback_spped = cmds.playbackOptions(query=True, playbackSpeed=True)
+    cmds.playbackOptions(edit=True, playbackSpeed=0)
+
+    # set the viewport renderer
+    current_renderer = cmds.modelEditor(panel, query=True, rendererName=True)
+    args = {"vp1": "base_OpenGL_Renderer", "vp2": "vp2Renderer"}
+    arg = args.get(renderer.lower(), renderer)
+    cmds.modelEditor(panel, edit=True, rendererName=arg)
+
+    # set the evaluation mode
+    current_mode = cmds.evaluationManager(query=True, mode=True)[0]
+    args = {
+        "emp": "parallel",
+        "ems": "serial",
+        "dg": "off",
+        "//": "parallel",
+        "->": "off",
+    }
+    cmds.evaluationManager(mode=args.get(mode.lower(), mode.lower()))
+
+    # disable cycle check
+    cycle_check = cmds.cycleCheck(query=True, evaluation=True)
+    cmds.cycleCheck(evaluation=False)
+
+    # run performance test
+    results = []
+    current_frame = cmds.currentTime(query=True)
+    start_frame = cmds.playbackOptions(query=True, minTime=True)
+    end_frame = cmds.playbackOptions(query=True, maxTime=True)
+    frame_range = end_frame - start_frame
+    for _ in range(loop):
+        cmds.currentTime(start_frame)
+        start_time = time.time()
+        cmds.play(wait=True)
+        end_time = time.time()
+        result = end_time - start_time
+        results.append(round(frame_range / result))
+    cmds.currentTime(current_frame)
+
+    # restore the configuration
+    cmds.playbackOptions(edit=True, playbackSpeed=playback_spped)
+    cmds.modelEditor(panel, edit=True, rendererName=current_renderer)
+    cmds.evaluationManager(mode=current_mode)
+    cmds.cycleCheck(evaluation=cycle_check)
+
+    # display the result
+    msg = "PERFORMANCE TEST\n"
+    msg += "=" * (len(msg) - 1) + "\n\n"
+    for result in results:
+        msg += "\t- {} FPS\n".format(result)
+
+    msg += "\n\tMIN: {} FPS".format(min(results))
+    msg += "\n\tMAX: {} FPS".format(max(results))
+    msg += "\n\n\tAVERAGE: {} FPS".format(round((sum(results) / len(results))))
+
+    LOG.info("\n" * 3 + msg + "\n" * 3)
+
+
 @contextlib.contextmanager
 def profile(sort="time", lines=None, strip=False):
+
     """Detail the execution of all statements in the block.
 
     The following are the values accepted by the ``sort`` parameter:
@@ -35,14 +133,14 @@ def profile(sort="time", lines=None, strip=False):
         lines (int): Limits the output to a specified number of lines.
         strip (bool): Removes all leading path information from file name.
     """
-    profile_ = cProfile.Profile()
+    profiler = cProfile.Profile()
     try:
-        profile_.enable()
+        profiler.enable()
         yield
     finally:
-        profile_.disable()
+        profiler.disable()
 
-    stats = pstats.Stats(profile_)
+    stats = pstats.Stats(profiler)
     if strip:
         stats.strip_dirs()
     stats.sort_stats(sort)
