@@ -1227,7 +1227,7 @@ commands:
       from maya import cmds
       influences = []
       for each in cmds.ls(selection=True):
-        influences_ = ftd.skincluster.get_influences(each)
+        influences_ = ftd.skincluster.find_influences(each)
         influences.extend(influences_)
       cmds.select(influences)
   select_unused_influences:
@@ -1237,7 +1237,7 @@ commands:
       from maya import cmds
       influences = []
       for each in cmds.ls(selection=True):
-        influences_ = ftd.skincluster.get_influences(each, unused=True)
+        influences_ = ftd.skincluster.find_influences(each, unused=True)
         influences.extend(influences_)
       cmds.select(influences)
   select_weighted_influences:
@@ -1247,7 +1247,7 @@ commands:
       from maya import cmds
       influences = []
       for each in cmds.ls(selection=True):
-        influences_ = ftd.skincluster.get_influences(each, weighted=True)
+        influences_ = ftd.skincluster.find_influences(each, weighted=True)
         influences.extend(influences_)
       cmds.select(influences)
 
@@ -1348,6 +1348,11 @@ commands:
       selection = cmds.ls(selection=True)[::-1]
       for i, each in enumerate(selection[1:]):
           cmds.parent(selection[i], each)
+  name_conflicts:
+    description: Find the name conflicts in the scene.
+    core: |
+      import ftd.name
+      ftd.name.find_conflicts(sets=True)
   offset:
     description: Create an offset group under the current selected node.
     icon: transform.svg
@@ -1408,7 +1413,7 @@ hotkey_sets:
         key: alt+c
         category: node_editor
       - command: node_editor_show_all
-        key: alt+g
+        key: "5"
         category: node_editor
       - command: script_editor
         category: script_editor
@@ -1697,6 +1702,8 @@ toolbar:
           options:
             - command: world_replace_control_shape
         - command: mirror_control_shape
+          label: true
+        - command: name_conflicts
           label: true
     - name: Rigging
       children:

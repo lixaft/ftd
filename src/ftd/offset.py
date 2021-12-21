@@ -51,6 +51,7 @@ def inverse_group(node):
     """
     inverse = group(node, suffix="inverse")
     offset = group(inverse)
+    offset = cmds.rename(offset, node + "_offset")
     ftd.graph.matrix_to_srt(node + ".inverseMatrix", inverse)
     return offset
 
