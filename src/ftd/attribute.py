@@ -44,17 +44,8 @@ def disconnect(plug):
     return source
 
 
-def divider(node, label=None, look="basic"):
-    # pylint: disable=unused-argument
-    """Create a fake attribute that will visually make a separator.
-
-    It's possible to choose between different divider style:
-
-    ========= =============
-      Value   Look
-    ========= =============
-    ``basic`` Default value
-    ========= =============
+def divider(node, label=None):
+    """Create an attribute separator for in the channel box.
 
     Warning:
         The actual name of the attribute created has nothing to do with the
@@ -63,6 +54,8 @@ def divider(node, label=None, look="basic"):
         like ``divider##`` with a unique index instead of the hash characters.
 
         Trying to access the attribute via this label will result in an error.
+
+        See examples for details.
 
     Examples:
         >>> from maya import cmds
@@ -77,10 +70,6 @@ def divider(node, label=None, look="basic"):
     Arguments:
         node (str): The name of the node on which the divider will be created.
         label (str): The displayed name of the separator.
-        look (str): The look of the separator.
-
-    Todo:
-        Implement different divider look.
     """
     plug = ftd.name.generate_unique(node + ".divider##")
     cmds.addAttr(
@@ -88,14 +77,15 @@ def divider(node, label=None, look="basic"):
         longName=plug.split(".")[-1],
         niceName=" ",
         attributeType="enum",
-        # thanks to maya, it writes a 0 if the value None is passed...
+        # An string the contains only an escape character must be passed in a
+        # blank label is requested, instead maya just put a 0 instead.
         enumName=label or " ",
     )
     cmds.setAttr(plug, channelBox=True)
 
 
 def move(node, attribute, offset):
-    """Move the position of the attribute in the channelBox.
+    """Move the position of the attribute in the channel box.
 
     .. admonition:: Limitations...
         :class: error
@@ -131,8 +121,8 @@ def move(node, attribute, offset):
     with unlock(node):
         attributes = cmds.listAttr(userDefined=True)
 
-        # this function can only move the attributes created by the user,
-        # so make sure the specified attributes is one of them
+        # This function can only move the attributes created by the user,
+        # so make sure the specified attributes is one of them.
         if attribute not in attributes:
             msg = "Invalid plug '%s.%s'. Must be an user attribute."
             LOG.error(msg, node, attribute)
@@ -145,6 +135,8 @@ def move(node, attribute, offset):
             for each in attributes[index + 1 + (offset > 0) :]:
                 to_last(each)
 
+            # Re-query all attributes again so that the index can be
+            # recalculated correctly in the next iteration.
             attributes = cmds.listAttr(userDefined=True)
 
 
@@ -207,7 +199,7 @@ def unlock(*args):
         True
 
     Arguments:
-        *args: The name of the node to unlock
+        *args: The nodes to unlock.
     """
     plugs = []
     for node in args:

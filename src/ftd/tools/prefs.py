@@ -46,11 +46,11 @@ def initialize():
 
 def load_commands(data):
     """Load the commands and the decorators from the data."""
-    # commands
+    # Commands
     for name, kwargs in data.get("commands", {}).items():
         Command(name, **kwargs)
 
-    # decorators
+    # Decorators
     for name, decorator in data.get("decorators", {}).items():
         Command.register_decorator(name, decorator)
 
@@ -63,7 +63,7 @@ def load_file(path):
     """
     filedata = _unserialize(path)
 
-    # commands and decorators
+    # Commands and decorators
     load_commands(filedata)
 
     # hotkeys
@@ -74,7 +74,7 @@ def load_file(path):
             hotkeys=data.get("hotkeys", []),
         )
 
-    # marking menus
+    # Marking menus
     for name, data in filedata.get("marking_menus", {}).items():
         create_marking_menu(
             name=name,
@@ -90,14 +90,14 @@ def load_file(path):
             parent=data.get("parent"),
         )
 
-    # colors
+    # Colors
     for key, value in filedata.get("colors", {}).items():
         if isinstance(value, int):
             cmds.displayColor(key, value)
         elif isinstance(value, list):
             cmds.displayRGBColor(key, *value)
 
-    # options
+    # Options
     for key, value in filedata.get("options", {}).items():
         if isinstance(value, (int, bool)):
             cmds.optionVar(intValue=(key, int(value)))
@@ -206,7 +206,7 @@ class Command(object):
 
     def build_string(self):
         """Get a string that can be executed via :func:`exec`."""
-        # prepare the decorators
+        # Prepare the decorators
         import_lines = set()
         decorator_lines = []
         for each in self._used_decorators:
@@ -215,7 +215,7 @@ class Command(object):
             decorator_lines.append(
                 "@{}.{}".format(obj.__module__, obj.__name__)
             )
-        # build the string
+        # Build the string
         string = '"""{}"""\n'.format(self._description)
         string += "\n".join(list(import_lines) + [""] + decorator_lines) + "\n"
         string += self._build_function(self._core, self._name)
@@ -271,7 +271,7 @@ def create_hotkey_set(name, hotkeys, base="Maya_Default"):
         base (str): The hotkey from which this one will be create.
         hotkeys (list): The list of hotkey to create.
     """
-    # create the set
+    # Create the set
     if cmds.hotkeySet(name, exists=True):
         cmds.hotkeySet(name, edit=True, delete=True)
     cmds.hotkeySet(name, source=base)
@@ -280,9 +280,9 @@ def create_hotkey_set(name, hotkeys, base="Maya_Default"):
     for data in hotkeys:
         cmd = Command.get(data["command"])
 
-        # first, create a `runTimeCommand` which contains the script to be
+        # First, create a `runTimeCommand` which contains the script to be
         # executed and which can be invoked by typing the specified name
-        # into the mel interpreter
+        # into the mel interpreter.
         cmds.runTimeCommand(
             cmd.name,
             command=cmd.build_string(),
@@ -291,15 +291,15 @@ def create_hotkey_set(name, hotkeys, base="Maya_Default"):
             edit=cmds.runTimeCommand(cmd.name, query=True, exists=True),
         )
 
-        # then create a `nameCommand` which can be attached to a hotkey to
-        # execute the specified `runTimeCommand`
+        # Then create a `nameCommand` which can be attached to a hotkey to
+        # execute the specified `runTimeCommand`.
         cmds.nameCommand(
             cmd.name + "_userCommand",
             command=cmd.name,
             annotation=cmd.description or " ",
         )
 
-        # parse the key sequence
+        # Parse the key sequence
         flags = {}
         for key in data["key"].split("+"):
             if key in ("ctrl", "alt", "shift"):
@@ -307,8 +307,8 @@ def create_hotkey_set(name, hotkeys, base="Maya_Default"):
             else:
                 flags["keyShortcut"] = key
 
-        # finally, create the shortcut that will be triggered each time the
-        # key sequence is used
+        # Finally, create the shortcut that will be triggered each time the
+        # key sequence is used.
         cmds.hotkey(name=cmd.name + "_userCommand", **flags)
 
 
@@ -317,7 +317,7 @@ def create_marking_menu(name, key, items, parent="MainPane"):
     if cmds.popupMenu(name, exists=True):
         cmds.deleteUI(name)
 
-    # find the flags that will be used to trigger the marking menu
+    # Find the flags that will be used to trigger the marking menu
     flags = {}
     for key_ in ("ctrl", "alt", "shift"):
         flags[key_ + "Modifier"] = key_ in key
@@ -346,7 +346,7 @@ def create_marking_menu(name, key, items, parent="MainPane"):
                 flags["image"] = ftd.ui.utility.find_icon(cmd.icon)
 
         item = cmds.menuItem(parent=parent, **flags)
-        # children
+        # Children
         if "box" in data:
             cmd = Command.get(data["box"])
             cmds.menuItem(

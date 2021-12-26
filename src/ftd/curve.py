@@ -50,7 +50,7 @@ def cvs_position(node, world=False):
         worldSpace=world,
         absolute=world,
     )
-    # build an array with each point position in it's own array.
+    # Build an array with each point position in it's own x, y, z array.
     return [tuple(pos[x * 3 : x * 3 + 3]) for x, _ in enumerate(pos[::3])]
 
 
@@ -152,7 +152,7 @@ def generate_weights(cvs, time, degree=3, knots=None):
     """
     order = degree + 1
 
-    # ensure that all data provided is correct and can be computed.
+    # Ensure that all data provided is correct and can be computed
     if len(cvs) <= degree:
         msg = "Curves of degree {} require at least {} cvs."
         msg = msg.format(degree, order)
@@ -169,22 +169,22 @@ def generate_weights(cvs, time, degree=3, knots=None):
         LOG.error(msg)
         raise CurveError(msg)
 
-    # remap the time parameter to match the range of the knot values
+    # Remap the time parameter to match the range of the knot values
     min_knot = knots[order] - 1
     max_knot = knots[len(knots) - 1 - order] + 1
     time = time * (max_knot - min_knot) + min_knot
 
-    # determine on which segment of the curve the time value lies
+    # Determine on which segment of the curve the time value lies
     segment = degree
     for index, knot in enumerate(knots[order : len(knots) - order]):
         if knot <= time:
             segment = index + order
 
-    # filters out cvs not used in the segment
+    # Filters out cvs not used in the segment
     indices = list(range(len(cvs)))
     used_indices = [indices[j + segment - degree] for j in range(0, order)]
 
-    # run the boor's algorithm
+    # Run the boor's algorithm
     cv_weights = [{cv: 1.0} for cv in used_indices]
     for i in range(1, order):
         for j in range(degree, i - 1, -1):
@@ -202,7 +202,7 @@ def generate_weights(cvs, time, degree=3, knots=None):
 
             cv_weights[j] = weights
 
-    # create the name tuple that will be used for the return values
+    # Create the name tuple that will be used for the return values
     Weight = collections.namedtuple("Weight", field_names=("item", "weight"))
 
     return [Weight(cvs[i], j) for i, j in cv_weights[degree].items()]

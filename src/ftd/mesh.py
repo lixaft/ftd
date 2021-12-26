@@ -35,15 +35,15 @@ def closest_vertex(mesh, origin):
     mfn = OpenMaya.MFnMesh(sel.getDagPath(0).extendToShape())
     point = OpenMaya.MPoint(origin)
 
-    # first find the closest face on the mesh
+    # First find the closest face on the mesh
     face = mfn.getClosestPoint(point, space=space)[1]
 
-    # then iterates through each vertex of the face to compare their distance
+    # Then iterates through each vertex of the face to compare their distance
     # with the origin point.
     vertices = []
     for vertex in mfn.getPolygonVertices(face):
         distance = mfn.getPoint(vertex, space=space).distanceTo(point)
         vertices.append((vertex, distance))
 
-    # finally return the vertex with the smallest distance
+    # Finally return the vertex with the smallest distance
     return min(vertices, key=operator.itemgetter(1))

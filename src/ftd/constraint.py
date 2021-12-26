@@ -48,10 +48,10 @@ def matrix(
         pdriver = driver + ".worldMatrix[0]"
     pdriven = driven + ".worldMatrix[0]"
 
-    # hold the nodes create by the setup to rename them at once
+    # Track all the nodes create by the setup to rename them at once
     nodes = []
 
-    # calculate matrix
+    # Calculte the matrix
     if offset or hierarchy:
         mult = cmds.createNode("multMatrix")
         nodes.append(mult)
@@ -72,7 +72,7 @@ def matrix(
 
         pdriver = "{}.matrixSum".format(mult)
 
-    # connect to driven
+    # Connect the matrix to translate, rotate, scale plug
     if decompose:
         decompose = cmds.createNode("decomposeMatrix")
         nodes.append(decompose)
@@ -94,7 +94,7 @@ def matrix(
         cmds.connectAttr(pdriver, driven + ".offsetParentMatrix")
         ftd.attribute.reset(driven, [x + y for x in srt for y in "xyz"])
 
-    # rename nodes
+    # Rename the created nodes
     for index, node in enumerate(nodes):
         new = cmds.rename(node, "{}_{}".format(driver, cmds.nodeType(node)))
         nodes[index] = new

@@ -8,7 +8,7 @@ import logging
 import pstats
 import time
 
-from maya import cmds, mel
+from maya import cmds
 
 __all__ = ["fps", "profile", "timing"]
 
@@ -16,6 +16,7 @@ LOG = logging.getLogger(__name__)
 
 
 def fps(loop=5, mode="parallel", gpu=True, cache=False, renderer="vp2"):
+    # pylint: disable=unused-argument
     """Measure the fps of the current scene.
 
     It take the active range of the scene, play it view time and show the
@@ -49,17 +50,17 @@ def fps(loop=5, mode="parallel", gpu=True, cache=False, renderer="vp2"):
     """
     panel = cmds.getPanel(withFocus=True)
 
-    # set the playback speed to free
+    # Set the playback speed to free
     playback_spped = cmds.playbackOptions(query=True, playbackSpeed=True)
     cmds.playbackOptions(edit=True, playbackSpeed=0)
 
-    # set the viewport renderer
+    # Set the viewport renderer
     current_renderer = cmds.modelEditor(panel, query=True, rendererName=True)
     args = {"vp1": "base_OpenGL_Renderer", "vp2": "vp2Renderer"}
     arg = args.get(renderer.lower(), renderer)
     cmds.modelEditor(panel, edit=True, rendererName=arg)
 
-    # set the evaluation mode
+    # Set the evaluation mode
     current_mode = cmds.evaluationManager(query=True, mode=True)[0]
     args = {
         "emp": "parallel",
@@ -70,11 +71,11 @@ def fps(loop=5, mode="parallel", gpu=True, cache=False, renderer="vp2"):
     }
     cmds.evaluationManager(mode=args.get(mode.lower(), mode.lower()))
 
-    # disable cycle check
+    # Disable cycle check
     cycle_check = cmds.cycleCheck(query=True, evaluation=True)
     cmds.cycleCheck(evaluation=False)
 
-    # run performance test
+    # Run performance test
     results = []
     current_frame = cmds.currentTime(query=True)
     start_frame = cmds.playbackOptions(query=True, minTime=True)
@@ -89,13 +90,13 @@ def fps(loop=5, mode="parallel", gpu=True, cache=False, renderer="vp2"):
         results.append(round(frame_range / result))
     cmds.currentTime(current_frame)
 
-    # restore the configuration
+    # Restore the configuration
     cmds.playbackOptions(edit=True, playbackSpeed=playback_spped)
     cmds.modelEditor(panel, edit=True, rendererName=current_renderer)
     cmds.evaluationManager(mode=current_mode)
     cmds.cycleCheck(evaluation=cycle_check)
 
-    # display the result
+    # Display the result
     msg = "PERFORMANCE TEST\n"
     msg += "=" * (len(msg) - 1) + "\n\n"
     for result in results:
@@ -105,7 +106,7 @@ def fps(loop=5, mode="parallel", gpu=True, cache=False, renderer="vp2"):
     msg += "\n\tMAX: {} FPS".format(max(results))
     msg += "\n\n\tAVERAGE: {} FPS".format(round((sum(results) / len(results))))
 
-    LOG.info("\n" * 3 + msg + "\n" * 3)
+    LOG.info("\n\n\n%s\n\n\n", msg)
 
 
 @contextlib.contextmanager
@@ -115,18 +116,19 @@ def profile(sort="time", lines=None, strip=False):
 
     The following are the values accepted by the ``sort`` parameter:
 
-    .. csv-table::
-        :header: Value, Description
-
-        ``calls``,        Call count
-        ``cumulative``,   Cumulative time
-        ``filename``,     File name
-        ``pcalls``,       Primitive call count
-        ``line``,         Line number
-        ``name``,         Function name
-        ``nfl``,          Name/file/line
-        ``stdname``,      Standard name
-        ``time``,         Internal time
+    ================= ======================
+          Value            Description
+    ================= ======================
+    ``calls``         Call count
+    ``cumulative``    Cumulative time
+    ``filename``      File name
+    ``pcalls``        Primitive call count
+    ``line``          Line number
+    ``name``          Function name
+    ``nfl``           Name/file/line
+    ``stdname``       Standard name
+    ``time``          Internal time
+    ================= ======================
 
     Arguments:
         sort (str): Sorts the output according to the specified mode.
@@ -152,25 +154,25 @@ def timing(unit="millisecond", message="{func.__name__}() {time:.3f} {unit}"):
 
     The value that can be used for specified the ``unit`` parameter are:
 
-    .. csv-table::
-        :header: Short, Long, Length
-        :widths: 20, 30, 20
-
-        ``m``,   ``minute``,       60s
-        ``s``,   ``second``,       1s
-        ``ms``,  ``millisecond``,  10\\ :sup:`-3`\\ s
-        ``us``,  ``microsecond``,  10\\ :sup:`-6`\\ s
-        ``ns``,  ``nanosecond``,   10\\ :sup:`-9`\\ s
+    ======== ================= ==================
+      Short        Long             Length
+    ======== ================= ==================
+    ``m``    ``minute``        60s
+    ``s``    ``second``        1s
+    ``ms``   ``millisecond``   10\\ :sup:`-3`\\ s
+    ``us``   ``microsecond``   10\\ :sup:`-6`\\ s
+    ``ns``   ``nanosecond``    10\\ :sup:`-9`\\ s
+    ======== ================= ==================
 
     The ``message`` parameter can be formatted using the following fields:
 
-    .. csv-table::
-        :header: Name, Description
-        :widths: 30, 120
-
-        ``func``, The instance of the function.
-        ``time``, The execution time.
-        ``unit``, The time unit.
+    ========= =============================
+       Name            Description
+    ========= =============================
+    ``func``  The instance of the function.
+    ``time``  The execution time.
+    ``unit``  The time unit.
+    ========= =============================
 
     Arguments:
         unit (str):  The unit of time in which the execution time is displayed.

@@ -100,21 +100,20 @@ class Flow(QtWidgets.QLayout):
         line_height = 0
 
         for item in self.item_list:
-            # check if the current object can fit
-            # if not, go to the next line
+            # Check if the current object can fit if not, go to the next line
             next_x = x + item.sizeHint().width() + right
             if next_x > rect.right() and line_height:
                 x = left
                 y += self.spacing() + line_height
                 line_height = 0
 
-            # set the item position
+            # Set the item position
             if not test_only:
                 item.setGeometry(
                     QtCore.QRect(QtCore.QPoint(x, y), item.sizeHint())
                 )
 
-            # update values with the current item for next iteration
+            # Update values with the current item for next iteration
             x += item.sizeHint().width() + self.spacing()
             line_height = max(line_height, item.sizeHint().height())
 

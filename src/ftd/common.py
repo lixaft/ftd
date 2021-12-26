@@ -65,8 +65,7 @@ def exec_string(string, language="python", decorators=None):
         LOG.error("The language '%s' is not supported.", language)
         return None
 
-    # pylint: disable=exec-used
-    exec((" " * 4).join(lines))
+    exec((" " * 4).join(lines))  # pylint: disable=exec-used
     callback = locals()["_callback"]
 
     for decorator in decorators or []:

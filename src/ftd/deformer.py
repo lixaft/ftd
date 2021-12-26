@@ -31,9 +31,9 @@ def blendshape(driver, driven, name="blendshape", alias=None, weight=1.0):
     bs_node = ftd.graph.find_related(driven, type="blendShape")
     index = 0
 
+    # If a blendshape already exists, find the first index where the
+    # target can be attached and connect it to this attribute.
     if bs_node:
-        # If a blendshape already exists, find the first index where the
-        # target can be attached and connect it to this attribute.
         plug = (
             "{}.inputTarget[0].inputTargetGroup[{}]"
             ".inputTargetItem[6000].inputGeomTarget"
@@ -47,9 +47,9 @@ def blendshape(driver, driven, name="blendshape", alias=None, weight=1.0):
             target=(driven, index, driver, 1.0),
             weight=(index, weight),
         )
+    # If no blendshape is already attached to the geometry, quick and easy:
+    # create the blendshape! :)
     else:
-        # If no blendshape yet deforms the node, quick and easy:
-        # create the blendshape!
         bs_node = cmds.blendShape(
             driver,
             driven,

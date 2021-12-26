@@ -285,21 +285,21 @@ class Core(object):
         """Iter over the nodes to rename."""
         for node in self._nodes:
 
-            # add the current node after checking it
+            # Add the current node after checking it
             if self._validate(node.object()):
                 yield node
 
-            # continue the iteration if renaming the descendants
+            # Continue the iteration if renaming the descendants
             # is not requested or impossible
             if not node.object().hasFn(OpenMaya.MFn.kDagNode):
                 continue
             if self._mode != self.HIERARCHY:
                 continue
 
-            # initialize the dag iterator
+            # Initialize the dag iterator
             mit = OpenMaya.MItDag()
             mit.reset(node.object())
-            # skip self
+            # Skip self
             mit.next()
 
             while not mit.isDone():

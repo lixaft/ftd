@@ -152,11 +152,11 @@ def encode(obj, default=object):
     """
     LOG.debug("Encode: %s", repr(obj))
 
-    # check if the object is already encoded
+    # Check if the object is already encoded
     if obj.__class__.__module__ == __name__:
         return obj
 
-    # if the object passed is a character string, convert it to a maya object
+    # If the object passed is a character string, convert it to a maya object
     if isinstance(obj, _STRING_TYPES):
         sel = OpenMaya.MSelectionList()
         try:
@@ -249,16 +249,16 @@ def wrap(func, *args, **kwargs):
         except BaseException:
             return obj
 
-    # decode each argument first
+    # First, decode each arguments
     args_ = [_convert(decode, x) for x in args]
     kwargs_ = {k: _convert(decode, v) for k, v in kwargs.items()}
 
-    # execute the function
+    # Execute the function
     returned = func(*args_, **kwargs_)
     if isinstance(returned, OpenMaya.MSelectionList):
         returned = returned.getSelectionStrings()
 
-    # finally encode the returned object(s)
+    # Finally encode the returned object(s)
     if isinstance(returned, _STRING_TYPES):
         return _convert(encode, returned)
     if isinstance(returned, (list, tuple, set)):
@@ -424,11 +424,11 @@ class _MetaNode(type):
         handle = OpenMaya.MObjectHandle(mobject)
         hash_ = handle.hashCode()
 
-        # if the instance is already created, return it as-is
+        # If the instance is already created, return it as-is
         if hash_ in cls._instances:
             return cls._instances[hash_]
 
-        # otherwise, initialize the instance and register it
+        # Otherwise, initialize the instance and register it
         self = super(_MetaNode, cls).__call__(mobject)
         self._handle = handle
         cls._instances[hash_] = self

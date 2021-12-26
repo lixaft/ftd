@@ -79,7 +79,7 @@ class ProxyGenerator(object):
     def compute(self):
         """Calculate the :attr:`mesh` to extract the information needed."""
 
-        # find the binded skincluster by iterating over the graph
+        # Find the binded skincluster by iterating over the graph
         mit = OpenMaya.MItDependencyGraph(
             self._mesh.object(),
             filter=OpenMaya.MFn.kSkinClusterFilter,
@@ -93,11 +93,11 @@ class ProxyGenerator(object):
         skincluster = OpenMayaAnim.MFnSkinCluster(mit.currentNode())
         influence_objects = skincluster.influenceObjects()
 
-        # variables that will be filled during the iteration of on the faces
+        # Variables that will be filled during the iteration of on the faces
         faces_per_influences = {}
         vertices_per_face = {}
 
-        # iterate over each face:
+        # Iterate over each face:
         # The main goal is to obtain the influence of the face that has the
         # greatest weight on the skincluster and to associate the face index
         # with the influence node.
@@ -105,7 +105,7 @@ class ProxyGenerator(object):
         while not mit.isDone():
             vertices = mit.getVertices()
 
-            # store all the weights classed by influence
+            # Store all the weights classed by influence
             values = {}
             weight_list = skincluster.findPlug("weightList", False)
             for vertex in vertices:
@@ -114,43 +114,43 @@ class ProxyGenerator(object):
                     weight = weights.elementByLogicalIndex(influence)
                     values.setdefault(influence, []).append(weight.asDouble())
 
-            # find the greatest weight by adding the weights of each
+            # Find the greatest weight by adding the weights of each
             # influence to obtain the greatest result
             sums = [sum(values) for values in values.values()]
             greatest = sums.index(max(sums))
 
-            # populate the previously created variables
+            # Populate the previously created variables
             faces_per_influences.setdefault(greatest, []).append(mit.index())
             vertices_per_face[mit.index()] = vertices
 
-            # jump to the next face
+            # Jump to the next face
             mit.next()
 
-        # build the data needed to create the proxy geometries.
+        # Build the data needed to create the proxy geometries.
         self._data = {}
         for influence, faces in faces_per_influences.items():
-            # initialize the arrays required by maya to build a mesh:
+            # Initialize the arrays required by maya to build a mesh:
             vertices = []  # the position of each vertex
             polygon_counts = []  # the number of vertices on each face
             polygon_connects = []  # the associated vertices ids of each face
 
-            # find all the face indices present in the proxy
+            # Find all the face indices present in the proxy
             indices = {v for f in faces for v in vertices_per_face[f]}
 
-            # the `old: new` index mapping
+            # The `old: new` index mapping
             mapid = {}
 
             for new, old in enumerate(indices):
-                # populate the vertex position
+                # Populate the vertex position
                 vertices.append(self._mesh.getPoint(old))
-                # populate the vertex id mapping
+                # Populate the vertex id mapping
                 mapid[old] = new
 
             for face in faces:
                 face_vertices = vertices_per_face[face]
-                # append the amount of vertices on the face.
+                # Append the amount of vertices on the face.
                 polygon_counts.append(len(face_vertices))
-                # and the index of each of them.
+                # And the index of each of them.
                 polygon_connects.extend([mapid[x] for x in face_vertices])
 
             data = (vertices, polygon_counts, polygon_connects)
@@ -160,7 +160,7 @@ class ProxyGenerator(object):
         """Create the proxy geometries from the computed data."""
         self._proxies.clear()
 
-        # find the initial shader group
+        # Find the initial shader group
         sel = OpenMaya.MSelectionList()
         sel.add("initialShadingGroup")
         shader = OpenMaya.MFnSet(sel.getDependNode(0))

@@ -46,8 +46,8 @@ def repeat(func):
 
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
-        # store a partial version on the module variables so that it
-        # can be executed later when the repeat action will be triggered
+        # Store a partial version on the module variables so that it
+        # can be executed later when the repeat action will be triggered.
         globals()["_callback"] = functools.partial(func, *args, **kwargs)
 
         # find the code to execute to call the function previously stored
@@ -55,10 +55,10 @@ def repeat(func):
         if __name__ != "__main__":
             command = "import {0};{0}.{1}".format(__name__, command)
 
-        # add the function to the repeat system of maya
+        # Ddd the function to the repeat system of maya
         cmds.repeatLast(
             addCommandLabel="{f.__module__}.{f.__name__}".format(f=func),
-            # the `addCommand` flag only accepts mel commands
+            # The `addCommand` flag only accepts mel code :/
             addCommand='python("{}")'.format(command),
         )
         return func(*args, **kwargs)

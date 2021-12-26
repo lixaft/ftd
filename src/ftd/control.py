@@ -45,24 +45,23 @@ def create(shape, name=None, size=1, normal="+y", color="yellow"):
     Returns:
         str: The name of the created control.
     """
-    # find the data that corresponds to the type of control
+    # Find the data that corresponds to the type of control
     data = copy.deepcopy(CONTROLS.get(shape, {}))
     if not data:
         msg = "The specified type (%s) does not correspond to any file."
         LOG.error(msg, shape)
         return None
 
-    # ensure that the data is valid and that the curve will be correctly built
+    # Ensure that the data is valid and that the curve can be correctly create
     if data.get("periodic"):
-        # ensure that the period curves have the same
-        # points at the beginning and end
+        # Ensure that the curve have the same points at the bbeginning and end
         degree = data["degree"]
         if data["point"][:degree] != data["point"][-degree:]:
             data["point"] += data["point"][:degree]
-        # builds an array for the values of the knots
+        # Generate the default values for the knots
         data.setdefault("knot", range(len(data["point"]) + degree - 1))
 
-    # apply the shape modifier
+    # Edit the points of the shape
     if not getattr(size, "__iter__", False):
         size = [size] * 3
     if len(normal) == 2:
@@ -72,7 +71,7 @@ def create(shape, name=None, size=1, normal="+y", color="yellow"):
     remap = {"x": {0: 1, 1: 0}, "z": {1: 2, 2: 1}}.get(normal, {})
     data["point"] = _edit_points(data["point"], remap, size)
 
-    # create the control node from the data
+    # Create the control in maya
     control = cmds.curve(**data)
     if not name:
         name = ftd.name.generate_unique(shape + "_ctrl")
@@ -93,7 +92,7 @@ def replace(old, new, absolute=False, mirror_axis=None):
         mirror_axis (str): If specified, mirror the shape on the given axis.
             The value can be ``"x"``, ``"y"`` or ``"z"``.
     """
-    # populate the flags with new shape data
+    # Populate the flags of the curve command with the new shape data
     flags = {}
     flags["point"] = ftd.curve.cvs_position(new, world=absolute)
     flags["degree"] = cmds.getAttr(new + ".degree")
@@ -107,12 +106,12 @@ def replace(old, new, absolute=False, mirror_axis=None):
         multiplier["xyz".index(mirror_axis)] *= -1
         flags["point"] = _edit_points(flags["point"], multiplier=multiplier)
 
-    # maya doesn't like the periodic curve as the old control...
-    # so make sure it is not periodic before replacing it
+    # Maya doesn't seem to like having a periodic curve as a old control in
+    # the command...  So just make sure it's not periodic before replacing it.
     if cmds.getAttr(old + ".form"):
         cmds.closeCurve(old, replaceOriginal=True, constructionHistory=False)
 
-    # replace the shape
+    # Replace the shape of the curve
     cmds.curve(old, replace=True, worldSpace=absolute, **flags)
 
 
@@ -138,7 +137,7 @@ def mirror(node, axis="x", rules=None):
         rules = SIDES.copy()
     rules.update({v: k for k, v in rules.items()})
 
-    # find the opposite control
+    # Find the opposite control
     tokens = node.split("_")
     if tokens[0] not in rules:
         LOG.debug("The %s control doesn't correspond to any rule.", node)
@@ -150,7 +149,7 @@ def mirror(node, axis="x", rules=None):
         LOG.debug("The %s control doesn't have an opposite.", node)
         return
 
-    # replace the shape
+    # Replace the shape of the curve
     replace(opposite, node, absolute=True, mirror_axis=axis)
 
 

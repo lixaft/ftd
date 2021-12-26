@@ -36,7 +36,7 @@ class Window(ftd.ui.window.Dockable):
     def setup(self):
         self.setMinimumWidth(137)
 
-        # widget
+        # Widget
         widgets = {
             "tab": QtWidgets.QTabWidget(),
             "tabs_menu": QtWidgets.QMenu(),
@@ -45,7 +45,7 @@ class Window(ftd.ui.window.Dockable):
             "settings": ftd.ui.widget.IconButton(),
         }
 
-        # header icons
+        # Header icons
         for key in ("tabs", "reload", "settings"):
             icon = ftd.ui.utility.find_icon(key + ".svg", qt=True)
             widgets[key].setIcon(icon)
@@ -58,7 +58,7 @@ class Window(ftd.ui.window.Dockable):
 
         self.widgets = widgets
 
-        # layout
+        # Layout
         layouts = {
             "main": QtWidgets.QVBoxLayout(self),
             "header": QtWidgets.QHBoxLayout(),
@@ -162,7 +162,7 @@ class Command(ftd.ui.widget.IconButton):
         self.setToolTip(cmd.description or cmd.name)
         self.clicked.connect(cmd.execute)
 
-        # icon
+        # Icon
         icon = ftd.ui.utility.find_icon(
             cmd.icon or "commandButton.png", qt=True
         )
@@ -172,7 +172,7 @@ class Command(ftd.ui.widget.IconButton):
         self.setMaximumSize(size)
         self.setIconSize(size * 0.9)
 
-        # text
+        # Text
         if data.get("label"):
             layout = QtWidgets.QVBoxLayout(self)
             layout.setContentsMargins(0, 0, 0, 0)
@@ -182,7 +182,7 @@ class Command(ftd.ui.widget.IconButton):
             layout.addStretch()
             layout.addWidget(label)
 
-        # menu
+        # Menu
         menu = QtWidgets.QMenu()
         self.setMenu(menu)
         for option in data.get("options", {}):

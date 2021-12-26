@@ -63,11 +63,11 @@ class Dockable(Base):
     def show(self):
         super(Dockable, self).show()
 
-        # make sur the workspace is not existing.
+        # Make sur the workspace is not existing.
         if cmds.workspaceControl(self._workspace, query=True, exists=True):
             cmds.deleteUI(self._workspace)
 
-        # create the workspace control
+        # Create the workspace control
         flags = {}
         flags["label"] = self.windowTitle()
         flags["minimumWidth"] = self.minimumWidth()
@@ -78,12 +78,12 @@ class Dockable(Base):
         cmds.workspaceControl(self._workspace)
         cmds.workspaceControl(self._workspace, edit=True, **flags)
 
-        # convert the workspace control into a qt object
+        # Convert the workspace control into a qt object
         pointer = OpenMayaUI.MQtUtil.findControl(self._workspace)
         to_py = getattr(__builtins__, "long", int)
         workspace = wrapInstance(to_py(pointer), QtWidgets.QWidget)
 
-        # add the instance to the workspace control
+        # Add the instance to the workspace control
         layout = workspace.layout()
         layout.addWidget(self)
 
