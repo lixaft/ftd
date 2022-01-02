@@ -16,7 +16,7 @@ dist/
 
 # Unit test
 .tox/
-pytest_cache/
+.pytest_cache/
 
 # Coverage reports
 .coverage

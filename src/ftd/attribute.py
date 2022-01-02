@@ -77,8 +77,9 @@ def divider(node, label=None):
         longName=plug.split(".")[-1],
         niceName=" ",
         attributeType="enum",
-        # An string the contains only an escape character must be passed in a
-        # blank label is requested, instead maya just put a 0 instead.
+        # A string that contains only a escape character must be passed instead
+        # of an empty string, because maya just put a "0" in the case of an
+        # empty string is passed.
         enumName=label or " ",
     )
     cmds.setAttr(plug, channelBox=True)
@@ -113,9 +114,10 @@ def move(node, attribute, offset):
 
     def to_last(attr):
         cmds.deleteAttr(node, attribute=attr)
-        # The `Undo:` displayed in the output windows should be removed
-        # but this seems to be done at the C level (with MGlobal.displayInfo)
-        # and therefore cannot be simply redirected with sys.stdout.
+        # The `Undo:` displayed in the output windows should be removed but
+        # this seems to be done at the C level (with MGlobal.displayInfo) and
+        # therefore cannot be simply redirected with sys.stdout. If anyone have
+        # any ideas, please let me know.
         cmds.undo()
 
     with unlock(node):
