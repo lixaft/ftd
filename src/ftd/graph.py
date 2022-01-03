@@ -8,10 +8,10 @@ from maya.api import OpenMaya
 import ftd.attribute
 
 __all__ = [
-    "find_related",
-    "matrix_to_srt",
-    "lock_node_editor",
     "delete_unused",
+    "find_related",
+    "lock_node_editor",
+    "matrix_to_srt",
 ]
 
 LOG = logging.getLogger(__name__)
@@ -26,14 +26,15 @@ def find_related(root, type, direction="up"):
     # pylint: disable=redefined-builtin
     """Find a node related to the root.
 
-    `The following are the valid value for type parameter:`
+    The following are the valid value for ``type`` parameter:
 
-    ======= ===========================
+    ======== ===========================
      Value         Description
-    ======= ===========================
-    ``up``  From destination to source.
-    ``dn``  From source to destination
-    ======= ===========================
+    ======== ===========================
+    ``up``   From destination to source.
+    ``down`` From source to destination.
+    ``dn``   Alias of ``down``.
+    ======== ===========================
 
     Examples:
         >>> from maya import cmds
@@ -45,28 +46,39 @@ def find_related(root, type, direction="up"):
         'cluster1'
 
     Arguments:
-        root (str): The name of the root node.
-        type (str): The node type to search for.
-        direction (str): The direction of the search.
+        root (str): The node name from which the search should start.
+        type (str): The type of node to be searched.
+        direction (str): Should be search in up or down stream?
 
     Returns:
-        str: The name of the found node. If no node was found return ``None``.
+        str: The name of the first node found. If no node matches the
+            parameters, returns "None".
+
+    Raises:
+        ValueError: The value of the direction is not covered by this function.
+            Please refer to the documentation to see all valid values.
     """
-    directions = {
-        "up": OpenMaya.MItDependencyGraph.kUpstream,
-        "dn": OpenMaya.MItDependencyGraph.kDownstream,
-    }
+    if direction in ("up",):
+        direction = OpenMaya.MItDependencyGraph.kUpstream
+    elif direction in ("dn", "down"):
+        direction = OpenMaya.MItDependencyGraph.kDownstream
+    else:
+        msg = "Invalid direction value: '{}'.".format(direction)
+        LOG.error(msg)
+        raise ValueError(msg)
+
     sel = OpenMaya.MSelectionList().add(root)
     mit = OpenMaya.MItDependencyGraph(
         sel.getDependNode(0),
-        direction=directions.get(direction),
+        direction=direction,
         traversal=OpenMaya.MItDependencyGraph.kDepthFirst,
         level=OpenMaya.MItDependencyGraph.kPlugLevel,
     )
     while not mit.isDone():
         current = OpenMaya.MFnDependencyNode(mit.currentNode())
-        # It would be better to use the iterator's filter flag if we can
-        # associate the typeName with its constant MFn type.
+        # It would be better to use the maya function set constant directly
+        # with the `filter` parameter. The problem is how to get this id from
+        # the passed string? If anyone has an idea xD
         # e.g. mesh -> kMesh, skinCluster -> kSkinClusterFilter, etc.
         if current.typeName == type:
             return current.name()
