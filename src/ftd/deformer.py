@@ -11,6 +11,31 @@ __all__ = ["blendshape", "clean_orig", "cluster"]
 LOG = logging.getLogger(__name__)
 
 
+def find(node, sets=False, type=None):
+    """Find all the deformers associated to the node.
+
+    Arguments:
+        node (str): The name of node on which find the deformers.
+        sets (bool): Return the deformer sets instead of the deformers.
+        type (str): Filter the type of the returned deformers.
+
+    Retruns:
+        list: An array that will contains all the deofmers of the shape.
+    """
+    result = []
+    for deformer in cmds.findDeformers(node):
+        if type is not None and cmds.nodeType(deformer) != type:
+            continue
+        if sets:
+            set_ = ftd.graph.find_related(
+                deformer, direction="dn", type="objectSet"
+            )
+            result.append(set_)
+        else:
+            result.append(deformer)
+    return result
+
+
 def blendshape(driver, driven, name="blendshape", alias=None, weight=1.0):
     """Create a new blendshape between the two specified shapes.
 
