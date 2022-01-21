@@ -53,6 +53,12 @@ def exec_string(string, language="python", decorators=None):
         language (str, optional): The language in which the object provided in
         the ``string`` parameter is written.
         decorators (list, optional): The python decorators to apply at runtime.
+
+    Returns:
+        any: Anything that the string will return.
+
+    Raises:
+        ValueError: The specified language is not supported by the function.
     """
     lines = ["def _callback():\n"]
 
@@ -62,8 +68,8 @@ def exec_string(string, language="python", decorators=None):
         line = "from maya import mel;mel.eval('{}')"
         lines.append(line.format(string.replace("\n", "")))
     else:
-        LOG.error("The language '%s' is not supported.", language)
-        return None
+        msg = "The language '{}' is not supported.".format(language)
+        raise ValueError(msg)
 
     exec((" " * 4).join(lines))  # pylint: disable=exec-used
     callback = locals()["_callback"]

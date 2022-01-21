@@ -192,3 +192,47 @@ def _edit_points(points, remap=None, multiplier=None):
         edited_points.append(edited_point)
 
     return edited_points
+
+
+def setup(name, shape="circle", parent=None, **kwargs):
+    """Create a scalable control."""
+    base = "_".join(name.split("_")[:-1])
+
+    # Create the transform nodes.
+    ctrl = create(shape, name, **kwargs)
+    offset = cmds.createNode("transform", name=base + "_offset")
+    scaled = cmds.createNode("transform", name=base + "_scaled")
+    revert = cmds.createNode("transform", name=base + "_output")
+
+    # Parent them into the outliner.
+    cmds.parent(scaled, offset)
+    cmds.parent(ctrl, scaled)
+    cmds.parent(revert, ctrl)
+    if parent is not None:
+        cmds.parent(offset, parent)
+
+    # Create the origShape.
+    shape = cmds.listRelatives(ctrl, shapes=True)[0]
+    orig = cmds.deformableShape(shape, createOriginalGeometry=True)[0]
+
+    name = base + "_transformGeometry"
+    transform = cmds.createNode("transformGeometry", name=name)
+    cmds.connectAttr(scaled + ".inverseMatrix", transform + ".transform")
+    cmds.connectAttr(orig, transform + ".inputGeometry")
+    cmds.connectAttr(
+        transform + ".outputGeometry",
+        shape + ".create",
+        force=True,
+    )
+
+    # Decompose matrix into SRT transform.
+    name = base + "_scaled_decomposeMatrix"
+    decompose = cmds.createNode("decomposeMatrix", name=name)
+    cmds.connectAttr(scaled + ".inverseMatrix", decompose + ".inputMatrix")
+    for attribute in (x + y for x in "srt" for y in "xyz"):
+        cmds.connectAttr(
+            "{}.o{}".format(decompose, attribute),
+            "{}.{}".format(revert, attribute),
+        )
+
+    return ctrl

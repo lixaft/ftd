@@ -41,10 +41,12 @@ def index(node, value=0):
         node (str): The target node.
         value (int): The index color between 0 and 31.
             The value 0 corresponds to the default color of the node.
+
+    Raises:
+        ValueError: The provided value is not in the valid range.
     """
-    if 0 > value < 31:
-        LOG.error("The value must be between 0 and 31.")
-        return
+    if not 0 <= value <= 31:
+        raise ValueError("The index color must be between 0 and 31.")
     cmds.setAttr(node + ".overrideEnabled", True)
     cmds.setAttr(node + ".overrideRGBColors", False)
     cmds.setAttr(node + ".overrideColor", value)

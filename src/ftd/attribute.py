@@ -4,8 +4,6 @@ import logging
 
 from maya import cmds
 
-import ftd.name
-
 __all__ = ["disconnect", "divider", "move", "reset", "unlock"]
 
 LOG = logging.getLogger(__name__)
@@ -15,7 +13,13 @@ SRT = tuple(x + y for x in "srt" for y in "xyz")
 
 
 def disconnect(plug):
-    """Disconnect the input connection of the given plug.
+    """Break the connection of the given plug.
+
+    ┌─────────┐      ┌─────────┐
+    │         ├──//──┤         │
+    └─────────┘      └─────────┘
+
+    Disconnect the plug from its source and return the source plug name.
 
     Examples:
         >>> from maya import cmds
@@ -27,10 +31,12 @@ def disconnect(plug):
         'A.translateX'
 
     Arguments:
-        plug (str): The plug that should be disconnected.
+        plug (str): The name of the plug to disconnect.
 
     Returns:
         str: The source of the disconnected plug.
+            If the plug passed as argument doesn't have any source connection,
+            return None.
     """
     sources = cmds.listConnections(
         plug,
@@ -45,23 +51,31 @@ def disconnect(plug):
 
 
 def divider(node, label=None):
-    """Create an attribute separator for in the channel box.
+    """Create an attribute separator in channel box.
 
-    Warning:
-        The actual name of the attribute created has nothing to do with the
-        label parameter. It will be auto-generated using the
-        :func:`~ftd.name.generate_unique` function. The real name should look
-        like ``divider##`` with a unique index instead of the hash characters.
+    │                   │
+    │ Attr1  0.0        │
+    │       █────────── │
+    │ Attr2  0.0        │
+    │                   │
 
-        Trying to access the attribute via this label will result in an error.
+    If a label is specified, the line separator will be replaced by the string
+    passed to the parameter.
 
-        See examples for details.
+    The name of the attribute will be generated automatically by the function
+    to get something unique that will not block any possibility for real
+    attributes for which names are important.
+
+    The attributes will be named `divider00`, `divider01` and so on.
 
     Examples:
         >>> from maya import cmds
         >>> _ = cmds.file(new=True, force=True)
-        >>> node = cmds.createNode("transform")
+        >>> node = cmds.createNode("transform", name="A")
         >>> divider(node, label="Others")
+        'A.divider00'
+        >>> divider(node, label="Others")
+        'A.divider01'
         >>> cmds.objExists(node + ".Others")
         False
         >>> cmds.objExists(node + ".divider00")
@@ -70,29 +84,46 @@ def divider(node, label=None):
     Arguments:
         node (str): The name of the node on which the divider will be created.
         label (str): The displayed name of the separator.
+
+    Returns:
+        str: The name of the plug separator.
     """
-    plug = ftd.name.generate_unique(node + ".divider##")
+    # Generate an unique attribute name.
+    index = 0
+    base = "{}.divider{:02}"
+
+    plug = base.format(node, index)
+    while cmds.objExists(plug):
+        index += 1
+        plug = base.format(node, index)
+
+    # Create the attribute and make it visible.
     cmds.addAttr(
         node,
-        longName=plug.split(".")[-1],
+        longName=plug.split(".", 1)[-1],
         niceName=" ",
         attributeType="enum",
-        # A string that contains only a escape character must be passed instead
-        # of an empty string, because maya just put a "0" in the case of an
-        # empty string is passed.
-        enumName=label or " ",
+        enumName=label or ("-" * 15),
     )
     cmds.setAttr(plug, channelBox=True)
+    return plug
 
 
 def move(node, attribute, offset):
     """Move the position of the attribute in the channel box.
 
-    .. admonition:: Limitations...
-        :class: error
+       │             │
+    ┌> │ Attr1 █ 0.0 │ ─┐
+    │  │ Attr2 █ 0.0 │  │
+    └─ │ Attr3 █ 0.0 │ <┘
+       │             │
 
-        You can only move attributes created by the user.
-        e.g the ``translateX`` attribute can be move.
+    Moves the attribute up or down by the number of indexes specified by the
+    offset parameter. Use a positive value to move the attribute upwards and
+    negative to move it downwards.
+
+    See default attributes (The one that is be created by maya) can be moved
+    using the function. See examples for detailes.
 
     Examples:
         >>> from maya import cmds
@@ -104,12 +135,18 @@ def move(node, attribute, offset):
         >>> move(node, "d", offset=2)
         >>> move(node, "a", offset=-1)
         >>> move(node, "translateX", offset=1)
+        Traceback (most recent call last):
+          ...
+        AttributeError
 
     Arguments:
         node (str): The node under which the attribute exists.
         attribute (str): The name of the attribute to move.
         offset (int): How much should the attribute be moved?
             This value can be positive or negative.
+
+    Raises:
+        AttributeError: The attribute is not an user attribute.
     """
 
     def to_last(attr):
@@ -126,9 +163,8 @@ def move(node, attribute, offset):
         # This function can only move the attributes created by the user,
         # so make sure the specified attributes is one of them.
         if attribute not in attributes:
-            msg = "Invalid plug '%s.%s'. Must be an user attribute."
-            LOG.error(msg, node, attribute)
-            return
+            msg = "Invalid plug '{}.{}'. Must be an user attribute."
+            raise AttributeError(msg.format(node, attribute))
 
         for _ in range(abs(offset)):
             index = attributes.index(attribute)
@@ -147,7 +183,7 @@ def reset(node, attributes=None):
 
     Tip:
         The default value of an attribute can be edited with the
-        :func:`cmds.setAttr` command and the ``defaultValue`` parameter.
+        :func:`cmds.setAttr` command and the ``defaultValue`` flag.
 
     Examples:
         >>> from maya import cmds
@@ -173,7 +209,7 @@ def reset(node, attributes=None):
         try:
             value = cmds.attributeQuery(attr, node=node, listDefault=True)[0]
             cmds.setAttr(plug, value)
-        except RuntimeError:
+        except BaseException:
             LOG.warning("Failed to reset '%s' plug.", plug)
 
 

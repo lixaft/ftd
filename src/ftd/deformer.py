@@ -6,12 +6,13 @@ from maya import cmds
 import ftd.graph
 import ftd.name
 
-__all__ = ["blendshape", "clean_orig", "cluster"]
+__all__ = ["find", "find_set", "blendshape", "clean_orig", "cluster"]
 
 LOG = logging.getLogger(__name__)
 
 
 def find(node, sets=False, type=None):
+    # pylint: disable=redefined-builtin
     """Find all the deformers associated to the node.
 
     Arguments:
@@ -34,6 +35,26 @@ def find(node, sets=False, type=None):
         else:
             result.append(deformer)
     return result
+
+
+def find_set(node):
+    """Find the set of a deformer node.
+
+    Arguments:
+        node (str): The name of the node on which the set will be retrived.
+
+    Returns:
+        str: The name of the deformer set.
+    """
+    for each in cmds.listHistory(node, future=True):
+        if "geometryFilter" not in cmds.nodeType(each, inherited=True):
+            continue
+        nodes = cmds.listConnections(
+            each + ".message",
+            type="objectSet",
+            exactType=True,
+        )
+        return (nodes or [None])[0]
 
 
 def blendshape(driver, driven, name="blendshape", alias=None, weight=1.0):
@@ -126,3 +147,11 @@ def cluster(obj, name=None):
     new = cmds.rename(new, name)
     cmds.rename(shape, new + "Shape")
     return new
+
+
+def orig_shape(shape):
+    """Get or create the original geometry."""
+    orig = cmds.deformableShape(shape, originalGeometry=True)[0]
+    if orig:
+        return orig
+    return cmds.deformableShape(shape, createOriginalGeometry=True)[0]

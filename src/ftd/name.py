@@ -1,9 +1,10 @@
 """Provide utilities related to names."""
 import logging
+import re
 
 from maya import cmds
 
-__all__ = ["find_conflicts", "generate_unique"]
+__all__ = ["find_conflicts", "generate_unique", "nice"]
 
 LOG = logging.getLogger(__name__)
 
@@ -23,11 +24,11 @@ def find_conflicts(sets=False):
         ['|a', '|a|a']
         >>> cmds.objExists("CONFLICTS_NODES")
         True
+        >>> sorted(cmds.sets("CONFLICTS_NODES", query=True))
+        ['|a', '|a|a']
         >>> _ = cmds.rename("|a|a", "b")
-        >>> find_conflicts(sets=True)
+        >>> find_conflicts()
         []
-        >>> cmds.objExists("CONFLICTS_NODES")
-        False
 
     Arguments:
         sets (bool): Create a set that will contain all nodes with a conflict.
@@ -87,7 +88,7 @@ def generate_unique(name):
         >>> generate_unique("node##_##_ext")
         Traceback (most recent call last):
           ...
-        NameError: More than one block of '#'.
+        NameError:
 
     Arguments:
         name (str): The base string from which the name will be generated.
@@ -117,3 +118,31 @@ def generate_unique(name):
         generated = _build()
 
     return generated.replace("*", "")
+
+
+def nice(name):
+    """Generate a nice name based on the given string.
+
+    Examples:
+        >>> names = [
+        ...     "simple_command",
+        ...     "simpleCommand",
+        ...     "SimpleCommand",
+        ...     "Simple command",
+        ... ]
+        >>> for name in names:
+        ...     nice(name)
+        'Simple Command'
+        'Simple Command'
+        'Simple Command'
+        'Simple Command'
+
+    Arguments:
+        name (str): The string from which generate the nice name.
+
+    Returns:
+        str: The generated nice name.
+    """
+    # The regular expression will match all upper case characters except the
+    # one that starts the string and insert a space before it.
+    return re.sub(r"(?<!^)([A-Z])", r" \1", name).replace("_", " ").title()
