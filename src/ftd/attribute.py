@@ -19,7 +19,7 @@ def disconnect(plug):
     │         ├──//──┤         │
     └─────────┘      └─────────┘
 
-    Disconnect the plug from its source and return the source plug name.
+    Disconnect the plug from its source and return the name of the source plug.
 
     Examples:
         >>> from maya import cmds
@@ -83,7 +83,7 @@ def divider(node, label=None):
 
     Arguments:
         node (str): The name of the node on which the divider will be created.
-        label (str): The displayed name of the separator.
+        label (str, optional): The displayed name of the separator.
 
     Returns:
         str: The name of the plug separator.
@@ -114,7 +114,7 @@ def move(node, attribute, offset):
 
        │             │
     ┌> │ Attr1 █ 0.0 │ ─┐
-    │  │ Attr2 █ 0.0 │  │
+    │  │ Attr2 █ 0.0 │ <┤
     └─ │ Attr3 █ 0.0 │ <┘
        │             │
 
@@ -128,7 +128,7 @@ def move(node, attribute, offset):
     Examples:
         >>> from maya import cmds
         >>> _ = cmds.file(new=True, force=True)
-        >>> node = cmds.createNode("transform")
+        >>> node = cmds.createNode("transform", name="A")
         >>> cmds.addAttr(node, longName="a", keyable=True)
         >>> cmds.addAttr(node, longName="b", keyable=True)
         >>> cmds.addAttr(node, longName="d", keyable=True)
@@ -179,11 +179,18 @@ def move(node, attribute, offset):
 
 
 def reset(node, attributes=None):
-    """Reset the attributes to thei default values.
+    """Reset the attributes to their default values.
+
+    If no attributes is specified reset all the keyable attributes of the node.
 
     Tip:
-        The default value of an attribute can be edited with the
-        :func:`cmds.setAttr` command and the ``defaultValue`` flag.
+        To edito the default value of an existing attribute, you can use the
+        `defaultValue` of the :func:`cmds.addAttr` command.
+
+        More information on the `official documentation`_.
+
+    Todo:
+        On linux it seems that sometimes the .scale failed to reset.
 
     Examples:
         >>> from maya import cmds
@@ -199,8 +206,10 @@ def reset(node, attributes=None):
 
     Arguments:
         node (str): The node containing the attributes to reset.
-        attributes (list): The attributes to reset.
-            By default, reset all keyable attributes.
+        attributes (list, optional): The attributes to reset.
+
+    .. _official documentation:
+        https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Tech-Docs/CommandsPython/addAttr.html#flagdefaultValue
     """
     for attr in attributes or cmds.listAttr(node, keyable=True):
         plug = "{}.{}".format(node, attr)
@@ -219,7 +228,7 @@ def unlock(*args):
 
     This function can be used to easily edit the locked attributes of a node.
     The attributes are first unlocked before the code is executed, and when the
-    execution is finished,  the attributes are relocked.
+    execution is finished, the attributes are relocked.
 
     Examples:
         >>> from maya import cmds

@@ -6,15 +6,25 @@ from maya import cmds
 LOG = logging.getLogger(__name__)
 
 
-def sort_children(root, recursive=False):
+def sort(root=None, recursive=False):
     """Sort the children of the provided root.
+
+    root:    ──────>   root:
+     └── C              └── A
+      ── A               ── B
+      ── B               ── C
+
+    If no root node is specified, reorder the top level nodes.
 
     Arguments:
         root (str): The node from which their children will be sorted.
-        recursive (bool): Sort recursively.
+        recursive (bool): Recurssively sort all descendants of the root.
     """
-    children = cmds.listRelatives(root, children=True) or []
-    for child in reversed(sorted(children)):
+    if root is None:
+        nodes = cmds.ls(assemblies=True)
+    else:
+        nodes = cmds.listRelatives(root, children=True) or []
+    for child in reversed(sorted(nodes)):
         cmds.reorder(child, front=True)
         if recursive:
-            sort_children(child, recursive=True)
+            sort(child, recursive=True)

@@ -28,9 +28,7 @@ def find(node, sets=False, type=None):
         if type is not None and cmds.nodeType(deformer) != type:
             continue
         if sets:
-            set_ = ftd.graph.find_related(
-                deformer, direction="dn", type="objectSet"
-            )
+            set_ = find_set(deformer)
             result.append(set_)
         else:
             result.append(deformer)
@@ -39,6 +37,16 @@ def find(node, sets=False, type=None):
 
 def find_set(node):
     """Find the set of a deformer node.
+
+    ┌───────────┐                      ┌───────────┐
+    │ transform │                   ┌──┤ objectSet │
+    └───────────┘                   │  └───────────┘
+    ┌───────────┐     ┌──────────┐  │  ┌───────────┐
+    │   shape   ├─────┤ deformer ├──┼──┤ groupPart │
+    └───────────┘     └──────────┘  │  └───────────┘
+                                    │  ┌───────────┐
+                                    └──┤  groupId  │
+                                       └───────────┘
 
     Arguments:
         node (str): The name of the node on which the set will be retrived.
