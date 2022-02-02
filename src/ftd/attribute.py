@@ -1,3 +1,4 @@
+# coding: utf-8
 """Provide utilities related to attributes."""
 import contextlib
 import logging
@@ -15,9 +16,9 @@ SRT = tuple(x + y for x in "srt" for y in "xyz")
 def disconnect(plug):
     """Break the connection of the given plug.
 
-    ┌─────────┐      ┌─────────┐
-    │         ├──//──┤         │
-    └─────────┘      └─────────┘
+    ┌──────────┐      ┌──────────┐
+    │          ■──//──■          │
+    └──────────┘      └──────────┘
 
     Disconnect the plug from its source and return the name of the source plug.
 

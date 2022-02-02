@@ -1,0 +1,6 @@
+pytest==4.6.11
+coverage
+pytest-cov
+python-coveralls
+
+-r requirements.txt

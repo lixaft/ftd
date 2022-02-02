@@ -1,3 +1,4 @@
+# coding: utf-8
 """Provide utilities related to the outliner."""
 import logging
 

@@ -1,0 +1,10 @@
+name: main-workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  maya:
+    runs-on: ubuntu-latest

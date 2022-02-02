@@ -1,3 +1,4 @@
+# coding: utf-8
 """Provide utilities related to deformers."""
 import logging
 
@@ -39,13 +40,13 @@ def find_set(node):
     """Find the set of a deformer node.
 
     ┌───────────┐                      ┌───────────┐
-    │ transform │                   ┌──┤ objectSet │
+    │ transform │                   ┌──■ objectSet │
     └───────────┘                   │  └───────────┘
     ┌───────────┐     ┌──────────┐  │  ┌───────────┐
-    │   shape   ├─────┤ deformer ├──┼──┤ groupPart │
+    │   shape   ■─────■ deformer ■──┼──■ groupPart │
     └───────────┘     └──────────┘  │  └───────────┘
                                     │  ┌───────────┐
-                                    └──┤  groupId  │
+                                    └──■  groupId  │
                                        └───────────┘
 
     Arguments:
@@ -57,12 +58,12 @@ def find_set(node):
     for each in cmds.listHistory(node, future=True):
         if "geometryFilter" not in cmds.nodeType(each, inherited=True):
             continue
-        nodes = cmds.listConnections(
+        sets = cmds.listConnections(
             each + ".message",
             type="objectSet",
             exactType=True,
         )
-        return (nodes or [None])[0]
+        return (sets or [None])[0]
 
 
 def blendshape(driver, driven, name="blendshape", alias=None, weight=1.0):

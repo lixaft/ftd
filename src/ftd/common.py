@@ -4,6 +4,8 @@ import os
 import sys
 import trace
 
+from maya import cmds
+
 LOG = logging.getLogger(__name__)
 
 __all__ = ["exec_string", "mayapy", "traceit"]
@@ -148,3 +150,25 @@ def traceit(func, path):
         finally:
             sys.stdin = stdin
             sys.stdout = stdout
+
+
+def deprecated(version):
+    pass
+
+
+def require(version):
+    """Require a version of maya to be executed."""
+    print("hello")
+    print(int(cmds.about(version=True)), version)
+
+    def _decorator(func):
+        def _wrapper(*args, **kwargs):
+
+            if int(cmds.about(version=True)) < version:
+                raise RuntimeError("Require at least maya{}.".format(version))
+
+            return func(*args, **kwargs)
+
+        return _wrapper
+
+    return _decorator

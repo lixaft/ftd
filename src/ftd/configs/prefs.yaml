@@ -36,6 +36,15 @@ commands:
       for each in cmds.ls(selection=True):
           ftd.attribute.reset(each, attributes)
 
+  # Bifrost ---
+  open_bifrost:
+    description: Open the bifrost graph.
+    decorators: []
+    icon: bifrostCompound.svg
+    core: |
+      from maya import mel
+      mel.eval("openBifrostGraphEditorFromSelection")
+
   # Constraints ---
   aim_constraint:
     description: Create a new aim constraint.
@@ -1589,6 +1598,7 @@ shelves:
     children:
       - command: startup
       - separator: true
+      - command: open_bifrost
 
 toolbar:
   ftd:
