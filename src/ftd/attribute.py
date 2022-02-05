@@ -14,7 +14,7 @@ SRT = tuple(x + y for x in "srt" for y in "xyz")
 
 
 def disconnect(plug):
-    """Break the connection of the given plug.
+    """Break the input connection of the given plug.
 
     ┌──────────┐      ┌──────────┐
     │          ■──//──■          │
@@ -54,11 +54,9 @@ def disconnect(plug):
 def divider(node, label=None):
     """Create an attribute separator in channel box.
 
-    │                   │
     │ Attr1  0.0        │
     │       █────────── │
     │ Attr2  0.0        │
-    │                   │
 
     If a label is specified, the line separator will be replaced by the string
     passed to the parameter.
@@ -113,11 +111,9 @@ def divider(node, label=None):
 def move(node, attribute, offset):
     """Move the position of the attribute in the channel box.
 
-       │             │
     ┌> │ Attr1 █ 0.0 │ ─┐
     │  │ Attr2 █ 0.0 │ <┤
     └─ │ Attr3 █ 0.0 │ <┘
-       │             │
 
     Moves the attribute up or down by the number of indexes specified by the
     offset parameter. Use a positive value to move the attribute upwards and
@@ -155,7 +151,7 @@ def move(node, attribute, offset):
         # The `Undo:` displayed in the output windows should be removed but
         # this seems to be done at the C level (with MGlobal.displayInfo) and
         # therefore cannot be simply redirected with sys.stdout. If anyone have
-        # any ideas, please let me know.
+        # any ideas, please let me know! :)
         cmds.undo()
 
     with unlock(node):
@@ -186,8 +182,7 @@ def reset(node, attributes=None):
 
     Tip:
         To edito the default value of an existing attribute, you can use the
-        `defaultValue` of the :func:`cmds.addAttr` command.
-
+        ``defaultValue`` parameter of the :func:`cmds.addAttr` command.
         More information on the `official documentation`_.
 
     Todo:
