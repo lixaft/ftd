@@ -152,14 +152,8 @@ def traceit(func, path):
             sys.stdout = stdout
 
 
-def deprecated(version):
-    pass
-
-
 def require(version):
     """Require a version of maya to be executed."""
-    print("hello")
-    print(int(cmds.about(version=True)), version)
 
     def _decorator(func):
         def _wrapper(*args, **kwargs):
