@@ -32,7 +32,6 @@ jobs:
           mayapy -m pip install --user \
             -r requirements.txt \
             -r requirements-dev.txt \
-            -r docs/requirements.txt
 
       - name: Run unittests
         run: |
@@ -41,9 +40,9 @@ jobs:
           mayapy --version
           mayapy run_tests.py
 
-      - name: Build documentation
-        run: |
-          pwd
-          ls -al
-          mayapy --version
-          mayapy -m sphinx docs/ docs/_build/ -vE
+      # - name: Build documentation
+      #   run: |
+      #     pwd
+      #     ls -al
+      #     mayapy --version
+      #     mayapy -m sphinx docs/ docs/_build/ -vE
