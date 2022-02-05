@@ -37,13 +37,13 @@ jobs:
       - name: Run unittests
         run: |
           pwd
-          ll
+          ls -al
           mayapy --version
           mayapy run_tests.py
 
       - name: Build documentation
         run: |
           pwd
-          ll
+          ls -al
           mayapy --version
           mayapy -m sphinx docs/ docs/_build/ -vE
