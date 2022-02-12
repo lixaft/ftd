@@ -10,16 +10,16 @@ from maya import cmds
 import ftd.color
 import ftd.curve
 
-__all__ = ["CONTROLS", "SIDES", "create", "replace", "mirror"]
+__all__ = ["SHAPES", "SIDES", "create", "replace", "mirror"]
 
 LOG = logging.getLogger(__name__)
 
-CONTROLS = {}
+SHAPES = {}
 """dict: The available controls."""
 
 _PATH = os.path.join(os.path.dirname(__file__), "configs", "controls.yaml")
 with open(_PATH, "r") as _stream:
-    CONTROLS.update(yaml.load(_stream, Loader=yaml.FullLoader))
+    SHAPES.update(yaml.load(_stream, Loader=yaml.FullLoader))
 del _PATH, _stream
 
 SIDES = {"L": "R", "l": "l"}
@@ -46,7 +46,7 @@ def create(shape, name=None, size=1, normal="+y", color="yellow"):
         str: The name of the created control.
     """
     # Find the data that corresponds to the type of control
-    data = copy.deepcopy(CONTROLS.get(shape, {}))
+    data = copy.deepcopy(SHAPES.get(shape, {}))
     if not data:
         msg = "The specified type (%s) does not correspond to any file."
         LOG.error(msg, shape)

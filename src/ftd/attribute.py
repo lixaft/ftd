@@ -3,22 +3,31 @@
 import contextlib
 import logging
 
-from maya import cmds
+from maya import cmds, mel
 
-__all__ = ["disconnect", "divider", "move", "reset", "unlock"]
+__all__ = [
+    "SRT",
+    "disconnect",
+    "divider",
+    "move",
+    "next_available",
+    "reset",
+    "unlock",
+]
 
 LOG = logging.getLogger(__name__)
 
 SRT = tuple(x + y for x in "srt" for y in "xyz")
-"""tuple: The translate, rotation, scale attributes for each axis."""
+"""tuple: All transformation attributes (short name)."""
 
 
 def disconnect(plug):
     """Break the input connection of the given plug.
 
-    ┌──────────┐      ┌──────────┐
-    │          ■──//──■          │
-    └──────────┘      └──────────┘
+    Schema:
+        ┌──────────┐      ┌──────────┐
+        │          ■──//──■          │
+        └──────────┘      └──────────┘
 
     Disconnect the plug from its source and return the name of the source plug.
 
@@ -35,9 +44,10 @@ def disconnect(plug):
         plug (str): The name of the plug to disconnect.
 
     Returns:
-        str: The source of the disconnected plug.
-            If the plug passed as argument doesn't have any source connection,
-            return None.
+        str: The source name of the disconnected plug.
+
+        If the plug passed as argument doesn't have any source connection,
+        return None.
     """
     sources = cmds.listConnections(
         plug,
@@ -52,20 +62,25 @@ def disconnect(plug):
 
 
 def divider(node, label=None):
-    """Create an attribute separator in channel box.
+    """Create visual separator for attribute in the channel box.
 
-    │ Attr1  0.0        │
-    │       █────────── │
-    │ Attr2  0.0        │
+    Schema:
+        │ Attr1  0.0        │
+        │       █────────── │
+        │ Attr2  0.0        │
 
-    If a label is specified, the line separator will be replaced by the string
-    passed to the parameter.
+    If a label parameter is specified, the dashes will be replaced by the value
+    given to the parameter.
 
     The name of the attribute will be generated automatically by the function
-    to get something unique that will not block any possibility for real
-    attributes for which names are important.
+    in order to get something without the user having to worry about it.
 
-    The attributes will be named `divider00`, `divider01` and so on.
+    The attribute will be named ``divider00``, ``divider01`` and so on.
+
+    Note:
+        If there are more than 99 dividers on a node (although I don't see when
+        this will happen xD) the function will continue with a padding of 3:
+        100, 101 and so on.
 
     Examples:
         >>> from maya import cmds
@@ -111,16 +126,17 @@ def divider(node, label=None):
 def move(node, attribute, offset):
     """Move the position of the attribute in the channel box.
 
-    ┌> │ Attr1 █ 0.0 │ ─┐
-    │  │ Attr2 █ 0.0 │ <┤
-    └─ │ Attr3 █ 0.0 │ <┘
+    Schema:
+        ┌> │ Attr1 █ 0.0 │ ─┐
+        │  │ Attr2 █ 0.0 │ <┤
+        └─ │ Attr3 █ 0.0 │ <┘
 
-    Moves the attribute up or down by the number of indexes specified by the
-    offset parameter. Use a positive value to move the attribute upwards and
-    negative to move it downwards.
+    Offset the position of the attribute in the channel box the number of times
+    specified by the offset parameter. The parameter accepts both positive
+    (upward) and negative (downward) values.
 
-    See default attributes (The one that is be created by maya) can be moved
-    using the function. See examples for detailes.
+    Default attributes (those created by maya) cannot be moved using this
+    function. See the examples for details.
 
     Examples:
         >>> from maya import cmds
@@ -175,6 +191,37 @@ def move(node, attribute, offset):
             attributes = cmds.listAttr(userDefined=True)
 
 
+def next_available(plug, start=0):
+    """Find the next available index of a multi attribute.
+
+    Schema:
+        ■ multi
+        ├─■ multi[0]
+        ├─■ multi[1]
+        ├─■ ...
+
+    Examples:
+        >>> from maya import cmds
+        >>> _ = cmds.file(new=True, force=True)
+        >>> src = cmds.createNode("multMatrix", name="src")
+        >>> dst = cmds.createNode("multMatrix", name="dst")
+        >>> next_available(dst + ".matrixIn")
+        'dst.matrixIn[0]'
+        >>> _ = cmds.connectAttr(src + ".matrixSum", dst + ".matrixIn[0]")
+        >>> next_available(dst + ".matrixIn")
+        'dst.matrixIn[1]'
+
+    Arguments:
+        plug (str): The name of the multi attribute plug.
+        start (int): The index from which the search should be start.
+
+    Returns:
+        str: The next available plug of the multi attribute.
+    """
+    index = mel.eval("getNextFreeMultiIndex {} {}".format(plug, start))
+    return "{}[{}]".format(plug, index)
+
+
 def reset(node, attributes=None):
     """Reset the attributes to their default values.
 
@@ -221,6 +268,14 @@ def reset(node, attributes=None):
 @contextlib.contextmanager
 def unlock(*args):
     """Temporarily unlock all attributes during the execution of the block.
+
+    Schema:
+         ┌─────┐
+         │     │
+        ┌──────┴┐
+        │   █   │
+        │   │   │
+        └───────┘
 
     This function can be used to easily edit the locked attributes of a node.
     The attributes are first unlocked before the code is executed, and when the

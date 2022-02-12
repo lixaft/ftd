@@ -1,0 +1,4 @@
+attribute
+=========
+
+.. automodule:: ftd.attribute

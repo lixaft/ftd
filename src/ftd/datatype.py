@@ -29,6 +29,7 @@ class Vector(object):
     __slots__ = ["_x", "_y", "_z"]
 
     PRECISION = 5
+    TOLERANCE = 0.001
 
     def __repr__(self):
         return "<Vector ({}, {}, {})>".format(self._x, self._y, self._z)
@@ -113,6 +114,14 @@ class Vector(object):
         _check_type(scalar, (float, int))
         return Vector(self.x / scalar, self.y / scalar, self.z / scalar)
 
+    def __xor__(self, vector):
+        _check_type(vector, Vector)
+        return Vector(
+            self.y * vector.z - self.z * vector.y,
+            self.z * vector.x - self.x * vector.z,
+            self.x * vector.y - self.y * vector.x,
+        )
+
     # comparison operator
     def __eq__(self, vector):
         _check_type(vector, Vector)
@@ -182,7 +191,7 @@ class Vector(object):
 
     # Constructor ---
     def __copy__(self):
-        return self._copy()
+        return Vector(self.x, self.z, self.z)
 
     def __init__(self, x=0, y=0, z=0):
         self._x = round(x, self.PRECISION)
@@ -229,9 +238,9 @@ class Vector(object):
         self._z = round(value, self.PRECISION)
 
     # Public methods ---
-    def magnitude(self):
+    def length(self):
         """Compute the length of the vector."""
-        return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+        return math.sqrt(self.x**2 + self.y**2 + self.z**2)
 
     def normal(self):
         """Return a normalized copy of self.
@@ -239,7 +248,7 @@ class Vector(object):
         Returns:
             Vector: A normalized copy of the vector.
         """
-        vector = self._copy()
+        vector = self.copy()
         vector.normalize()
         return vector
 
@@ -250,21 +259,8 @@ class Vector(object):
         self.y = self.y / magnetude
         self.z = self.z / magnetude
 
-    def dot(self, vector):
-        """Compute the cross product."""
-        _check_type(vector, Vector)
-        return self.x * vector.x + self.y * vector.y + self.z + vector.z
-
-    def cross(self, vector):
-        """Compute the cross product."""
-        _check_type(vector, Vector)
-        return Vector(
-            self.y * vector.z - self.z * vector.y,
-            self.z * vector.x - self.x * vector.z,
-            self.x * vector.y - self.y * vector.x,
-        )
-
-    # Private methods ---
-    def _copy(self):
-        """Return a copy of self."""
-        return Vector(self.x, self.z, self.z)
+    # Aliases ---
+    magnitude = length
+    cross = __xor__
+    dot = __mul__
+    copy = __copy__

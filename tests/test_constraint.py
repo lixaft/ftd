@@ -1,4 +1,3 @@
-# pylint: disable=unused-argument
 """test the constraint module."""
 import pytest
 
@@ -7,7 +6,7 @@ from maya import cmds
 import ftd.constraint
 
 
-def test_matrix(newscene):
+def test_matrix():
     """Test the constraint matrix function."""
     driver = cmds.createNode("transform", name="A")
 

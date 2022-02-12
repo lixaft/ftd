@@ -132,7 +132,6 @@ def matrix_to_srt(plug, transform):
     return decompose
 
 
-@ftd.common.require(2022)
 def invert(plug):
     """Inverse the given plug acording to its type.
 

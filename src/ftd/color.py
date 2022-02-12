@@ -6,13 +6,14 @@ import yaml
 
 from maya import cmds
 
-__all__ = ["index", "name", "rgb"]
+__all__ = ["COLORS", "index", "name", "rgb"]
 
 LOG = logging.getLogger(__name__)
 
 COLORS = {}
 """dict: The available colors."""
 
+# Populate the colors data.
 _PATH = os.path.join(os.path.dirname(__file__), "configs", "colors.yaml")
 with open(_PATH, "r") as _stream:
     COLORS.update(yaml.load(_stream, Loader=yaml.FullLoader))

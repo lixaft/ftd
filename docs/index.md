@@ -117,7 +117,7 @@ Do not hesitate to <a href="mailto:fabien.taxil@gmail.com">contact me</a> if you
 
 ## Documentation
 
-It's possible to localy build this documentation using [sphinx](https://):
+It's possible to localy build this documentation using [sphinx](https://www.sphinx-doc.org/en/master/index.html):
 
 ```bash
 sphinx-build docs/ docs/_build/
@@ -142,5 +142,5 @@ _Require Maya 2020._
 ---
 hidden:
 ---
-pages/changelog
+pages/ftd
 ```

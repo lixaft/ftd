@@ -4,7 +4,7 @@ import pytest
 from maya import cmds
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def newscene():
     """Create a new scene."""
     cmds.file(new=True, force=True)

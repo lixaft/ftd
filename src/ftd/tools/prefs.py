@@ -135,7 +135,7 @@ class Command(object):
     _registered = {}
     _decorators = {}
 
-    def __init__(self, name, core, **kwargs):
+    def __init__(self, name, **kwargs):
         self._name = name
         self._description = kwargs.get("description")
         self._icon = kwargs.get("icon")
@@ -146,12 +146,13 @@ class Command(object):
         self._short = kwargs.get("short", "".join(x[0] for x in split))
 
         self._used_decorators = kwargs.get("decorators", [])
-        self._core = core
+        self._core = kwargs.get("code", "pass\n")
 
         self._label = kwargs.get("label")
         self._registered[name] = self
 
         self.tags = kwargs.get("tags", [])
+        self.context = kwargs.get("context", "")
 
     # Read properties ---
     @property
@@ -369,7 +370,7 @@ def create_marking_menu(name, key, items, parent="MainPane"):
         allowOptionBoxes=True,
         parent=parent,
         postMenuCommand=main_build,
-        **flags
+        **flags,
     )
 
 
@@ -402,7 +403,7 @@ def create_shelf(name, items, parent="ShelfLayout"):
                 parent=name,
                 image=icon,
                 annotation=cmd.description,
-                **flags
+                **flags,
             )
 
     array = cmds.shelfTabLayout(parent, query=True, childArray=True)

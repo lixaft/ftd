@@ -4,8 +4,6 @@ import os
 import sys
 import trace
 
-from maya import cmds
-
 LOG = logging.getLogger(__name__)
 
 __all__ = ["exec_string", "mayapy", "traceit"]
@@ -107,16 +105,13 @@ def mayapy(version):
     Returns:
         str: The path to the executable.
     """
-    mayapath = os.getenv("MAYA_LOCATION")
-    if not mayapath:
-        if sys.platform == "win32":
-            mayapath = "C:/Program Files/Autodesk/Maya{}"
-        elif sys.platform == "darwin":
-            mayapath = "/Applications/Autodesk/maya{}/Maya.app/Contents"
-        else:
-            mayapath = "/usr/autodesk/maya{}"
-
-    path = mayapath.format(version) + "/bin/mayapy"
+    paths = {
+        "win32": "C:/Program Files/Autodesk/Maya{}",
+        "darwin": "/Applications/Autodesk/maya{}/Maya.app/Contents",
+        "linux": "/usr/autodesk/maya{}",
+    }
+    base = os.getenv("MAYA_LOCATION") or paths.get(sys.platform, "")
+    path = base.format(version) + "/bin/mayapy"
     if sys.platform == "win32":
         path += ".exe"
 
@@ -150,19 +145,3 @@ def traceit(func, path):
         finally:
             sys.stdin = stdin
             sys.stdout = stdout
-
-
-def require(version):
-    """Require a version of maya to be executed."""
-
-    def _decorator(func):
-        def _wrapper(*args, **kwargs):
-
-            if int(cmds.about(version=True)) < version:
-                raise RuntimeError("Require at least maya{}.".format(version))
-
-            return func(*args, **kwargs)
-
-        return _wrapper
-
-    return _decorator

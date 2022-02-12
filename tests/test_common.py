@@ -1,4 +1,3 @@
-# pylint: disable=unused-argument
 """Test the common module."""
 import pytest
 
@@ -7,7 +6,7 @@ from maya import cmds
 import ftd.common
 
 
-def test_exec_string(newscene):
+def test_exec_string():
     """Test executin string in python or mel."""
 
     ftd.common.exec_string('createNode "transform" -name "A"', language="mel")

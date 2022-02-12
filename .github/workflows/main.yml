@@ -38,7 +38,7 @@ jobs:
           pwd
           ls -al
           mayapy --version
-          mayapy run_tests.py
+          mayapy scripts/run_tests.py
 
       # - name: Build documentation
       #   run: |

@@ -3,6 +3,8 @@ import json
 import logging
 import re
 
+import yaml
+
 LOG = logging.getLogger(__name__)
 
 __all__ = ["json_dump"]
@@ -45,3 +47,21 @@ def json_dump(path, obj, clean=False, **kwargs):
 
     with open(path, "w") as stream:
         stream.write(obj_string)
+
+
+class YamlDumper(yaml.Dumper):
+    """Custom YAML dumper."""
+
+    def __init__(self, *args, **kwargs):
+        super(YamlDumper, self).__init__(*args, **kwargs)
+        self.add_representer(str, self.string_representer)
+
+    @staticmethod
+    def string_representer(dumper, data):
+        """Represent a string using a different scalar style."""
+        kwargs = {}
+        if "\n" in data:
+            kwargs["style"] = "|"
+        elif not data:
+            kwargs["style"] = '"'
+        return dumper.represent_scalar("tag:yaml.org,2002:str", data, **kwargs)

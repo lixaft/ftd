@@ -1,4 +1,3 @@
-# pylint: disable=unused-argument
 """Test the color module."""
 import pytest
 
@@ -7,7 +6,7 @@ from maya import cmds
 import ftd.color
 
 
-def test_index(newscene):
+def test_set_color_using_index():
     """Test the color index function."""
     node = cmds.createNode("transform", name="A")
     ftd.color.index(node, 0)
