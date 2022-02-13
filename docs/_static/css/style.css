@@ -22,30 +22,6 @@ p.rubric {
   font-weight: 500;
 }
 
-/* Sidebar */
-.sidebar-drawer {
-  background: var(--color-background-primary);
-  border: none;
-}
-.sidebar-search {
-  background: var(--color-background-primary);
-}
-.sidebar-tree .toctree-l1 > .reference {
-  color: var(--color-toc-item-text);
-  background: var(--color-background-primary);
-}
-.sidebar-tree .current > .reference,
-.sidebar-tree .current > .reference:hover,
-.sidebar-tree .toctree-l1 > .reference:hover {
-  color: var(--color-link);
-  background: var(--color-background-primary);
-}
-
-.sidebar-tree .toctree-l1 > label .icon,
-.sidebar-tree li.has-children > .reference {
-  color: var(--color-toc-item-text);
-}
-
 /* Image */
 img {
   border-radius: var(--border-radius);

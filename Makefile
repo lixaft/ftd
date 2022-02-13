@@ -6,7 +6,7 @@ all:
 # Build the sphinx documentation
 .PHONY: docs
 docs:
-	@sphinx-build docs/ docs/_build/ -vE
+	@python scripts/build_docs.py
 
 # Run the tests in maya
 .PHONY: tests

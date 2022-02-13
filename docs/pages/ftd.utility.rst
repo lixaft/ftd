@@ -1,0 +1,4 @@
+utility
+=======
+
+.. automodule:: ftd.utility

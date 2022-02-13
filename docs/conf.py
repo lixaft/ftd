@@ -1,20 +1,21 @@
-# pylint: disable=invalid-name, wrong-import-position
+# pylint: disable=invalid-name
 """Configuration file for the Sphinx documentation builder.
 
 This file does only contain a selection of the most common options. For a
 full list see the documentation:
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 """
+import importlib
 import os
 import sys
 
 # Path setup
-rootpath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-docspath = os.path.join(rootpath, "docs")
-srcpath = os.path.join(rootpath, "src")
-sys.path.append(srcpath)
+path_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+path_docs = os.path.join(path_root, "docs")
+path_src = os.path.join(path_root, "src")
+sys.path.append(path_src)
 
-import ftd
+ftd = importlib.import_module("ftd")
 
 # Project information
 project = "ftd"
@@ -60,9 +61,12 @@ html_static_path = ["_static"]
 # html_favicon = ""
 html_show_sourcelink = True
 htmlhelp_basename = "ftddoc"
-napoleon_use_admonition_for_examples = False
+html_css_files = [
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+]
 
 # Extension configuration
+napoleon_use_admonition_for_examples = True
 autodoc_mock_imports = ["maya"]
 autodoc_default_options = {
     "show-inheritance": True,
@@ -71,13 +75,12 @@ autodoc_default_options = {
 }
 autodoc_member_order = "alphabetical"
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
-
 autosummary_generate = True
 
 
 def setup(app):
     """Setup sphinx application."""
-    # app.add_css_file("css/style.css")
+    app.add_css_file("css/style.css")
     app.connect("builder-inited", _generate_stub_pages)
     app.connect("autodoc-process-docstring", _process_docstring)
 
@@ -94,8 +97,18 @@ def _process_docstring(app, what, name, obj, options, lines):
     new_lines = []
 
     for line in lines:
+
         if line == "Schema:":
-            new_lines.extend([".. code-block::", ""])
+            line = [".. code-block::", ""]
+
+        elif line == ".. admonition:: Examples":
+            line = [
+                ".. dropdown:: :fa:`code` Examples",
+                "   :animate: fade-in",
+            ]
+
+        if isinstance(line, list):
+            new_lines.extend(line)
         else:
             new_lines.append(line)
 
