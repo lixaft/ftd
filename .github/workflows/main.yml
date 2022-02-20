@@ -1,4 +1,4 @@
-name: main-workflow
+name: CI
 
 on:
   push:
@@ -25,24 +25,44 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Check environment
+        run: |
+          pwd
+          ls -al
+          mayapy --version
+
       - name: Setup environment
         run: |
           wget https://bootstrap.pypa.io/pip/${{ matrix.pip }}
           mayapy get-pip.py --user
           mayapy -m pip install --user \
             -r requirements.txt \
-            -r requirements-dev.txt \
+            -r requirements-dev.txt
 
       - name: Run unittests
+        run: mayapy scripts/run_tests.py -v
+
+  documentation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+
+      - name: Check environment
         run: |
           pwd
           ls -al
-          mayapy --version
-          mayapy scripts/run_tests.py
+          python --version
 
-      # - name: Build documentation
-      #   run: |
-      #     pwd
-      #     ls -al
-      #     mayapy --version
-      #     mayapy -m sphinx docs/ docs/_build/ -vE
+      - name: Setup environment
+        run: |
+          python -m pip install \
+          -r requirements.txt \
+          -r docs/requirements.txt
+
+      - name: Build documentation
+        run: python scripts/build_docs.py -v

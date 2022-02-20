@@ -3,3 +3,6 @@ furo
 sphinx-copybutton
 sphinx-inline-tabs
 myst-parser
+autodocsumm
+sphinx-panels
+PySide2
