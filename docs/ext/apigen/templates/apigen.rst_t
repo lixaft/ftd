@@ -1,0 +1,91 @@
+{#- Generate summary.
+
+Arguments:
+    title: The nice name of the section.
+    members: An iterable that contains all the members to render.
+-#}
+{% macro summary(title, members) -%}
+{% if members %}
+
+.. rubric:: {{ title }}
+.. autosummary::
+    {% for member in members %}
+    {{ member.name }}
+    {%- endfor %}
+{%- endif %}
+{%- endmacro %}
+
+{#- Generate documentation.
+
+Arguments:
+    title: The nice name of the section.
+    directive: The directive to use for generate the documentation.
+    members: An iterable that contains all the members to render.
+    header: The header style to use.
+-#}
+{% macro generate(title, directive, members, header="~") -%}
+{% if members %}
+
+{{ title }}
+{{ header * title | length }}
+{% for member in members %}
+.. {{ directive }}:: {{ member.path }}
+{%- endfor %}
+{%- endif %}
+{%- endmacro %}
+
+
+{#- Start document. -#}
+
+{{- node.name }}
+{{ "=" * node.name | length }}
+
+|
+
+.. automodule:: {{ node.path }}
+
+|
+
+{%- if node.members %}
+
+Synopsis
+--------
+{{- summary("Packages", node.packages) }}
+{{- summary("Modules", node.modules) }}
+{{- summary("Constants", node.constants) }}
+{{- summary("Classes", node.classes) }}
+{{- summary("Functions", node.functions) }}
+
+|
+
+{%- endif %}
+
+{%- if node.constants or node.functions or node.classes %}
+
+Detailed Description
+--------------------
+
+|
+{{- generate("Constants", "autodata", node.constants) }}
+{{- generate("Classes", "autoclass", node.classes) }}
+{{- generate("Functions", "autofunction", node.functions) }}
+
+{%- endif %}
+
+{%- if node.type == "package" %}
+
+.. toctree::
+    :hidden:
+
+    {%- if node.packages %}
+    {% for package in node.packages %}
+    {{ package.path }}
+    {%- endfor %}
+    {%- endif %}
+
+    {%- if node.modules %}
+    {% for module in node.modules %}
+    {{ module.path }}
+    {%- endfor %}
+    {%- endif %}
+{% endif %}

@@ -27,8 +27,8 @@ htmlcov/
 .mypy_cache/
 
 # Sphinx documentation
-docs/_build/
-docs/_apidoc/
+docs/build/
+docs/source/apidoc/
 
 # Others
 .temp/

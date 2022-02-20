@@ -1,4 +1,0 @@
-color
-=====
-
-.. automodule:: ftd.color

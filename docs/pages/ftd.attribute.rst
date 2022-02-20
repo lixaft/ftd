@@ -1,4 +1,0 @@
-attribute
-=========
-
-.. automodule:: ftd.attribute

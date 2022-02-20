@@ -4,39 +4,7 @@
 /* Variables */
 :root {
   --box-shadow: 0 0.2rem 0.5rem rgb(0 0 0 / 5%), 0 0 0.0625rem rgb(0 0 0 / 10%);
-  --border-radius: 5px;
-}
-
-/* Header text */
-h2 {
-  font-family: "Titillium Web", sans-serif;
-  font-weight: 900;
-  font-size: 25px;
-  text-transform: uppercase;
-}
-h3 {
-  font-family: "Titillium Web", sans-serif;
-  font-weight: 700;
-}
-p.rubric {
-  font-weight: 500;
-}
-
-/* Image */
-img {
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  transition: 0.5s ease;
-  overflow: hidden;
-}
-
-img[alt="changelog"] {
-  width: 24px;
-  box-shadow: None;
-}
-
-.sig {
-  margin-top: 30px;
+  --border-radius: 0.2rem;
 }
 
 /* Admonition */
@@ -102,4 +70,82 @@ img[alt="changelog"] {
   background-color: var(--primary-color);
   -webkit-mask-image: var(--icon);
   mask-image: var(--icon);
+}
+
+/* Cards
+The card seems to be applied after this file, so we need to !import everything.
+*/
+details.dropdown .summary-up,
+details.dropdown .summary-down {
+  top: 0.5em !important;
+}
+.card-header::before {
+  --icon: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.8939 3.75839C21.4848 5.12062 20.6843 7.68865 19.7343 10.3604C19.9806 10.4351 20.2051 10.501 20.3897 10.5581C20.5526 10.6065 20.6845 10.7251 20.7462 10.879C20.8122 11.0372 20.8034 11.213 20.7243 11.3624C19.9455 12.8476 17.8169 16.7339 15.7104 18.8994C15.6752 18.939 15.6399 18.9873 15.6048 19.0225C12.9307 21.6988 8.58889 21.6988 5.91131 19.0269C3.23269 16.3506 3.23269 12.0136 5.91131 9.33482C5.9465 9.29966 5.99488 9.26452 6.03446 9.22936C8.19644 7.12548 12.0809 4.99757 13.5446 4.21961C13.6941 4.14052 13.87 4.13173 14.0241 4.19764C14.1825 4.26356 14.3012 4.39542 14.3496 4.55375C14.4068 4.73392 14.4727 4.9626 14.5475 5.20868C17.2173 4.25951 19.7866 3.45975 21.1482 3.05547C21.3505 2.99395 21.5662 3.04667 21.7157 3.19609C21.8974 3.34089 21.9186 3.56047 21.8939 3.75839ZM15.1279 14.2478C15.1279 11.7648 13.109 9.74799 10.6242 9.74799C8.13486 9.74799 6.12053 11.7651 6.12053 14.2478C6.12053 16.7353 8.13486 18.7476 10.6242 18.7476C13.1399 18.7792 15.1279 16.7683 15.1279 14.2478ZM10.6242 13.1228C10.6242 13.7426 10.1186 14.2478 9.49829 14.2478C8.87375 14.2478 8.37236 13.7422 8.37236 13.1228C8.37236 12.5034 8.87375 11.9979 9.49829 11.9979C9.79736 11.9979 10.0834 12.1165 10.2945 12.3274C10.5056 12.5384 10.6242 12.8556 10.6242 13.1228ZM11.7783 15.9352C11.7783 16.2472 11.5241 16.4977 11.2164 16.4977C10.9041 16.4977 10.6534 16.2471 10.6534 15.9352C10.6534 15.6231 10.9032 15.3727 11.2157 15.3727C11.5249 15.3727 11.7783 15.6539 11.7783 15.9352Z" fill="black"/></svg>');
+  position: relative;
+  content: "";
+  height: 1rem;
+  left: 0.5rem;
+  position: absolute;
+  width: 1rem;
+  background-color: gray;
+  -webkit-mask-image: var(--icon);
+  mask-image: var(--icon);
+}
+.card {
+  background: var(--color-admonition-background) !important;
+  box-shadow: var(--box-shadow) !important;
+  border: none !important;
+  border-radius: var(--border-radius) !important;
+  border-left: 0.2rem solid var(--color-admonition-title--admonition-todo) !important;
+  font-size: var(--admonition-font-size) !important;
+  padding: 0px !important;
+}
+.card-header {
+  position: relative;
+  background-color: var(
+    --color-admonition-title-background--admonition-todo
+  ) !important;
+  font-size: var(--admonition-title-font-size) !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  border: none !important;
+  border-radius: 0px var(--border-radius) var(--border-radius) 0px !important;
+  padding: 0.5rem 0.5rem 0.5rem 2rem !important;
+}
+.card-body {
+  padding: 0.5rem !important;
+}
+
+div[class^="summary-content"] > div[class*=" highlight-"] {
+  margin: 0px;
+}
+
+/* Header text */
+h2 {
+  font-family: "Titillium Web", sans-serif;
+  font-weight: 900;
+  font-size: 25px;
+  text-transform: uppercase;
+}
+h3 {
+  font-family: "Titillium Web", sans-serif;
+  font-weight: 700;
+}
+p.rubric {
+  font-weight: 500;
+}
+
+/* Image */
+img {
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: 0.5s ease;
+  overflow: hidden;
+}
+img[alt="changelog"] {
+  width: 24px;
+  box-shadow: None;
+}
+.sig {
+  margin-top: 30px;
 }

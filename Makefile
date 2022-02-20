@@ -25,12 +25,10 @@ clean:
 	@rm -rf \
 		build/ \
 		dist/ \
-		cover/ \
 		htmlcov/ \
 		.temp/ \
-		.tox/ \
 		.vscode/ \
-		.mypy_cache/ \
 		.pytest_cache/ \
-		docs/_build/ \
+		docs/build/ \
+		docs/source/apigen \
 		src/ftd.egg-info

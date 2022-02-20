@@ -141,6 +141,23 @@ _Require Maya 2020._
 ```{toctree}
 ---
 hidden:
+caption: API Reference
 ---
-pages/ftd
+ftd/ftd
+```
+
+```{toctree}
+---
+hidden:
+caption: Sphinx Extensions
+---
+pages/apigen
+```
+
+```{toctree}
+---
+hidden:
+caption: Project Links
+---
+GitHub <https://github.com/lixaft/ftd>
 ```

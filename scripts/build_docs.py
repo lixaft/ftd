@@ -10,7 +10,7 @@ def main():
 
     os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-    argv = ["docs/", "docs/_build/", "-E"]
+    argv = ["docs/source", "docs/build", "-E"]
     argv.extend(sys.argv[1:])
     status = sphinx.cmd.build.main(argv)
 
