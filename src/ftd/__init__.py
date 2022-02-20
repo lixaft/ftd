@@ -4,6 +4,7 @@ import logging.config
 
 import ftd.version
 
+__all__ = ["__version__"]
 __version__ = ftd.version.STR
 
 # logging setup

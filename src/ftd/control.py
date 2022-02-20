@@ -1,4 +1,4 @@
-"""Provide utilities related to controls.."""
+"""Provide utilities related to controls."""
 import copy
 import logging
 import os
@@ -15,7 +15,10 @@ __all__ = ["SHAPES", "SIDES", "create", "replace", "mirror"]
 LOG = logging.getLogger(__name__)
 
 SHAPES = {}
-"""dict: The available controls."""
+"""dict: The available controls.
+
+:meta hide-value:
+"""
 
 _PATH = os.path.join(os.path.dirname(__file__), "configs", "controls.yaml")
 with open(_PATH, "r") as _stream:

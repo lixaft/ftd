@@ -1,3 +1,4 @@
+# pylint: disable=protected-access
 """Custom sphinx extension to generate API documentation."""
 import importlib
 import inspect
@@ -32,6 +33,7 @@ class Node(object):
     """Generic node object."""
 
     type = ""
+    directive = ""
 
     def __init__(self, name, parent, app):
         prefix = (parent.path + ".") if parent is not None else ""
@@ -56,18 +58,21 @@ class Variable(Node):
     """Variable node object."""
 
     type = "variable"
+    directive = "autodata"
 
 
 class Function(Variable):
     """Function node object."""
 
     type = "function"
+    directive = "autofunc"
 
 
 class Class(Variable):
     """Class node object."""
 
     type = "class"
+    directive = "autoclass"
 
     def __init__(self, *args, **kwargs):
         super(Class, self).__init__(*args, **kwargs)
@@ -83,7 +88,7 @@ class Class(Variable):
         # for name in dir(self._obj):
         #     print(name)
 
-        for name, obj in inspect.getmembers(
+        for name, _ in inspect.getmembers(
             self._obj, predicate=inspect.isfunction
         ):
             if name.startswith("_"):
@@ -92,16 +97,41 @@ class Class(Variable):
             self.methods.append(node)
 
 
+class Attribute(Variable):
+    """Attribute node object."""
+
+    type = "attribute"
+    directive = "autoattribute"
+
+
 class Method(Function):
     """Method node object."""
 
     type = "method"
+    directive = "automethod"
+
+
+class Property(Method):
+    """Property node object."""
+
+    type = "property"
+    directive = "autoproperty"
+
+
+class Exception_(Class):
+    # pylint: disable=invalid-name
+    """Exception node object."""
+
+    type = "exception"
+    direction = "autoexception"
 
 
 class Module(Node):
     """Package node object."""
 
     type = "module"
+    directive = "automodule"
+
     _template_file = __name__ + ".rst_t"
 
     def __init__(self, *args, **kwargs):
@@ -142,7 +172,7 @@ class Module(Node):
                 node = Variable(name, parent=self, app=self._app)
                 self.constants.append(node)
 
-    def generate(self, out_dir):
+    def _generate(self, out_dir):
         """Generate the rst files."""
         with open(os.path.join(out_dir, self.path + ".rst"), "w") as stream:
             stream.write(self._template.render(node=self))
@@ -169,10 +199,10 @@ class Package(Module):
                 node = Module(name, parent=self, app=self._app)
                 self.modules.append(node)
 
-    def generate(self, out_dir):
-        super(Package, self).generate(out_dir)
+    def _generate(self, out_dir):
+        super(Package, self)._generate(out_dir)
         for each in self.modules + self.packages:
-            each.generate(out_dir)
+            each._generate(out_dir)
 
 
 def builder_inited(app):
@@ -196,7 +226,7 @@ def builder_inited(app):
         }.update(config or {})
 
         node = Package(module, app=app)
-        node.generate(out_dir)
+        node._generate(out_dir)
 
 
 def setup(app):

@@ -11,7 +11,10 @@ __all__ = ["COLORS", "index", "name", "rgb"]
 LOG = logging.getLogger(__name__)
 
 COLORS = {}
-"""dict: The available colors."""
+"""dict: The available colors.
+
+:meta hide-value:
+"""
 
 # Populate the colors data.
 _PATH = os.path.join(os.path.dirname(__file__), "configs", "colors.yaml")

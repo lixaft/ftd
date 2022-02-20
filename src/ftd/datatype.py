@@ -17,9 +17,6 @@ class Vector(object):
     # pylint: disable=invalid-name
     """Three dimensional vector.
 
-    Attributes:
-        PRECISION (int): Number up to which the values are rounded.
-
     Arguments:
         x (float): The x component of the vector.
         y (float): The y component of the vector.

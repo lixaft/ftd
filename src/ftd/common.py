@@ -1,12 +1,11 @@
-"""Provides utilities for tasks unrelated to maya."""
+"""Provide utilities for tasks unrelated to maya."""
 import logging
-import os
 import sys
 import trace
 
 LOG = logging.getLogger(__name__)
 
-__all__ = ["exec_string", "mayapy", "traceit"]
+__all__ = ["exec_string", "traceit"]
 
 
 def exec_string(string, language="python", decorators=None):
@@ -81,48 +80,6 @@ def exec_string(string, language="python", decorators=None):
             callback = decorator(callback)
 
     return callback()
-
-
-def mayapy(version):
-    """Find the mayapy executable path.
-
-    Note:
-        Obviously, the specified version of maya must be installed on the disk.
-
-    Usually the returned value should be:
-
-    ======= =================================================================
-    System                         File path
-    ======= =================================================================
-    MacOs   ``/Applications/Autodesk/maya<...>/Maya.app/Contents/bin/mayapy``
-    Windows ``C:/Program Files/Autodesk/Maya<...>/bin/mayapy.exe``
-    Linux   ``/usr/autodesk/maya<...>/bin/mayapy``
-    ======= =================================================================
-
-    Arguments:
-        version (int): The version of maya.
-
-    Returns:
-        str: The path to the executable.
-    """
-    paths = {
-        "win32": "C:/Program Files/Autodesk/Maya{}",
-        "darwin": "/Applications/Autodesk/maya{}/Maya.app/Contents",
-        "linux": "/usr/autodesk/maya{}",
-    }
-    base = os.getenv("MAYA_LOCATION") or paths.get(sys.platform, "")
-    path = base.format(version) + "/bin/mayapy"
-    if sys.platform == "win32":
-        path += ".exe"
-
-    if not os.path.exists(path):
-        msg = (
-            "Unable to find a mayapy executable corresponding to the "
-            "specified version. The application is installed ?"
-        )
-        LOG.error(msg)
-        return None
-    return path
 
 
 def traceit(func, path):

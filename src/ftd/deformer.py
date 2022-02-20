@@ -39,15 +39,16 @@ def find(node, sets=False, type=None):
 def find_set(node):
     """Find the set of a deformer node.
 
-    ┌───────────┐                      ┌───────────┐
-    │ transform │                   ┌──■ objectSet │
-    └───────────┘                   │  └───────────┘
-    ┌───────────┐     ┌──────────┐  │  ┌───────────┐
-    │   shape   ■─────■ deformer ■──┼──■ groupPart │
-    └───────────┘     └──────────┘  │  └───────────┘
-                                    │  ┌───────────┐
-                                    └──■  groupId  │
-                                       └───────────┘
+    Schema:
+        ┌───────────┐                      ┌───────────┐
+        │ transform │                   ┌──■ objectSet │
+        └───────────┘                   │  └───────────┘
+        ┌───────────┐     ┌──────────┐  │  ┌───────────┐
+        │   shape   ■─────■ deformer ■──┼──■ groupPart │
+        └───────────┘     └──────────┘  │  └───────────┘
+                                        │  ┌───────────┐
+                                        └──■  groupId  │
+                                           └───────────┘
 
     Arguments:
         node (str): The name of the node on which the set will be retrived.
