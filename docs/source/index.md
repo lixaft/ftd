@@ -143,7 +143,7 @@ _Require Maya 2020._
 hidden:
 caption: API Reference
 ---
-ftd/ftd
+apigen/ftd/ftd
 ```
 
 ```{toctree}

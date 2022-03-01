@@ -1,47 +1,67 @@
 # pylint: disable=protected-access
-"""Custom sphinx extension to generate API documentation."""
+"""Sphinx extension to generate API documentation."""
+import copy
 import importlib
 import inspect
 import os
 import pkgutil
 import shutil
-import sys
 import types
 
 import jinja2.sandbox
 import sphinx
 import sphinx.jinja2glue
 
-__all__ = ["main"]
 __version__ = "0.1.0"
 
-TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
+TEMPLATE_FILE = os.path.join(
+    os.path.dirname(__file__), "templates", __name__ + ".rst_t"
+)
 
 CONFIG_NAME = __name__ + "_config"
-CONFIG_DEFAULT = {
-    "filter": r"[a-zA-Z0-9]+",
-}
+DEFAULT_CONFIG = {"runtime": {"app": None}}
 
 
 def import_module(module, app):
-    """Import a python module."""
+    """Handle the import of a module by mocking them with autodoc config.
+
+    Query the value of ``autodoc_mock_imports`` inside the ``conf.py`` module.
+
+    Arguments:
+        module (str): The name of the module to import.
+        app (Sphinx): The current sphinx application.
+
+    Returns:
+        module: The python module.
+    """
     with sphinx.ext.autodoc.mock(app.config.autodoc_mock_imports or []):
         return importlib.import_module(module)
 
 
 class Node(object):
-    """Generic node object."""
+    """Generic node object.
+
+    Arguments:
+        name (str): The name of the node object.
+        parent (Node): The parent node.
+        config (dict): The configuration dictionary.
+    """
 
     type = ""
     directive = ""
 
-    def __init__(self, name, parent, app):
+    def __repr__(self):
+        return "<Node::{} '{}'>".format(self.type, self.name)
+
+    def __init__(self, name, parent, config):
         prefix = (parent.path + ".") if parent is not None else ""
 
-        self._app = app
+        self._config = config
+        self._kwargs = {"name": name, "parent": self, "config": config}
 
         self.name = name
         self.path = prefix + self.name
+
         self.parent = parent
         self.members = []
 
@@ -50,7 +70,7 @@ class Node(object):
 
     @property
     def is_empty(self):
-        """bool: True if there is not child members."""
+        """bool: Does the node have any children?"""
         return bool(self.members)
 
 
@@ -65,7 +85,7 @@ class Function(Variable):
     """Function node object."""
 
     type = "function"
-    directive = "autofunc"
+    directive = "autofunction"
 
 
 class Class(Variable):
@@ -78,23 +98,42 @@ class Class(Variable):
         super(Class, self).__init__(*args, **kwargs)
 
         self.attributes = []
+        self.properties = []
         self.methods = []
 
-        self.read_only_properties = []
-        self.read_write_properties = []
+        cls = getattr(self.parent._module, self.name)
+        self._obj = cls
 
-        self._obj = getattr(self.parent._obj, self.name)
-        # print(self._obj.__class__.__name__.center(50, "-"))
-        # for name in dir(self._obj):
-        #     print(name)
-
-        for name, _ in inspect.getmembers(
-            self._obj, predicate=inspect.isfunction
-        ):
+        # Register children.
+        for name, obj in cls.__dict__.items():
             if name.startswith("_"):
                 continue
-            node = Method(name, parent=self, app=self._app)
-            self.methods.append(node)
+
+            if isinstance(obj, property):
+                self.properties.append(Property(**self._kwargs))
+
+            elif isinstance(obj, types.MethodType):
+                self.methods.append(Method(**self._kwargs))
+
+            # obj = getattr(cls, name)
+
+            # qualname = getattr(obj, "__qualname__", None)
+            # if qualname and self.name not in qualname:
+            #     continue
+            # print(qualname, name, obj)
+
+            # print(name)
+
+        # children = [
+        #     {"predicate": inspect.ismethod, "container": self.methods},
+        #     {"predicate": inspect.is, "container": self.methods},
+        # ]
+
+        # for name, _ in inspect.getmembers(cls, predicate=inspect.ismethod):
+        #     if name.startswith("_"):
+        #         continue
+        #     node = Method(name, parent=self, config=self._config)
+        #     self.methods.append(node)
 
 
 class Attribute(Variable):
@@ -132,57 +171,58 @@ class Module(Node):
     type = "module"
     directive = "automodule"
 
-    _template_file = __name__ + ".rst_t"
-
     def __init__(self, *args, **kwargs):
+        # Fill the `parent` parameter.
         if len(args) < 2:
             kwargs.setdefault("parent", None)
+
         super(Module, self).__init__(*args, **kwargs)
 
+        # Import the module as object.
+        module = import_module(self.path, self._config["runtime"]["app"])
+        self._module = module
+
+        # Children containers.
         self.constants = []
         self.functions = []
         self.classes = []
 
-        self._obj = import_module(self.path, self._app)
-
-        # Initialize jinja template.
-        loader = sphinx.jinja2glue.BuiltinTemplateLoader()
-        loader.init(self._app.builder, dirs=[TEMPLATE_DIR])
-        environment = jinja2.sandbox.SandboxedEnvironment(loader=loader)
-        self._template = environment.get_template(self._template_file)
-
-        for name in getattr(self._obj, "__all__", dir(self._obj)):
-            obj = getattr(self._obj, name)
-
+        # Register children.
+        for name in getattr(module, "__all__", dir(module)):
             if name.startswith("_"):
                 continue
+
+            # Get the python object.
+            obj = getattr(module, name)
 
             if isinstance(obj, types.ModuleType) or hasattr(obj, "__path__"):
                 continue
 
             if isinstance(obj, types.FunctionType):
-                node = Function(name, parent=self, app=self._app)
-                self.functions.append(node)
+                self.functions.append(Function(**self._kwargs))
 
             elif inspect.isclass(obj):
-                node = Class(name, parent=self, app=self._app)
-                self.classes.append(node)
+                self.classes.append(Class(**self._kwargs))
 
             else:
-                node = Variable(name, parent=self, app=self._app)
-                self.constants.append(node)
+                self.constants.append(Variable(**self._kwargs))
 
-    def _generate(self, out_dir):
-        """Generate the rst files."""
-        with open(os.path.join(out_dir, self.path + ".rst"), "w") as stream:
-            stream.write(self._template.render(node=self))
+    def _generate(self, template, output, **kwargs):
+        """Generate the rst files.
+
+        Arguments:
+            template (Template): The jinja template to use to generate the doc.
+            output (str): The output directory.
+            **kwargs: The available keyword inside the jinja template.
+        """
+        with open(os.path.join(output, self.path + ".rst"), "w") as stream:
+            stream.write(template.render(node=self, **kwargs))
 
 
 class Package(Module):
     """Module node object."""
 
     type = "package"
-    _template_file = __name__ + ".rst_t"
 
     def __init__(self, *args, **kwargs):
         super(Package, self).__init__(*args, **kwargs)
@@ -190,43 +230,62 @@ class Package(Module):
         self.packages = []
         self.modules = []
 
-        for info in pkgutil.iter_modules(self._obj.__path__, self.path + "."):
-            name = info.name.split(".")[-1]
-            if info.ispkg:
-                node = Package(name, parent=self, app=self._app)
+        # Populate the children packages and modules.
+        modules = pkgutil.iter_modules(self._module.__path__, self.path + ".")
+        for _, name, is_package in modules:
+            name = name.split(".")[-1]
+            if is_package:
+                node = Package(name, parent=self, config=self._config)
                 self.packages.append(node)
             else:
-                node = Module(name, parent=self, app=self._app)
+                node = Module(name, parent=self, config=self._config)
                 self.modules.append(node)
 
-    def _generate(self, out_dir):
-        super(Package, self)._generate(out_dir)
-        for each in self.modules + self.packages:
-            each._generate(out_dir)
+    def _generate(self, template, output, **kwargs):
+        super(Package, self)._generate(template, output)
+        for node in self.modules + self.packages:
+            node._generate(template, output, **kwargs)
 
 
 def builder_inited(app):
-    """Called before sphinx action."""
-    for module, config in getattr(app.config, CONFIG_NAME).items():
+    """Entry point of a sphinx build.
 
-        # Create the directory.
-        out_dir = os.path.join(app.srcdir, module)
-        if os.path.exists(out_dir):
-            shutil.rmtree(out_dir)
-        os.makedirs(out_dir)
+    Arguments:
+        app (Sphinx): The current sphinx application.
+    """
+    # Prepare the output directory.
+    default = os.path.join(app.srcdir, __name__)
+    if os.path.exists(default):
+        shutil.rmtree(default)
+    os.makedirs(default)
 
-        # Ensure that the files will not be pushed with git.
-        with open(os.path.join(out_dir, ".gitignore"), "w") as stream:
-            stream.write("*")
+    # Ensure that the files will not be pushed with git.
+    with open(os.path.join(default, ".gitignore"), "w") as stream:
+        stream.write("*")
 
-        # Apply default configuration.
-        config = {
-            "rebuild": True,
-            "output": module,
-        }.update(config or {})
+    for name, config in getattr(app.config, CONFIG_NAME).items():
+        module = importlib.import_module(name)
+        is_package = hasattr(module, "__path__")
 
-        node = Package(module, app=app)
-        node._generate(out_dir)
+        # Find the output directory.
+        output = default
+        if is_package:
+            output = os.path.join(default, name)
+            os.makedirs(output)
+
+        # Initialize jinja template.
+        loader = sphinx.jinja2glue.BuiltinTemplateLoader()
+        loader.init(app.builder, dirs=[os.path.dirname(TEMPLATE_FILE)])
+        env = jinja2.sandbox.SandboxedEnvironment(loader=loader)
+        template = env.get_template(TEMPLATE_FILE)
+
+        # Build final configuration.
+        config = copy.deepcopy(DEFAULT_CONFIG)
+        config.update(config or {})
+        config["runtime"]["app"] = app
+
+        node = (Package if is_package else Module)(name, config=config)
+        node._generate(template, output)
 
 
 def setup(app):
@@ -235,12 +294,3 @@ def setup(app):
     app.add_config_value(CONFIG_NAME, {}, "env", dict)
     app.connect("builder-inited", builder_inited)
     return {"version": __version__}
-
-
-def main():
-    """Entry point of the cli."""
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

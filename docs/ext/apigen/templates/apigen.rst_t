@@ -19,17 +19,16 @@ Arguments:
 
 Arguments:
     title: The nice name of the section.
-    directive: The directive to use for generate the documentation.
     members: An iterable that contains all the members to render.
     header: The header style to use.
 -#}
-{% macro generate(title, directive, members, header="~") -%}
+{% macro generate(title, members, header="~") -%}
 {% if members %}
 
 {{ title }}
 {{ header * title | length }}
 {% for member in members %}
-.. {{ directive }}:: {{ member.path }}
+.. {{ member.directive }}:: {{ member.path }}
 {%- endfor %}
 {%- endif %}
 {%- endmacro %}
@@ -37,7 +36,7 @@ Arguments:
 
 {#- Start document. -#}
 
-{{- node.name }}
+{{ node.name }}
 {{ "=" * node.name | length }}
 
 |
@@ -66,9 +65,9 @@ Detailed Description
 --------------------
 
 |
-{{- generate("Constants", "autodata", node.constants) }}
-{{- generate("Classes", "autoclass", node.classes) }}
-{{- generate("Functions", "autofunction", node.functions) }}
+{{- generate("Constants", node.constants) }}
+{{- generate("Functions", node.functions) }}
+{{- generate("Classes", node.classes) }}
 
 {%- endif %}
 
