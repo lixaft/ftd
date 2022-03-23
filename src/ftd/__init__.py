@@ -2,10 +2,8 @@
 import logging
 import logging.config
 
-import ftd.version
-
 __all__ = ["__version__"]
-__version__ = ftd.version.STR
+__version__ = "0.1.0"
 
 # logging setup
 LOG_FORMAT = "(%(asctime)s) %(levelname)s [%(name)s.%(funcName)s]: %(message)s"

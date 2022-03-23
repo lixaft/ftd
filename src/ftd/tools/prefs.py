@@ -370,7 +370,7 @@ def create_marking_menu(name, key, items, parent="MainPane"):
         allowOptionBoxes=True,
         parent=parent,
         postMenuCommand=main_build,
-        **flags,
+        **flags
     )
 
 
@@ -403,7 +403,7 @@ def create_shelf(name, items, parent="ShelfLayout"):
                 parent=name,
                 image=icon,
                 annotation=cmd.description,
-                **flags,
+                **flags
             )
 
     array = cmds.shelfTabLayout(parent, query=True, childArray=True)

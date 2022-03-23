@@ -5,7 +5,7 @@ import os
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
-__all__ = ["find_icon", "get_toplevel"]
+__all__ = ["find_icon", "find_maya", "get_toplevel"]
 
 LOG = logging.getLogger(__name__)
 
@@ -48,7 +48,12 @@ def find_icon(name, default=None, directory="icons", qt=False, limit=5):
     return QtGui.QIcon(icon) if qt else icon
 
 
-def get_toplevel(name="MayaWindow"):
+def find_maya():
+    """Find the maya main widget."""
+    return get_toplevel("MayaWindow")
+
+
+def get_toplevel(name):
     """Find a top level widget with a specified name.
 
     Arguments:
@@ -57,5 +62,5 @@ def get_toplevel(name="MayaWindow"):
     Returns:
         QWidget: The top level widget.
     """
-    widget = QtWidgets.QApplication.topLevelWidgets()
-    return ([x for x in widget if x.objectName() == name] or [None])[0]
+    widgets = QtWidgets.QApplication.topLevelWidgets()
+    return ([w for w in widgets if w.objectName() == name] or [None])[0]

@@ -1,29 +1,26 @@
 """Manage the package version."""
 import logging
 
+import packaging.version
+
+import ftd
+
 __all__ = [
     "MAJOR",
     "MINOR",
-    "PATCH",
-    "TUPLE",
-    "STR",
+    "MICRO",
+    "RELEASE",
     "require_maya",
     "deprecated",
 ]
 
 LOG = logging.getLogger(__name__)
 
-MAJOR = 0
-"""int: The major version of the package."""
-MINOR = 1
-"""int: The minor version of the package."""
-PATCH = 0
-"""int: The patch version of the package."""
-
-TUPLE = (MAJOR, MINOR, PATCH)
-"""tuple: The version as a tuple."""
-STR = "{}.{}.{}".format(*TUPLE)
-"""str: The version as a string."""
+VERSION = packaging.version.parse(ftd.__version__)
+MAJOR = VERSION.major
+MINOR = VERSION.minor
+MICRO = VERSION.micro
+RELEASE = VERSION.release
 
 
 def require_maya(minimum=None, maximum=None):

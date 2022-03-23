@@ -6,7 +6,7 @@ import logging
 from maya import cmds
 from maya.api import OpenMaya
 
-__all__ = ["show_orient"]
+__all__ = ["show_orient", "parent", "set_radius"]
 
 LOG = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ def set_radius(root, method="average", multiplier=1.0, recurse=False):
     Schema:
             ┌───■
         ■───┼───■
-            └───■───■
+            └───■────■
 
     Arguments:
         root (str): The root joint on which the radius should be set.

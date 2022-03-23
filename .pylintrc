@@ -75,6 +75,7 @@ enable=
 # --disable=W"
 disable=
     duplicate-code,
+    c-extension-no-member,
     # delegate to flake8
     import-error,
     # python 2 & 3 compatibility

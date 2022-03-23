@@ -7,6 +7,7 @@ from maya import cmds, mel
 
 __all__ = [
     "SRT",
+    "copy",
     "disconnect",
     "divider",
     "move",
@@ -19,6 +20,60 @@ LOG = logging.getLogger(__name__)
 
 SRT = tuple(x + y for x in "srt" for y in "xyz")
 """tuple: All transformation attributes (short name)."""
+
+
+def copy(source, destination, attributes=None):
+    """Copy the attribute(s) from the source node to the destination node.
+
+    If no value is specified for the ``attributes'' parameter, all user
+    attributes of the source node will be copied.
+
+    Examples:
+        >>> from maya import cmds
+        >>> _ = cmds.file(new=True, force=True)
+        >>> src = cmds.createNode("transform", name="src")
+        >>> dst = cmds.createNode("transform", name="dst")
+        >>> cmds.addAttr(src, longName="test")
+        >>> cmds.objExists("dst.test")
+        False
+        >>> copy(src, dst)
+        >>> cmds.objExists("dst.test")
+        True
+
+    Arguments:
+        source (str): The name of the node from which the attribute(s) will be
+            copied.
+        destination (str): The name of the node to which the attribute(s) will
+            be copied.
+        attributes (list, optional): The list of attributes to copy.
+    """
+    attributes = attributes or cmds.listAttr(source, userDefined=True) or []
+
+    for attribute in attributes:
+        src_plug = "{}.{}".format(source, attribute)
+        dst_plug = "{}.{}".format(destination, attribute)
+
+        # Get all the information needed to create the copy.
+        type_ = cmds.addAttr(src_plug, query=True, attributeType=True)
+        locked = cmds.getAttr(src_plug, lock=True)
+        visible = cmds.getAttr(src_plug, channelBox=True)
+        keyable = cmds.getAttr(src_plug, keyable=True)
+        value = cmds.getAttr(src_plug)
+        default = cmds.addAttr(src_plug, query=True, defaultValue=True)
+
+        # Create the attribute on the destination node.
+        kwargs = {}
+        kwargs["longName"] = attribute
+        kwargs["attributeType"] = type_
+        if default is not None:
+            kwargs["defaultValue"] = default
+        cmds.addAttr(destination, **kwargs)
+
+        # Set attribute properties.
+        cmds.setAttr(dst_plug, value)
+        cmds.setAttr(dst_plug, channelBox=visible)
+        cmds.setAttr(dst_plug, keyable=keyable)
+        cmds.setAttr(dst_plug, lock=locked)
 
 
 def disconnect(plug):

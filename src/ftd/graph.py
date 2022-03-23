@@ -20,7 +20,16 @@ LOG = logging.getLogger(__name__)
 
 
 def delete_unused():
-    """Delete all the unused nodes in the scene."""
+    """Delete all the unused nodes in the scene.
+
+    Examples:
+        >>> from maya import cmds
+        >>> _ = cmds.file(new=True, force=True)
+        >>> a = cmds.createNode("addDoubleLinear", name="A")
+        >>> delete_unused()
+        >>> cmds.objExists(a)
+        False
+    """
     mel.eval("MLdeleteUnused")
 
 
@@ -135,12 +144,20 @@ def matrix_to_srt(plug, transform):
 def invert(plug):
     """Inverse the given plug acording to its type.
 
-    ┌──────────┐      ┌──────────┐
-    │    +1    ■──────■    -1    │
-    └──────────┘      └──────────┘
+    Schema:
+        ┌──────────┐      ┌──────────┐
+        │    +1    ■──────■    -1    │
+        └──────────┘      └──────────┘
 
+    Arguments:
+        plug (str): The plug to invert.
+
+    Returns:
+        str: The inverted plug.
+
+    Raises:
+        TypeError: Invalid plug type.
     """
-
     plug_type = cmds.getAttr(plug, type=True)
 
     if plug_type == "matrix":

@@ -28,8 +28,7 @@ class Base(QtWidgets.QDialog):
     """str: The style sheet to apply to the widget."""
 
     def __init__(self, parent=None):
-        parent = parent or ftd.ui.utility.get_toplevel()
-        super(Base, self).__init__(parent)
+        super(Base, self).__init__(parent or ftd.ui.utility.find_maya())
 
         self.setObjectName(self.name)
         self.setWindowTitle(self.title or self.name.replace("_", " ").title())
@@ -55,7 +54,7 @@ class Dockable(Base):
 
     def __init__(self, parent=None):
         self._workspace = "{}_workspaceControl".format(self.name)
-        super(Dockable, self).__init__(parent=parent)
+        super(Dockable, self).__init__(parent)
 
         self._panel = None
         self._area = None

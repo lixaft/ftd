@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name, redefined-builtin, protected-access
 """Object-oriented API for Autodesk Maya."""
-from __future__ import division
+from __future__ import absolute_import, division
 
 import abc
 import logging

@@ -33,6 +33,8 @@ def create(shape, name=None, size=1, normal="+y", color="yellow"):
     """Create a new control.
 
     Examples:
+        >>> from maya import cmds
+        >>> _ = cmds.file(new=True, force=True)
         >>> create("global")
         'global_ctrl'
 

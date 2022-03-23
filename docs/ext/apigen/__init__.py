@@ -101,28 +101,28 @@ class Class(Variable):
         self.properties = []
         self.methods = []
 
-        cls = getattr(self.parent._module, self.name)
-        self._obj = cls
+        # cls = getattr(self.parent._module, self.name)
+        # self._obj = cls
 
-        # Register children.
-        for name, obj in cls.__dict__.items():
-            if name.startswith("_"):
-                continue
+        # # Register children.
+        # for name, obj in cls.__dict__.items():
+        #     if name.startswith("_"):
+        #         continue
 
-            if isinstance(obj, property):
-                self.properties.append(Property(**self._kwargs))
+        #     if isinstance(obj, property):
+        #         self.properties.append(Property(**self._kwargs))
 
-            elif isinstance(obj, types.MethodType):
-                self.methods.append(Method(**self._kwargs))
+        #     elif isinstance(obj, types.MethodType):
+        #         self.methods.append(Method(**self._kwargs))
 
-            # obj = getattr(cls, name)
+        # obj = getattr(cls, name)
 
-            # qualname = getattr(obj, "__qualname__", None)
-            # if qualname and self.name not in qualname:
-            #     continue
-            # print(qualname, name, obj)
+        # qualname = getattr(obj, "__qualname__", None)
+        # if qualname and self.name not in qualname:
+        #     continue
+        # print(qualname, name, obj)
 
-            # print(name)
+        # print(name)
 
         # children = [
         #     {"predicate": inspect.ismethod, "container": self.methods},
@@ -194,18 +194,20 @@ class Module(Node):
 
             # Get the python object.
             obj = getattr(module, name)
+            kwargs = self._kwargs.copy()
+            kwargs["name"] = name
 
             if isinstance(obj, types.ModuleType) or hasattr(obj, "__path__"):
                 continue
 
             if isinstance(obj, types.FunctionType):
-                self.functions.append(Function(**self._kwargs))
+                self.functions.append(Function(**kwargs))
 
             elif inspect.isclass(obj):
-                self.classes.append(Class(**self._kwargs))
+                self.classes.append(Class(**kwargs))
 
             else:
-                self.constants.append(Variable(**self._kwargs))
+                self.constants.append(Variable(**kwargs))
 
     def _generate(self, template, output, **kwargs):
         """Generate the rst files.
