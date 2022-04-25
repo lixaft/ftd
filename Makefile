@@ -1,26 +1,24 @@
-# Run all command
-.PHONY: all
-all:
-	@make docs tests lint
+.PHONY: help
+help: ## Show this help message
+	@echo 'Usage: make [target] ...'
+	@echo
+	@echo 'Targets:'
+	@grep -E '^\w+:\s##\s.+' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*## "}; {printf "  %-15s %s\n", $$1, $$2}'
 
-# Build the sphinx documentation
 .PHONY: docs
-docs:
+docs: ## Build sphinx documentation
 	@python scripts/build_docs.py
 
-# Run the tests in maya
 .PHONY: tests
-tests:
+tests: ## Run the tests in maya
 	@mayapy scripts/run_tests.py
 
-# Run pre-commit in the repository
 .PHONY: lint
-lint:
+lint: ## Run pre-commit in the repository
 	@pre-commit run -a
 
-# Clear all the unecessary file.
 .PHONY: clean
-clean:
+clean: ## Delete all the unecessary file.
 	@rm -f .coverage
 	@rm -rf \
 		build/ \
@@ -28,6 +26,7 @@ clean:
 		htmlcov/ \
 		.temp/ \
 		.vscode/ \
+		.mypy_cache/ \
 		.pytest_cache/ \
 		docs/build/ \
 		docs/source/apigen \

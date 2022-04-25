@@ -20,7 +20,7 @@ SHAPES = {}
 :meta hide-value:
 """
 
-_PATH = os.path.join(os.path.dirname(__file__), "configs", "controls.yaml")
+_PATH = os.path.join(os.path.dirname(__file__), "resources", "controls.yaml")
 with open(_PATH, "r") as _stream:
     SHAPES.update(yaml.load(_stream, Loader=yaml.FullLoader))
 del _PATH, _stream

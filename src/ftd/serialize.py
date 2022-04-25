@@ -1,4 +1,5 @@
 """Provide utilities related to serialization."""
+import codecs
 import json
 import logging
 import re
@@ -65,3 +66,15 @@ class YamlDumper(yaml.Dumper):
         elif not data:
             kwargs["style"] = '"'
         return dumper.represent_scalar("tag:yaml.org,2002:str", data, **kwargs)
+
+
+def compress_data(data):
+    """Compress dictionary using zlib and base64."""
+    result = bytes(str(json.dumps(data)).encode("utf-8"))
+    return codecs.encode(codecs.encode(result, "zlib"), "base64")
+
+
+def uncompress_data(string):
+    """Read compressed dictionary."""
+    result = codecs.decode(codecs.decode(string, "base64"), "zlib")
+    return json.loads(result)

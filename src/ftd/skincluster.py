@@ -125,7 +125,8 @@ def find_influences(node, weighted=True, unused=True):
     Returns:
         list: An array containing the influence objects.
     """
-    all_ = cmds.skinCluster(node, query=True, influence=True)
+    skc = mel.eval("findRelatedSkinCluster {}".format(node))
+    all_ = cmds.skinCluster(skc, query=True, influence=True)
     if unused and weighted:
         return all_
     weighted_ = cmds.skinCluster(node, query=True, weightedInfluence=True)
