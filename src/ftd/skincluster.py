@@ -18,7 +18,7 @@ def add(node, influences):
     Examples:
         >>> from maya import cmds
         >>> _ = cmds.file(new=True, force=True)
-        >>> msh, _ = cmds.polyCube()
+        >>> msh = cmds.polyCube()[0]
         >>> a = cmds.createNode("joint", name="A")
         >>> b = cmds.createNode("joint", name="B")
         >>> _ = cmds.skinCluster(msh, a)
@@ -36,7 +36,7 @@ def add(node, influences):
     if not skincluster:
         LOG.error("No skincluster found under the node '%s'.", node)
         return
-    inf = set(influences) - set(find_influences(skincluster))
+    inf = set(influences) - set(find_influences(node))
     cmds.skinCluster(skincluster, edit=True, addInfluence=list(inf))
 
 
@@ -163,7 +163,7 @@ def remove(node, influences):
     if not skincluster:
         LOG.error("No skincluster found under the node '%s'.", node)
         return
-    inf = set(influences) & set(find_influences(skincluster))
+    inf = set(influences) & set(find_influences(node))
     LOG.debug(str(inf))
     cmds.skinCluster(skincluster, edit=True, removeInfluence=list(inf))
 

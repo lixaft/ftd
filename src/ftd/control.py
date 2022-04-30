@@ -79,7 +79,7 @@ def create(shape, name=None, size=1, normal="+y", color="yellow"):
     # Create the control in maya
     control = cmds.curve(**data)
     if not name:
-        name = ftd.name.generate_unique(shape + "_ctrl")
+        name = ftd.name.unique(shape + "_ctrl")
     control = cmds.rename(control, name)
     ftd.color.name(control, color)
 

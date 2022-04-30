@@ -1,4 +1,4 @@
-"""Utilities related to history."""
+"""History related utilities."""
 import contextlib
 import functools
 import logging
@@ -6,6 +6,7 @@ import sys
 import trace
 
 from maya import cmds
+from maya.api import OpenMaya
 
 __all__ = ["repeat", "undo", "undo_chunk", "undo_repeat", "traceit"]
 

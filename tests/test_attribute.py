@@ -1,5 +1,4 @@
-"""Test the :mod:`ftd.attribute` module."""
-
+"""Test for attribute."""
 import pytest
 
 from maya import cmds
@@ -7,45 +6,53 @@ from maya import cmds
 import ftd.attribute
 
 
-def test_disconnect_attribute():
-    """Test to dosconnect two attributes."""
-    node_a = cmds.createNode("transform", name="A")
-    node_b = cmds.createNode("transform", name="B")
-    cmds.connectAttr(node_a + ".translateX", node_b + ".translateY")
+@pytest.mark.parametrize(
+    "attributes",
+    [
+        [{"longName": "long", "attributeType": "long"}],
+        [{"longName": "short", "attributeType": "short"}],
+        [{"longName": "bool", "attributeType": "bool"}],
+    ],
+    ids=["long", "short", "bool"],
+)
+def test_copy_attributes(attributes):
+    """Test to copy simple attribute types."""
+    src = cmds.createNode("transform")
+    dst = cmds.createNode("transform")
 
-    assert ftd.attribute.disconnect(node_b + ".translateX") is None
-    assert ftd.attribute.disconnect(node_b + ".translateY") == "A.translateX"
+    # Create the attributes.
+    for flags in attributes:
+        cmds.addAttr(src, **flags)
+
+    # Perform the copy.
+    ftd.attribute.copy(src, dst)
+
+    # Compare the attributes.
+    for flags in attributes:
+        src_plug = "{}.{}".format(src, flags["longName"])
+        dst_plug = "{}.{}".format(dst, flags["longName"])
+        assert cmds.objExists(dst_plug)
+        assert cmds.getAttr(src_plug) == cmds.getAttr(dst_plug)
 
 
-@pytest.mark.parametrize("label", (None, "", " ", "Divider"))
-def test_divider_attribute(label):
-    """Test to create a divider attribute."""
-    node = cmds.createNode("transform", name="A")
-
-    assert ftd.attribute.divider(node, label) == "A.divider00"
-    assert ftd.attribute.divider(node, label) == "A.divider01"
-    assert ftd.attribute.divider(node, label) == "A.divider02"
-
-    for attribute in ("divider00", "divider01", "divider02"):
-        assert cmds.attributeQuery(attribute, node=node, exists=True)
-        enum = cmds.attributeQuery("divider00", node=node, listEnum=True)
-        assert enum != attribute
-        assert enum == [label or "-" * 15]
+@pytest.mark.parametrize("amount", [1, 10, 102])
+@pytest.mark.parametrize("label", [None, "", "text"])
+def test_create_separator(amount, label):
+    # TODO: Check the copied attributes.
+    """Test to create attributre separator on a single node."""
+    node = cmds.createNode("transform")
+    for _ in range(amount):
+        ftd.attribute.separator(node, label)
 
 
-def test_reset_attribute_values():
-    """Test to reset attributes to their default value."""
-    node = cmds.createNode("transform", name="A")
+def test_move_attribute():
+    """Test to move an attribute aloung the channel box."""
+    node = cmds.createNode("transform")
+    cmds.addAttr(node, longName="_a")
+    cmds.addAttr(node, longName="_b")
+    cmds.addAttr(node, longName="_c")
+    cmds.addAttr(node, longName="_d")
+    cmds.addAttr(node, longName="_e")
 
-    cmds.setAttr(node + ".translate", 1, 1, 1)
-    cmds.setAttr(node + ".translateX", lock=True)
-    cmds.setAttr(node + ".translateY", keyable=False, channelBox=True)
-
-    ftd.attribute.reset(node)
-    assert cmds.getAttr(node + ".translate")[0] == (1.0, 1.0, 0.0)
-
-    ftd.attribute.reset(node, ["translateX", "translateY", "translateZ"])
-    assert cmds.getAttr(node + ".translate")[0] == (1.0, 0.0, 0.0)
-
-    cmds.addAttr(node, longName="inputMatrix", attributeType="matrix")
-    ftd.attribute.reset(node, ["inputMatrix"])
+    ftd.attribute.move(node, attribute="_a", offset=3)
+    assert cmds.listAttr(userDefined=True) == ["_b", "_c", "_d", "_a", "_e"]

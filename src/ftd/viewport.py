@@ -3,12 +3,12 @@ import logging
 
 from maya import cmds
 
-__all__ = ["toggle_view"]
+__all__ = ["toggle_element"]
 
 LOG = logging.getLogger(__name__)
 
 
-def toggle_view(element, panel=None):
+def toggle_element(element, panel=None):
     """Toggles the visibility of an element in the viewport.
 
     The function simply wraps the :func:`cmds.modelEditor` command to toggle
@@ -19,7 +19,7 @@ def toggle_view(element, panel=None):
     Examples:
         >>> from maya import cmds
         >>> panel = cmds.getPanel(withFocus=True)
-        >>> toggle_view(element="joint")
+        >>> toggle_element("joint")
         >>> cmds.modelEditor(panel, query=True, joint=True)
         False
 
@@ -36,3 +36,32 @@ def toggle_view(element, panel=None):
         panel = cmds.getPanel(withFocus=True)
     state = cmds.modelEditor(panel, query=True, **{element: True})
     cmds.modelEditor(panel, edit=True, **{element: not state})
+
+
+def is_visible(node):
+    """Check if the node is visible by querying all its ancestors.
+
+    Examples:
+        >>> from maya import cmds
+        >>> _ = cmds.file(new=True, force=True)
+        >>> a = cmds.createNode("transform", name="A")
+        >>> b = cmds.createNode("transform", name="B", parent=a)
+        >>> cmds.setAttr(a + ".visibility", False)
+        >>> cmds.getAttr(b + ".visibility")
+        True
+        >>> is_visible(b)
+        False
+
+    Arguments:
+        node (str): The node to check.
+
+    Returns:
+        bool: True if the node is visible, False otherwise.
+    """
+    path = cmds.ls(node, long=True)[0]
+    while "|" in path:
+        path, tail = path.rsplit("|", 1)
+        visible = cmds.getAttr(tail + ".visibility")
+        if not visible:
+            return False
+    return True

@@ -6,7 +6,6 @@ import logging
 
 from maya import cmds
 
-import ftd.graph
 import ftd.name
 
 __all__ = [
@@ -109,7 +108,7 @@ def from_transform(nodes, name="curve", degree=3, close=False, attach=False):
         flags["periodic"] = True
         flags["knot"] = range(len(point) + degree - 1)
 
-    name = ftd.name.generate_unique(name)
+    name = ftd.name.unique(name)
     curve = cmds.curve(point=point, degree=degree, **flags)
     curve = cmds.rename(curve, name)
     if not attach:

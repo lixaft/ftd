@@ -4,7 +4,7 @@ import re
 
 from maya import cmds
 
-__all__ = ["find_conflicts", "generate_unique", "nice"]
+__all__ = ["find_conflicts", "unique", "nice"]
 
 LOG = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ def find_conflicts(sets=False):
     return nodes
 
 
-def generate_unique(name):
+def unique(name):
     """Generate a name that is guaranteed to be unique to avoid conflicts.
 
     If the base of the name contains at least one ``#`` character, it will be
@@ -66,13 +66,13 @@ def generate_unique(name):
         >>> from maya import cmds
         >>> _ = cmds.file(new=True, force=True)
         >>> for _ in range(3):
-        ...     name = generate_unique("node")
+        ...     name = unique("node")
         ...     cmds.createNode("transform", name=name)
         'node'
         'node1'
         'node2'
         >>> for _ in range(3):
-        ...     name = generate_unique("node##_srt")
+        ...     name = unique("node##_srt")
         ...     cmds.createNode("transform", name=name)
         'node00_srt'
         'node01_srt'
@@ -80,12 +80,12 @@ def generate_unique(name):
         >>> cmds.createNode("transform", name="setup01_srt")
         'setup01_srt'
         >>> for _ in range(3):
-        ...     name = generate_unique("setup##*")
+        ...     name = unique("setup##*")
         ...     cmds.createNode("transform", name=name)
         'setup00'
         'setup02'
         'setup03'
-        >>> generate_unique("node##_##_ext")
+        >>> unique("node##_##_ext")
         Traceback (most recent call last):
           ...
         NameError:

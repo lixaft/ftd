@@ -1,31 +1,41 @@
-# coding: utf-8
 """Provide utilities related to attributes."""
 import contextlib
+import io
 import logging
+import sys
 
-from maya import cmds, mel
+from maya import cmds
 
-__all__ = [
-    "SRT",
-    "copy",
-    "disconnect",
-    "divider",
-    "move",
-    "next_available",
-    "reset",
-    "unlock",
-]
+__all__ = ["SRT", "copy", "separator", "move", "reset", "unlock"]
 
 LOG = logging.getLogger(__name__)
+
+TRANSLATE = ("translateX", "translateY", "translateZ")
+ROTATE = ("rotateX", "rotateY", "rotateZ")
+SCALE = ("scaleX", "scaleY", "scaleZ")
+SHEAR = ("shearX", "shearY", "shearZ")
 
 SRT = tuple(x + y for x in "srt" for y in "xyz")
 """tuple: All transformation attributes (short name)."""
 
+LONG_SRT = TRANSLATE + ROTATE + SCALE
+"""tuple: All transformation attributes (long name)."""
+
 
 def copy(source, destination, attributes=None):
+    # TODO: Currently this function only support long, short and bool
+    # attributes. Need an implementation for:
+    # - matrix
+    # - compound
+    # - enum
+    # - double3
+    # - string
+    # TODO: Need to handle what should happen if attribute already exists on
+    # the target node.
+    # TODO: Update the docstring.
     """Copy the attribute(s) from the source node to the destination node.
 
-    If no value is specified for the ``attributes'' parameter, all user
+    If no value is specified for the ``attributes`` parameter, all the user
     attributes of the source node will be copied.
 
     Examples:
@@ -76,90 +86,49 @@ def copy(source, destination, attributes=None):
         cmds.setAttr(dst_plug, lock=locked)
 
 
-def disconnect(plug):
-    """Break the input connection of the given plug.
+def separator(node, label=None):
+    """Create a visual separator for the channel box using a dummy attribute.
 
-    Schema:
-        ┌──────────┐      ┌──────────┐
-        │          ■──//──■          │
-        └──────────┘      └──────────┘
+    This create a maya enum attribute at the last position of the channel box.
 
-    Disconnect the plug from its source and return the name of the source plug.
+    The name section will be left empty, and the enum section will be filled
+    with the value specified in the ``label`` parameter. If no value is
+    specified, a series of dashes (``-``) will be used instead.
 
-    Examples:
-        >>> from maya import cmds
-        >>> _ = cmds.file(new=True, force=True)
-        >>> a = cmds.createNode("transform", name="A")
-        >>> b = cmds.createNode("transform", name="B")
-        >>> _ = cmds.connectAttr(a + ".translateX", b + ".translateX")
-        >>> disconnect(b + ".translateX")
-        'A.translateX'
-
-    Arguments:
-        plug (str): The name of the plug to disconnect.
-
-    Returns:
-        str: The source name of the disconnected plug.
-
-        If the plug passed as argument doesn't have any source connection,
-        return None.
-    """
-    sources = cmds.listConnections(
-        plug,
-        source=True,
-        destination=False,
-        plugs=True,
-    )
-    source = (sources or [None])[0]
-    if source:
-        cmds.disconnectAttr(source, plug)
-    return source
-
-
-def divider(node, label=None):
-    """Create visual separator for attribute in the channel box.
-
-    Schema:
-        │ Attr1  0.0        │
-        │       █────────── │
-        │ Attr2  0.0        │
-
-    If a label parameter is specified, the dashes will be replaced by the value
-    given to the parameter.
-
-    The name of the attribute will be generated automatically by the function
-    in order to get something without the user having to worry about it.
-
-    The attribute will be named ``divider00``, ``divider01`` and so on.
+    The attribute name itself will be automatically generated with an index at
+    the end which will be incremented by 1 until a unique name is found.
+    This should result in something like:
+    ``separator 00``, ``separator 01``, ``separator02``, ...
 
     Note:
-        If there are more than 99 dividers on a node (although I don't see when
-        this will happen xD) the function will continue with a padding of 3:
-        100, 101 and so on.
+        If there are more that 99 separators on the same node (I don't really
+        see any reasons for that but why not xD), the index of the attribute
+        name will continue to grow using a padding of three:
+        ``separator 100``, ``separator 101``, ``separator102``...
 
     Examples:
         >>> from maya import cmds
         >>> _ = cmds.file(new=True, force=True)
         >>> node = cmds.createNode("transform", name="A")
-        >>> divider(node, label="Others")
-        'A.divider00'
-        >>> divider(node, label="Others")
-        'A.divider01'
+        >>> separator(node, label="Others")
+        'A.separator00'
+        >>> separator(node, label="Others")
+        'A.separator01'
         >>> cmds.objExists(node + ".Others")
         False
-        >>> cmds.objExists(node + ".divider00")
+        >>> cmds.objExists(node + ".separator00")
         True
 
     Arguments:
-        node (str): The name of the node on which the divider will be created.
-        label (str, optional): The displayed name of the separator.
+        node (str): The name of the node on which create the separator.
+        label (str, optional): The text that will be used on the separator.
 
     Returns:
-        str: The name of the plug separator.
+        str: The name of the created plug.
     """
     # Generate an unique attribute name.
     index = 0
-    base = "{}.divider{:02}"
+    base = "{}.separator{:02}"
 
     plug = base.format(node, index)
     while cmds.objExists(plug):
@@ -180,11 +149,6 @@ def divider(node, label=None):
 
 def move(node, attribute, offset):
     """Move the position of the attribute in the channel box.
-
-    Schema:
-        ┌> │ Attr1 █ 0.0 │ ─┐
-        │  │ Attr2 █ 0.0 │ <┤
-        └─ │ Attr3 █ 0.0 │ <┘
 
     Offset the position of the attribute in the channel box the number of times
     specified by the offset parameter. The parameter accepts both positive
@@ -219,11 +183,16 @@ def move(node, attribute, offset):
 
     def to_last(attr):
         cmds.deleteAttr(node, attribute=attr)
-        # The `Undo:` displayed in the output windows should be removed but
-        # this seems to be done at the C level (with MGlobal.displayInfo) and
-        # therefore cannot be simply redirected with sys.stdout. If anyone have
-        # any ideas, please let me know! :)
-        cmds.undo()
+        # TODO: The `Undo:` displayed in the output windows should be removed
+        # but this seems to be done at the C level (with MGlobal.displayInfo)
+        # and therefore cannot be simply redirected with sys.stdout. If anyone
+        # have any ideas, please let me know! :)
+        old = sys.stdout
+        sys.stdout = io.BytesIO()
+        try:
+            cmds.undo()
+        finally:
+            sys.stdout = old
 
     with unlock(node):
         attributes = cmds.listAttr(userDefined=True)
@@ -244,37 +213,6 @@ def move(node, attribute, offset):
             # Re-query all attributes again so that the index can be
             # recalculated correctly in the next iteration.
             attributes = cmds.listAttr(userDefined=True)
-
-
-def next_available(plug, start=0):
-    """Find the next available index of a multi attribute.
-
-    Schema:
-        ■ multi
-        ├─■ multi[0]
-        ├─■ multi[1]
-        ├─■ ...
-
-    Examples:
-        >>> from maya import cmds
-        >>> _ = cmds.file(new=True, force=True)
-        >>> src = cmds.createNode("multMatrix", name="src")
-        >>> dst = cmds.createNode("multMatrix", name="dst")
-        >>> next_available(dst + ".matrixIn")
-        'dst.matrixIn[0]'
-        >>> _ = cmds.connectAttr(src + ".matrixSum", dst + ".matrixIn[0]")
-        >>> next_available(dst + ".matrixIn")
-        'dst.matrixIn[1]'
-
-    Arguments:
-        plug (str): The name of the multi attribute plug.
-        start (int): The index from which the search should be start.
-
-    Returns:
-        str: The next available plug of the multi attribute.
-    """
-    index = mel.eval("getNextFreeMultiIndex {} {}".format(plug, start))
-    return "{}[{}]".format(plug, index)
 
 
 def reset(node, attributes=None):
@@ -324,14 +262,6 @@ def reset(node, attributes=None):
 def unlock(*args):
     """Temporarily unlock all attributes during the execution of the block.
 
-    Schema:
-         ┌─────┐
-         │     │
-        ┌──────┴┐
-        │   █   │
-        │   │   │
-        └───────┘
-
     This function can be used to easily edit the locked attributes of a node.
     The attributes are first unlocked before the code is executed, and when the
     execution is finished, the attributes are relocked.
@@ -366,3 +296,14 @@ def unlock(*args):
     finally:
         for plug in plugs:
             cmds.setAttr(plug, lock=True)
+
+
+@contextlib.contextmanager
+def restore(nodes):
+    """Restore the nodes before the action."""
+    for node in nodes:
+        cmds.nodePreset(save=(node, node))
+    yield
+    for node in nodes:
+        cmds.nodePreset(load=(node, node))
+        cmds.nodePreset(delete=(node, node))

@@ -6,7 +6,7 @@ from maya import cmds
 from maya.api import OpenMaya
 
 import ftd.attribute
-import ftd.graph
+import ftd.connection
 
 __all__ = [
     "group",
@@ -109,7 +109,7 @@ def matrix_to_group():
             source = (sources or [None])[0]
             cmds.disconnectAttr(source, plug)
             unmatrix(node)
-            ftd.graph.matrix_to_srt(source, group(node))
+            ftd.connection.matrix_to_srt(source, group(node))
 
         elif OpenMaya.MMatrix(cmds.getAttr(plug)) != OpenMaya.MMatrix():
             unmatrix(node)

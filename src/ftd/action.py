@@ -21,8 +21,8 @@ def execute(action):
 class Action(object):
     """A command that can be executed."""
 
-    FUNCTION = "main"
-    _exported = [
+    _FUNCTION = "main"
+    _EXPORTED = [
         "name",
         "description",
         "icon",
@@ -40,9 +40,8 @@ class Action(object):
 
     def __init__(self, identifier):
         self.identifier = identifier
-        self.name = re.sub(
-            r"\W", "_", re.sub(r"(?<!^)([A-Z])", r" \1", identifier)
-        ).lower()
+        normalized = re.sub(r"(?<!^)([A-Z])", r" \1", identifier)
+        self.name = re.sub(r"\W", "_", normalized).lower()
 
         self.description = ""
         self.icon = ["commandButton.png"]
@@ -58,7 +57,7 @@ class Action(object):
         self.variants = []
 
     def build_function(self, variant=None, module=False):
-        """Convert the core into a string function."""
+        """Convert the code into a string function."""
         lines = []
 
         name = self.identifier
@@ -76,13 +75,13 @@ class Action(object):
             lines.extend(lines_)
 
         lines_ = ["def {}():\n", '"""{}"""\n'] + code.splitlines(True)
-        func = (" " * 4).join(lines_).format(self.FUNCTION, self.description)
+        func = (" " * 4).join(lines_).format(self._FUNCTION, self.description)
         lines.append(func)
 
         if module:
             lines_ = [
                 'if __name__ == "__main__":',
-                "    {}()".format(self.FUNCTION),
+                "    {}()".format(self._FUNCTION),
             ]
             lines.extend(lines_)
 
@@ -92,7 +91,7 @@ class Action(object):
         """Build a callable function."""
         # pylint: disable=exec-used
         exec(self.build_function(variant))
-        cmd = locals()[self.FUNCTION]
+        cmd = locals()[self._FUNCTION]
         for decorator in self.decorators:
             cmd = DECORATORS[decorator](cmd)
         return cmd
@@ -108,17 +107,16 @@ class Action(object):
                 return variant
         raise NameError("Unknown variant")
 
-    # Convertion.
     def to_dict(self):
         """Convert the action to a python dictionary."""
-        return {x: getattr(self, x) for x in self._exported}
+        return {x: getattr(self, x) for x in self._EXPORTED}
 
     @classmethod
     def from_dict(cls, identifier, config):
         """Build an action object from the action dictionary."""
         action = cls(identifier)
         for key, value in config.items():
-            if key in cls._exported:
+            if key in cls._EXPORTED:
                 setattr(action, key, value)
         return action
 

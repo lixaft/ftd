@@ -8,3 +8,4 @@ from maya import cmds
 def newscene():
     """Create a new scene."""
     cmds.file(new=True, force=True)
+    cmds.flushUndo()

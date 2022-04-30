@@ -3,6 +3,7 @@
 import logging
 
 from maya import cmds
+from maya.api import OpenMaya
 
 LOG = logging.getLogger(__name__)
 
@@ -63,3 +64,27 @@ def makedirs(path, node="transform"):
         if not cmds.objExists(each):
             tail = cmds.createNode(node, name=each, parent=tail)
     return tail
+
+
+def iter_descendants(node, path=False):
+    """Safe iteration over the descendants of the given node.
+
+    Arguments:
+        node (str): The name of the root node.
+        path (bool): Return the full path instead of just the node name.
+
+    Yeilds:
+        str: The current node name or path.
+    """
+    sel = OpenMaya.MSelectionList()
+    sel.add(node)
+    obj = sel.getDependNode(0)
+    iterator = OpenMaya.MItDag()
+    iterator.reset(obj)
+    iterator.next()
+    while not iterator.isDone():
+        if path:
+            yield iterator.fullPathName()
+        else:
+            yield iterator.partialPathName()
+        iterator.next()

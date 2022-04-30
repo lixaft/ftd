@@ -4,7 +4,6 @@ import logging
 
 from maya import cmds
 
-import ftd.graph
 import ftd.name
 
 __all__ = ["find", "find_set", "blendshape", "clean_orig", "cluster"]
